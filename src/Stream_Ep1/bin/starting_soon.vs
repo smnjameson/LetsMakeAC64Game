@@ -1,0 +1,10 @@
+al C:88c .Loop
+al C:8ba .ClearScreen
+al C:86d .Entry
+al C:400 .SCREEN_RAM
+al C:85e .ColorRamp
+al C:86c .ColorIndex
+al C:80b .upstartEnd
+al C:80e .TextMap
+al C:d800 .COLOR_RAM
+al C:89b .InnerLoop

@@ -1,0 +1,12 @@
+.label ClearScreen=$8ba {
+}
+.label Entry=$86d {
+  .label Loop=$88c
+  .label InnerLoop=$89b
+}
+.label SCREEN_RAM=$400
+.label ColorRamp=$85e
+.label ColorIndex=$86c
+.label TextMap=$80e
+.label COLOR_RAM=$d800 {
+}
