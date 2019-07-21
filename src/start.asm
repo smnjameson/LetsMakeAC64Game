@@ -2,41 +2,71 @@ BasicUpstart2(Entry)
 
 #import "zeropage.asm"
 #import "../libs/vic.asm"
+#import "../libs/tables.asm"
 
-START:
 #import "maps/maploader.asm"
-.print ("MAP LOADER = "+ (*-START))
+#import "player/player.asm"
 
 Entry:
-	lda #$00
-	sta VIC.BACKGROUND_COLOR
-	sta VIC.BORDER_COLOR
+		lda #$00
+		sta VIC.BACKGROUND_COLOR
+		sta VIC.BORDER_COLOR
 
-	lda #$7f	//Disable CIA IRQ's to prevent crash because 
-	sta $dc0d
-	sta $dd0d
+		lda #$7f	//Disable CIA IRQ's to prevent crash because 
+		sta $dc0d
+		sta $dd0d
 
-	//Bank out BASIC and Kernal ROM
-	lda $01
-	and #%11111000
-	ora #%00000101
-	sta $01
+		//Bank out BASIC and Kernal ROM
+		lda $01
+		and #%11111000
+		ora #%00000101
+		sta $01
 
-	//Set VIC BANK 3
-	lda $dd00
-	and #%11111100
-	sta $dd00
+		//Set VIC BANK 3
+		lda $dd00
+		and #%11111100
+		sta $dd00
 
-	//Set screen and characther memory
-	lda #%00001100
-	sta VIC.MEMORY_SETUP
+		//Set screen and character memory
+		lda #%00001100
+		sta VIC.MEMORY_SETUP
 
 
+		jsr MAPLOADER.DrawMap
 
-	jsr MAPLOADER.DrawMap
+		jsr PLAYER.Initialise
+
 
 	//Inf loop
-	jmp *
+	!Loop:
+		:waitForRasterLine($ff)
+
+
+		jsr PLAYER.PlayerControl
+		jsr PLAYER.DrawPlayer
+
+		jsr PLAYER.GetCollisions
+
+		.label COLLISION_LOOKUP = TEMP1
+		
+		ldy COLLISION_Y
+		lda TABLES.ScreenRowLSB ,y
+		sta COLLISION_LOOKUP
+		lda TABLES.ScreenRowMSB ,y
+		sta COLLISION_LOOKUP + 1
+
+		ldy COLLISION_X
+		tya
+		clc
+		adc #81
+		tay
+		lda #$0c
+		sta (COLLISION_LOOKUP), y
+
+
+		:waitForRasterLine($82)
+
+		jmp !Loop-
 	
 
 #import "maps/assets.asm"

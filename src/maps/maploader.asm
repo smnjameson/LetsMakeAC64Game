@@ -1,6 +1,5 @@
-MAPLOADER: {
-	TileScreenLocations:
-		.byte 0,1,40,41		//Table to speed up tile to screen location conversion
+  MAPLOADER: {
+
 
 	DrawMap: {
 			//Label the ZP temp vars for use here
@@ -26,6 +25,7 @@ MAPLOADER: {
 			//Reset row counter
 			lda	#$00
 			sta Row
+			
 		!RowLoop:
 			//Reset col counter
 			lda	#$00
@@ -47,6 +47,7 @@ MAPLOADER: {
 			rol TileLookup + 2
 			asl TileLookup + 1
 			rol TileLookup + 2
+
 			//Add the MAP_TILES address
 			clc
 			lda #<MAP_TILES
@@ -60,12 +61,12 @@ MAPLOADER: {
 
 		TileLookup:
 			lda $BEEF, y //Self modified tile data lookup
-			ldx TileScreenLocations, y 
+			ldx TABLES.TileScreenLocations2x2, y 
 		Scr: 
 			sta $BEEF, x  //Self modifidied screen ram  
 			tax
 			lda CHAR_COLORS, x
-			ldx TileScreenLocations, y 
+			ldx TABLES.TileScreenLocations2x2, y 
 		Color:
 			sta $BEEF, x //Self modified color ram
 			iny
