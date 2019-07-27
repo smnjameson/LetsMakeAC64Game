@@ -3,6 +3,7 @@ BasicUpstart2(Entry)
 #import "zeropage.asm"
 #import "../libs/vic.asm"
 #import "../libs/tables.asm"
+#import "utils/utils.asm"
 
 #import "maps/maploader.asm"
 #import "player/player.asm"
@@ -41,33 +42,24 @@ Entry:
 	!Loop:
 		:waitForRasterLine($ff)
 
+		inc $d020
 
-		jsr PLAYER.PlayerControl
+		inc ZP_COUNTER
+
 		jsr PLAYER.DrawPlayer
+		
+		jsr PLAYER.PlayerControl
+		
+		jsr PLAYER.JumpAndFall
 
 		jsr PLAYER.GetCollisions
 
-		.label COLLISION_LOOKUP = TEMP1
+		dec $d020
 		
-		ldy COLLISION_Y
-		lda TABLES.ScreenRowLSB ,y
-		sta COLLISION_LOOKUP
-		lda TABLES.ScreenRowMSB ,y
-		sta COLLISION_LOOKUP + 1
-
-		ldy COLLISION_X
-		tya
-		clc
-		adc #81
-		tay
-		lda #$0c
-		sta (COLLISION_LOOKUP), y
-
-
 		:waitForRasterLine($82)
 
 		jmp !Loop-
-	
+
 
 #import "maps/assets.asm"
 
