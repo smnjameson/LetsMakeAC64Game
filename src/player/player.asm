@@ -7,7 +7,7 @@ PLAYER: {
 	.label STATE_WALK_RIGHT = %00001000
 
 	PlayerX:
-			.byte $80, $04 // 1/16 pixel accuracy
+			.byte $00, $48, $00 // 1/256th pixel accuracy
 	PlayerY:
 			.byte $00 // 1 pixel accuracy
 
@@ -20,7 +20,7 @@ PLAYER: {
 	PlayerState:
 			.byte $00
 	PlayerWalkSpeed:
-			.byte $18
+			.byte $80, $01
 
 	Initialise: {
 			lda #$0a
@@ -87,21 +87,11 @@ PLAYER: {
 			sty Y_PIXEL_OFFSET
 
 			//calculate x and y in screen space
-			lda PlayerX
-			sta TEMP1
 			lda PlayerX + 1
+			sta TEMP1
+			lda PlayerX + 2
 			sta TEMP2
 			//Convert from 1:1/16 to 1:1
-			lda TEMP1
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			sta TEMP1
 			lda TEMP2
 			bne !+
 			lda TEMP1
@@ -203,25 +193,10 @@ PLAYER: {
 
 
 			//Set player position X & Y
-			lda PlayerX
-			sta TEMP1
 			lda PlayerX + 1
-			sta TEMP2
-
-			//Convert from 1:1/16 to 1:1
-			lda TEMP1
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			lsr TEMP2
-			ror 
-			
 			sta VIC.SPRITE_0_X
 
-			lda TEMP2
+			lda PlayerX + 2
 			beq !+
 			lda VIC.SPRITE_MSB
 			ora #%00000001
@@ -281,8 +256,11 @@ PLAYER: {
 			sbc PlayerWalkSpeed
 			sta PlayerX
 			lda PlayerX + 1
-			sbc #$00
+			sbc PlayerWalkSpeed + 1
 			sta PlayerX + 1
+			lda PlayerX + 2
+			sbc #$00
+			sta PlayerX + 2
 
 			lda PlayerState
 			ora #STATE_WALK_LEFT
@@ -304,8 +282,11 @@ PLAYER: {
 			adc PlayerWalkSpeed
 			sta PlayerX
 			lda PlayerX + 1
-			adc #$00
+			adc PlayerWalkSpeed + 1
 			sta PlayerX + 1
+			lda PlayerX + 2
+			adc #$00
+			sta PlayerX + 2
 
 			lda PlayerState
 			ora #STATE_WALK_RIGHT
