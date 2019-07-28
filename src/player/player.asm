@@ -7,10 +7,10 @@ PLAYER: {
 	.label STATE_WALK_RIGHT = %00001000
 
 	PlayerX:
-			.byte $00, $00 //1 pixel accuracy
+			.byte $80, $04 // 1/16 pixel accuracy
 	PlayerY:
-			.byte $00 //1 pixel accuracy
-			
+			.byte $00 // 1 pixel accuracy
+
 	PlayerFloorCollision:
 			.byte $00
 	PlayerJumpIndex:
@@ -19,6 +19,8 @@ PLAYER: {
 			.byte $00
 	PlayerState:
 			.byte $00
+	PlayerWalkSpeed:
+			.byte $18
 
 	Initialise: {
 			lda #$0a
@@ -47,31 +49,25 @@ PLAYER: {
 	GetCollisions: {
 
 		//Get floor collisions for each foot
-		ldx #1
+		ldx #2
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta PlayerFloorCollision
 
-		ldx #4
+		ldx #8
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		ora PlayerFloorCollision
 		and #$f0
 		sta PlayerFloorCollision
-
-		//DEbug /////////
-		lsr
-		lsr
-		lsr
-		lsr
-		sta VIC.COLOR_RAM
-		/////////////////
 
 		rts
 	}
@@ -81,10 +77,10 @@ PLAYER: {
 	GetCollisionPoint: {
 			//x register contains x offset (half value)
 			//y register contains y offset
-			.label X_PIXEL_OFFSET = TEMP1
-			.label Y_PIXEL_OFFSET = TEMP2
+			.label X_PIXEL_OFFSET = TEMP3
+			.label Y_PIXEL_OFFSET = TEMP4
 
-			.label X_BORDER_OFFSET = $0b
+			.label X_BORDER_OFFSET = $16
 			.label Y_BORDER_OFFSET = $32
 
 			stx X_PIXEL_OFFSET
@@ -92,17 +88,58 @@ PLAYER: {
 
 			//calculate x and y in screen space
 			lda PlayerX
+			sta TEMP1
+			lda PlayerX + 1
+			sta TEMP2
+			//Convert from 1:1/16 to 1:1
+			lda TEMP1
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			sta TEMP1
+			lda TEMP2
+			bne !+
+			lda TEMP1
 			cmp #X_BORDER_OFFSET
 			bcs !+
 			lda #X_BORDER_OFFSET
+			sta TEMP1
 		!:	
+			lda TEMP1
 			clc
 			adc X_PIXEL_OFFSET
+			sta TEMP1
+			lda TEMP2
+			adc #$00
+			sta TEMP2
+
+			lda TEMP1
 			sec
 			sbc #X_BORDER_OFFSET
-			lsr
-			lsr
+			sta TEMP1
+			lda TEMP2
+			sbc #$00
+			sta TEMP2
+
+			
+
+			lda TEMP1
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+
 			tax
+
+
+
 
 			lda PlayerY
 			cmp #Y_BORDER_OFFSET
@@ -167,9 +204,25 @@ PLAYER: {
 
 			//Set player position X & Y
 			lda PlayerX
-			asl
+			sta TEMP1
+			lda PlayerX + 1
+			sta TEMP2
+
+			//Convert from 1:1/16 to 1:1
+			lda TEMP1
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			lsr TEMP2
+			ror 
+			
 			sta VIC.SPRITE_0_X
-			bcc !+
+
+			lda TEMP2
+			beq !+
 			lda VIC.SPRITE_MSB
 			ora #%00000001
 			jmp !EndMSB+
@@ -223,13 +276,13 @@ PLAYER: {
 			and #JOY_LT
 			bne !+
 
-			ldx PLAYER.PlayerX
-			dex
-			cpx #255
-			bne !Skip+
-			ldx #183
-		!Skip:
-			stx PLAYER.PlayerX
+			sec
+			lda PlayerX
+			sbc PlayerWalkSpeed
+			sta PlayerX
+			lda PlayerX + 1
+			sbc #$00
+			sta PlayerX + 1
 
 			lda PlayerState
 			ora #STATE_WALK_LEFT
@@ -245,13 +298,15 @@ PLAYER: {
 			lda JOY_ZP
 			and #JOY_RT
 			bne !+
-			ldx PLAYER.PlayerX
-			inx
-			cpx #184
-			bne !Skip+
-			ldx #$00
-		!Skip:
-			stx PLAYER.PlayerX
+
+			clc
+			lda PlayerX
+			adc PlayerWalkSpeed
+			sta PlayerX
+			lda PlayerX + 1
+			adc #$00
+			sta PlayerX + 1
+
 			lda PlayerState
 			ora #STATE_WALK_RIGHT
 			sta PlayerState
