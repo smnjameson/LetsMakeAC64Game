@@ -35,11 +35,11 @@ PLAYER: {
 			sta SPRITE_POINTERS + 0
 
 			lda VIC.SPRITE_ENABLE 
-			ora %00000001
+			ora #%00000001
 			sta VIC.SPRITE_ENABLE
 
 			lda VIC.SPRITE_MULTICOLOR
-			ora %00000001
+			ora #%00000001
 			sta VIC.SPRITE_MULTICOLOR
 
 			rts
