@@ -19,7 +19,7 @@ Entry:
 
 		//Bank out BASIC and Kernal ROM
 		lda $01
-		and #%11111000
+		and #%11111000 
 		ora #%00000101
 		sta $01
 
@@ -44,19 +44,17 @@ Entry:
 
 		inc $d020
 
-		inc ZP_COUNTER
+			inc ZP_COUNTER
 
-		jsr PLAYER.DrawPlayer
-		
-		jsr PLAYER.PlayerControl
-		
-		jsr PLAYER.JumpAndFall
+			jsr PLAYER.DrawPlayer
+			
+			jsr PLAYER.PlayerControl
+			
+			jsr PLAYER.JumpAndFall
 
-		jsr PLAYER.GetCollisions
+			jsr PLAYER.GetCollisions
 
 		dec $d020
-		
-		:waitForRasterLine($82)
 
 		jmp !Loop-
 

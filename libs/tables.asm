@@ -20,6 +20,11 @@ TABLES: {
 		.byte 64,65,66,67,68,69,70,71
 	__PlayerWalkRight: 
 
+	PowerOfTwo:
+		.byte 1,2,4,8,16,32,64,128
+	InvPowerOfTwo:
+		.byte 255-1, 255-2, 255-4, 255-8, 255-16, 255-32, 255-64, 255-128
+
 }
 
 
