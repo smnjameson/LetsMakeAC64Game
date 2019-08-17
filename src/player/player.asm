@@ -122,6 +122,8 @@ PLAYER: {
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
+		
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x

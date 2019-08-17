@@ -31,6 +31,8 @@ VIC: {
 
 	.label MEMORY_SETUP = $d018
 
+	.label INTERRUPT_CONTROL = $d01a
+	
 	.label SPRITE_MULTICOLOR = $d01c
 
 	.label BORDER_COLOR = $d020

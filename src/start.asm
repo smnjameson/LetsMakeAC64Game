@@ -3,19 +3,21 @@ BasicUpstart2(Entry)
 #import "zeropage.asm"
 #import "../libs/vic.asm"
 #import "../libs/tables.asm"
+#import "../libs/macros.asm"
+
 #import "utils/utils.asm"
+#import "utils/irq.asm"
 
 #import "maps/maploader.asm"
 #import "player/player.asm"
+
 
 Entry:
 		lda #$00
 		sta VIC.BACKGROUND_COLOR
 		sta VIC.BORDER_COLOR
 
-		lda #$7f	//Disable CIA IRQ's to prevent crash because 
-		sta $dc0d
-		sta $dd0d
+		jsr IRQ.Setup
 
 		//Bank out BASIC and Kernal ROM
 		lda $01
@@ -40,24 +42,24 @@ Entry:
 
 	//Inf loop
 	!Loop:
-		:waitForRasterLine($ff)
+		lda PerformFrameCodeFlag
+		beq !Loop-
+		dec PerformFrameCodeFlag
 
 		inc $d020
-
 			inc ZP_COUNTER
 
 			jsr PLAYER.DrawPlayer
-			
 			jsr PLAYER.PlayerControl
-			
 			jsr PLAYER.JumpAndFall
-
 			jsr PLAYER.GetCollisions
 
 		dec $d020
-
 		jmp !Loop-
 
+
+	PerformFrameCodeFlag:
+		.byte $00
 
 #import "maps/assets.asm"
 
