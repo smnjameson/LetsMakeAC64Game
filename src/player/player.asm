@@ -31,8 +31,18 @@ PLAYER: {
 
 	Player1_FloorCollision:
 			.byte $00
+	Player1_LeftCollision:
+			.byte $00
+	Player1_RightCollision:
+			.byte $00
+
 	Player2_FloorCollision:
 			.byte $00
+	Player2_LeftCollision:
+			.byte $00
+	Player2_RightCollision:
+			.byte $00
+
 
 	Player1_JumpIndex:
 			.byte $00
@@ -91,7 +101,7 @@ PLAYER: {
 
 	GetCollisions: {
 
-		//Get floor collisions for each foot
+		//Get floor collisions for each foot for Player 1
 		lda #$00
 		ldx #2
 		ldy #20
@@ -112,8 +122,59 @@ PLAYER: {
 		tax
 		lda CHAR_COLORS, x
 		ora Player1_FloorCollision
-		and #$f0
 		sta Player1_FloorCollision
+
+
+
+
+		//Get Left Collision
+		lda #$00
+		ldx #0
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		sta Player1_LeftCollision
+
+		lda #$00
+		ldx #0
+		ldy #18
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		ora Player1_LeftCollision
+		sta Player1_LeftCollision
+
+
+		//Get Right Collision
+		lda #$00
+		ldx #11
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		sta Player1_RightCollision
+
+		lda #$00
+		ldx #11
+		ldy #18
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		ora Player1_RightCollision
+		sta Player1_RightCollision
+
+
+
+
+
+
+
+
 
 
 		//Get floor collisions for each foot player 2
@@ -139,8 +200,50 @@ PLAYER: {
 		tax
 		lda CHAR_COLORS, x
 		ora Player2_FloorCollision
-		and #$f0
 		sta Player2_FloorCollision
+
+
+		//Get Left Collision
+		lda #$01
+		ldx #0
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		sta Player2_LeftCollision
+
+		lda #$01
+		ldx #0
+		ldy #18
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		ora Player2_LeftCollision
+		sta Player2_LeftCollision
+
+
+
+		//Get Right Collision
+		lda #$01
+		ldx #11
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		sta Player2_RightCollision
+
+		lda #$01
+		ldx #11
+		ldy #18
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		ora Player2_RightCollision
+		sta Player2_RightCollision
 
 
 		rts
@@ -255,6 +358,8 @@ PLAYER: {
 
 			rts
 	}
+
+
 
 
 
@@ -457,6 +562,10 @@ PLAYER: {
 			and #JOY_LT
 			bne !+
 
+			lda Player1_LeftCollision
+			and #COLLISION_SOLID
+			bne !+
+
 			sec
 			lda Player1_X
 			sbc Player1_WalkSpeed
@@ -481,6 +590,10 @@ PLAYER: {
 		!Right:
 			lda JOY_ZP1
 			and #JOY_RT
+			bne !+
+
+			lda Player1_RightCollision
+			and #COLLISION_SOLID
 			bne !+
 
 			clc
@@ -538,6 +651,10 @@ PLAYER: {
 			and #JOY_LT
 			bne !+
 
+			lda Player2_LeftCollision
+			and #COLLISION_SOLID
+			bne !+		
+
 			sec
 			lda Player2_X
 			sbc Player2_WalkSpeed
@@ -562,6 +679,10 @@ PLAYER: {
 			lda JOY_ZP2
 			and #JOY_RT
 			bne !+
+
+			lda Player2_RightCollision
+			and #COLLISION_SOLID
+			bne !+		
 
 			clc
 			lda Player2_X
@@ -594,7 +715,6 @@ PLAYER: {
 			.label PlayerY = VECTOR4
 
 			.label CURRENT_PLAYER = TEMP1
-
 
 		lda #$02
 		sta CURRENT_PLAYER
