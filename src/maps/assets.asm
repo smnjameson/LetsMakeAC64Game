@@ -24,6 +24,6 @@
 		.import binary "../../assets/maps/map_1.bin"
 
 * = $f000 "Charset"
-	.import binary "../../assets/maps/chars.bin"
+	.import binary "../../assets/maps/chars.bin"   //roll 12!
 
 

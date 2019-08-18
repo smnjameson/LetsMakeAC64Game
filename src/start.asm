@@ -10,6 +10,23 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "player/player.asm"
+#import "animation/charanimations.asm"
+
+
+Random: {
+        lda seed
+        beq doEor
+        asl
+        beq noEor
+        bcc noEor
+    doEor:    
+        eor #$1d
+    noEor:  
+        sta seed
+        rts
+    seed:
+        .byte $76
+}
 
 
 Entry:

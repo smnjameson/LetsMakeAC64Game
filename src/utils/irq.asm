@@ -32,6 +32,13 @@ IRQ: {
 			lda #$01
 			sta PerformFrameCodeFlag
 
+			lda #$02
+			sta $d020
+			jsr CHAR_ANIMATIONS.AnimateWater
+			jsr CHAR_ANIMATIONS.FlickerLights
+			lda #$00
+			sta $d020
+
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState();
 		rti
