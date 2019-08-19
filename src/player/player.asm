@@ -295,22 +295,15 @@ PLAYER: {
 
 		!PlayerSetupComplete:
 
-			//calculate x and y in screen space
+			//Store Player position X
 			ldy #$01
 			lda (PLAYER_X), y
 			sta PLAYER_POSITION
 			iny
 			lda (PLAYER_X), y
 			sta PLAYER_POSITION + 1
-			//Convert from 1:1/16 to 1:1
-			lda PLAYER_POSITION + 1
-			bne !+
-			lda PLAYER_POSITION
-			cmp #X_BORDER_OFFSET
-			bcs !+
-			lda #X_BORDER_OFFSET
-			sta PLAYER_POSITION
-		!:	
+
+			//Add sprite offset X
 			lda PLAYER_POSITION
 			clc
 			adc X_PIXEL_OFFSET
@@ -319,6 +312,7 @@ PLAYER: {
 			adc #$00
 			sta PLAYER_POSITION + 1
 
+			//Subtract border width
 			lda PLAYER_POSITION
 			sec
 			sbc #X_BORDER_OFFSET
@@ -328,7 +322,7 @@ PLAYER: {
 			sta PLAYER_POSITION + 1
 
 			
-
+			//Divide by 8 to get ScreenX
 			lda PLAYER_POSITION
 			lsr PLAYER_POSITION + 1
 			ror 
@@ -336,17 +330,12 @@ PLAYER: {
 			ror 
 			lsr PLAYER_POSITION + 1
 			ror 
-
 			tax
 
 
-
+			//Divide player Y by 8 to get ScreenY
 			ldy #$00
 			lda (PLAYER_Y), y
-			cmp #Y_BORDER_OFFSET
-			bcs !+
-			lda #Y_BORDER_OFFSET
-		!:
 			clc
 			adc Y_PIXEL_OFFSET
 			sec
