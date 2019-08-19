@@ -103,7 +103,7 @@ PLAYER: {
 
 		//Get floor collisions for each foot for Player 1
 		lda #$00
-		ldx #2
+		ldx #4
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -114,7 +114,7 @@ PLAYER: {
 
 		
 		lda #$00
-		ldx #8
+		ldx #10
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -179,7 +179,7 @@ PLAYER: {
 
 		//Get floor collisions for each foot player 2
 		lda #$01
-		ldx #2
+		ldx #4
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -192,7 +192,7 @@ PLAYER: {
 
 		
 		lda #$01
-		ldx #8
+		ldx #10
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -259,7 +259,7 @@ PLAYER: {
 			.label X_PIXEL_OFFSET = TEMP3
 			.label Y_PIXEL_OFFSET = TEMP4
 
-			.label X_BORDER_OFFSET = $16
+			.label X_BORDER_OFFSET = $18
 			.label Y_BORDER_OFFSET = $32
 
 			.label PLAYER_X = VECTOR1
