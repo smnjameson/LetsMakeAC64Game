@@ -326,10 +326,8 @@ PLAYER: {
 			lda PLAYER_POSITION
 			lsr PLAYER_POSITION + 1
 			ror 
-			lsr PLAYER_POSITION + 1
-			ror 
-			lsr PLAYER_POSITION + 1
-			ror 
+			lsr
+			lsr
 			tax
 
 
