@@ -26,6 +26,13 @@ IRQ: {
 		rts
 	}
 
+	ColorRamp1:
+		.byte $0b, $02, $02, $04, $0e, $03, $0d, $01
+
+		.byte $01, $0d, $03, $0e, $04, $02, $0b, $0b
+	RampIndex:
+		.byte $07
+
 	MainIRQ: {		
 		:StoreState()
 			.for(var i=0; i<10; i++) {
@@ -44,11 +51,38 @@ IRQ: {
 
 			////////
 			:waitForRasterLine($ea)
-			ldy #$08
+
+			lda #$07
+			sta IRQ_TEMP1
+
+			ldy RampIndex
 		!:
+			tya
+			and #$0f
+			tax
+
+			lda ColorRamp1, x
+			sta VIC.BACKGROUND_COLOR
+
+
+			lda VIC.RASTER_Y
+			cmp VIC.RASTER_Y
+			beq *-3
+
+			dey
+			dec IRQ_TEMP1
+			bne !-
 			
 
 
+			lda ZP_COUNTER
+			and #$01
+			beq !+
+			dec RampIndex
+		!:
+
+			lda #$01
+			sta VIC.BACKGROUND_COLOR
 
 			lda #$01
 			sta PerformFrameCodeFlag

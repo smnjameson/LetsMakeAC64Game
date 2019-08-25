@@ -8,6 +8,7 @@
 .label VECTOR3 = $0e
 .label VECTOR4 = $10
 
+.label IRQ_TEMP1 = $12
 
 
 .label COLLISION_X1 = $21
