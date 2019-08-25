@@ -13,3 +13,10 @@
 		tax 
 		pla 
 }
+
+
+.macro waitForRasterLine( line ) {
+		lda #line
+		cmp VIC.RASTER_Y
+		bne *-3	
+}

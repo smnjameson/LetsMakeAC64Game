@@ -28,6 +28,7 @@ VIC: {
 	.label RASTER_Y = $d012 
 
 	.label SPRITE_ENABLE = $d015
+	.label SCREEN_CONTROL_2 = $d016
 
 	.label MEMORY_SETUP = $d018
 
@@ -37,6 +38,8 @@ VIC: {
 
 	.label BORDER_COLOR = $d020
 	.label BACKGROUND_COLOR = $d021
+	.label EXTENDED_BG_COLOR_1 = $d022
+	.label EXTENDED_BG_COLOR_2 = $d023
 
 	.label SPRITE_MULTICOLOR_1 = $d025
 	.label SPRITE_MULTICOLOR_2 = $d026
@@ -54,8 +57,3 @@ VIC: {
 }
 
 
-.macro waitForRasterLine( line ) {
-		lda #line
-		cmp VIC.RASTER_Y
-		bne *-3	
-}

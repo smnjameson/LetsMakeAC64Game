@@ -15,7 +15,7 @@ IRQ: {
 		sta $fffe   // 0314
 		stx $ffff	// 0315
 
-		lda #$ff
+		lda #$e2
 		sta $d012
 		lda $d011
 		and #%01111111
@@ -27,17 +27,31 @@ IRQ: {
 	}
 
 	MainIRQ: {		
-		:StoreState();
+		:StoreState()
+			.for(var i=0; i<10; i++) {
+				nop
+			}
+
+			ldx #WHITE
+			lda VIC.SCREEN_CONTROL_2
+			and #%11101111
+			tay
+			
+			stx VIC.BACKGROUND_COLOR
+			sty VIC.SCREEN_CONTROL_2
+
+
+
+			////////
+			:waitForRasterLine($ea)
+			ldy #$08
+		!:
+			
+
+
 
 			lda #$01
 			sta PerformFrameCodeFlag
-
-			lda #$02
-			sta $d020
-			jsr CHAR_ANIMATIONS.AnimateWater
-			jsr CHAR_ANIMATIONS.FlickerLights
-			lda #$00
-			sta $d020
 
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState();

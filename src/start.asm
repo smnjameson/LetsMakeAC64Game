@@ -10,6 +10,7 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "player/player.asm"
+#import "player/hud.asm"
 #import "animation/charanimations.asm"
 
 
@@ -30,9 +31,18 @@ Random: {
 
 
 Entry:
-		lda #$00
+		lda #$06
 		sta VIC.BACKGROUND_COLOR
+		lda #$00
 		sta VIC.BORDER_COLOR
+
+		lda #$00
+		sta VIC.EXTENDED_BG_COLOR_1
+		lda #$01
+		sta VIC.EXTENDED_BG_COLOR_2
+
+
+
 
 		jsr IRQ.Setup
 
@@ -55,7 +65,7 @@ Entry:
 		jsr MAPLOADER.DrawMap
 
 		jsr PLAYER.Initialise
-
+		jsr HUD.Initialise
 
 	//Inf loop
 	!Loop:
@@ -63,7 +73,6 @@ Entry:
 		beq !Loop-
 		dec PerformFrameCodeFlag
 
-		inc $d020
 			inc ZP_COUNTER
 
 			jsr PLAYER.DrawPlayer
@@ -71,7 +80,14 @@ Entry:
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
 
-		dec $d020
+			
+			//Reset Values set by IRQ	
+			lda #BLUE
+			sta VIC.BACKGROUND_COLOR
+			lda VIC.SCREEN_CONTROL_2
+			ora #%00010000 
+			sta VIC.SCREEN_CONTROL_2
+
 		jmp !Loop-
 
 

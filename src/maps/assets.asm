@@ -23,6 +23,9 @@
 	MAP_1:
 		.import binary "../../assets/maps/map_1.bin"
 
+	HUD_DATA:
+		.import binary "../../assets/maps/hud.bin"
+		
 * = $f000 "Charset"
 	.import binary "../../assets/maps/chars.bin"   //roll 12!
 

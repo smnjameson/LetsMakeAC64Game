@@ -245,7 +245,6 @@ PLAYER: {
 		ora Player2_RightCollision
 		sta Player2_RightCollision
 
-
 		rts
 	}
 
@@ -302,7 +301,7 @@ PLAYER: {
 			iny
 			lda (PLAYER_X), y
 			sta PLAYER_POSITION + 1
-
+		
 			//Add sprite offset X
 			lda PLAYER_POSITION
 			clc

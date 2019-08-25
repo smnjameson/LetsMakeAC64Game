@@ -1,0 +1,72 @@
+TITLE SUGGESTIONS:
+
+Candy Crash*
+Sweet Tooth
+Gobstoppers
+Sugar Time
+Candy Apocalypse
+Double Diabetes
+Andy Crash
+Wilford Bremley's Playhouse
+Andy and Mandy In Candyland
+Sugar Rush
+Gummi Gobble* (Weird connotations)
+Forbidden Candy
+Beyond the Candy Palace
+Sweet Fighter
+Candyrama
+Sweetwolf
+Pik 'n' Mix
+The Last After8
+Sweets of Rage
+Sweetmando
+Outgum
+Sweets'n'Gobblings
+Chockie Egg
+
+
+
+=========================================
+
+
+Player two can join at any time
+
+Six enemies maximum at one time, keep respawning until level requirement met
+
+Player leaves through a large door which appears at the end of the round
+Switch activates the final exit door
+Switch can only be activated when player is heavy enough from eating enemies
+In two player mode both players need to stand on switch
+As players eat they get fatter and slower, giving the player who is behind a catch up advantage
+
+
+Enemies spawn in through some kind of portal anmimation (small door/pipe)
+
+2 player mechanic, crown as in super mario 3d world, gives bonus points at end, awarded to winner per round, dropped on death and can be picked up by anyone???
+
+
+Attack
+======
+Lick animation with tongue extending?
+
+Pez gun, with constant respawning special ammo, non special ammo has no additional effect
+OR Player spits candies, special pickups change the candy and its effect
+
+Projectiles will drop with gravity
+Special ammo creates puddles when missing enemies
+Puddles could be bounce, freeze, slow, ice(slide) recognisable by color changes?
+
+
+
+Obstacles
+=========
+
+Spikes
+Conveyor belt
+Floor swith (for final door, needs combined weight)
+Levers (On/Off blocks, conveyor direction)
+Slowing floor (slime?)
+Ice floor (Sliding)
+Bounce (springs?)
+
+
