@@ -31,17 +31,15 @@ Random: {
 
 
 Entry:
-		lda #$06
+		lda #$00
 		sta VIC.BACKGROUND_COLOR
 		lda #$00
 		sta VIC.BORDER_COLOR
 
-		lda #$00
+		lda #$05
 		sta VIC.EXTENDED_BG_COLOR_1
-		lda #$01
+		lda #$0e
 		sta VIC.EXTENDED_BG_COLOR_2
-
-
 
 
 		jsr IRQ.Setup

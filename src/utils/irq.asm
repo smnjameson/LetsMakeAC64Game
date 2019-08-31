@@ -35,9 +35,10 @@ IRQ: {
 
 	MainIRQ: {		
 		:StoreState()
-			.for(var i=0; i<10; i++) {
-				nop
-			}
+			ldx #$04
+		!:
+			dex
+			bne !-
 
 			ldx #WHITE
 			lda VIC.SCREEN_CONTROL_2
