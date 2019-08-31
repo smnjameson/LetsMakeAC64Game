@@ -5,6 +5,10 @@ TABLES: {
 		.fill 25, <[$c000 + i * $28]
 	ScreenRowMSB:
 		.fill 25, >[$c000 + i * $28]
+	BufferLSB:
+		.fill 25, <[MAPLOADER.BUFFER + i * $28]
+	BufferMSB:
+		.fill 25, >[MAPLOADER.BUFFER + i * $28]
 
 	JumpAndFallTable:
 		.byte $04, $04, $03, $03, $03

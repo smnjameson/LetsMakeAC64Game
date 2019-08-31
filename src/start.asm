@@ -12,7 +12,7 @@ BasicUpstart2(Entry)
 #import "player/player.asm"
 #import "player/hud.asm"
 #import "animation/charanimations.asm"
-
+#import "soft_sprites/softsprites.asm"
 
 Random: {
         lda seed
@@ -64,6 +64,16 @@ Entry:
 
 		jsr PLAYER.Initialise
 		jsr HUD.Initialise
+		jsr SOFTSPRITES.Initialise
+
+		//DEBUG
+		ldx #$0 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$0 //SpriteY
+		lda #180 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+
 
 	//Inf loop
 	!Loop:
@@ -78,9 +88,18 @@ Entry:
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
 
+
 			
+
+			jsr SOFTSPRITES.ClearSprites
+			// lda #$00
+			// ldx #$01
+			// ldy #$01
+			// jsr SOFTSPRITES.MoveSprite
+			jsr SOFTSPRITES.DrawSprites
+
 			//Reset Values set by IRQ	
-			lda #BLUE
+			lda #BLACK
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000 

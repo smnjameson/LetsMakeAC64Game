@@ -1,5 +1,6 @@
   MAPLOADER: {
 
+  	.label BUFFER = $bc00
 
 	DrawMap: {
 			//Label the ZP temp vars for use here
@@ -120,6 +121,25 @@
 			jmp !RowLoop-
 		!:
 			
+			jsr BufferMap
+
+			rts
+	}
+
+	BufferMap: {
+			ldx #$00
+		!:
+			lda SCREEN_RAM, x
+			sta BUFFER, x
+			lda SCREEN_RAM + 250, x
+			sta BUFFER + 250, x
+			lda SCREEN_RAM + 500, x
+			sta BUFFER + 500, x
+			lda SCREEN_RAM + 750, x
+			sta BUFFER + 750, x
+			inx
+			cpx #250
+			bne !-
 			rts
 	}
 }

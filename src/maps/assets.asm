@@ -27,6 +27,7 @@
 		.import binary "../../assets/maps/hud.bin"
 		
 * = $f000 "Charset"
-	.import binary "../../assets/maps/chars.bin"   //roll 12!
+	CHAR_SET:
+		.import binary "../../assets/maps/chars.bin"   //roll 12!
 
 
