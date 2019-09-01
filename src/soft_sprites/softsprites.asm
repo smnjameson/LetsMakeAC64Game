@@ -101,12 +101,6 @@ SOFTSPRITES: {
 			lda TEMP1
 			clc
 			adc SpriteData_Y, y
-			//TEMP
-			cmp #168
-			bcc !+
-			lda #$00
-		!:
-			/////////////////
 			sta SpriteData_Y, y
 
 
@@ -117,16 +111,6 @@ SOFTSPRITES: {
 			lda SpriteData_X_MSB, y
 			adc #$00
 			sta SpriteData_X_MSB, y
-			beq !+
-			//TEMP
-			lda SpriteData_X_LSB, y
-			cmp #56
-			bcc !+
-			lda #$00
-			sta SpriteData_X_LSB, y
-			sta SpriteData_X_MSB, y
-			//////////////////
-		!:
 			rts
 	}
 
@@ -152,6 +136,7 @@ SOFTSPRITES: {
 			.label TEMP = TEMP3
 			.label SHIFT_TEMP = TEMP4
 			.label SCREEN_X = TEMP5
+
 
 			.label CHAR_DATA_LEFT = VECTOR1
 			.label SPRITE_LOOKUP = VECTOR2
@@ -486,6 +471,7 @@ SOFTSPRITES: {
 		    ldx #$00
 		Loop:
 		    txa
+
 		    and #%10101010
 		    sta TEMP1
 

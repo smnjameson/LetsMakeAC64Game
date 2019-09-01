@@ -76,7 +76,7 @@ Entry:
 		lda #180 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
-		ldx #$86 //SpriteX
+		ldx #$02 //SpriteX
 		clc		 //Carry = bit 9 of Sprite X
 		ldy #$55 //SpriteY
 		lda #180 //Character ID
@@ -100,7 +100,7 @@ Entry:
 
 			lda #$01
 			ldx #$02
-			ldy #$01
+			ldy #$ff
 			jsr SOFTSPRITES.MoveSprite
 
 			jsr SOFTSPRITES.UpdateSprites
@@ -119,5 +119,9 @@ Entry:
 		.byte $00
 
 #import "maps/assets.asm"
+
+
+
+
 
 

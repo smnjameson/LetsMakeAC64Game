@@ -227,7 +227,7 @@ PLAYER: {
 
 		//Get Right Collision
 		lda #$01
-		ldx #11
+		ldx #13
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -236,7 +236,7 @@ PLAYER: {
 		sta Player2_RightCollision
 
 		lda #$01
-		ldx #11
+		ldx #13
 		ldy #18
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt

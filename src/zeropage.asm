@@ -4,6 +4,7 @@
 .label TEMP4 = $05
 .label TEMP5 = $06
 .label TEMP6 = $07
+.label TEMP7 = $08
 
 .label VECTOR1 = $0A
 .label VECTOR2 = $0C
