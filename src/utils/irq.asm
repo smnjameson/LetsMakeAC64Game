@@ -88,6 +88,45 @@ IRQ: {
 			lda #$01
 			sta PerformFrameCodeFlag
 
+			lda #<SecondIRQ    
+			ldx #>SecondIRQ
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$00
+			sta $d012
+			lda $d011
+			and #%11111111
+			sta $d011	
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+
+	SecondIRQ: {
+		:StoreState()
+
+
+			//Reset Values set by IRQ	
+			lda #BLACK
+			sta VIC.BACKGROUND_COLOR
+			lda VIC.SCREEN_CONTROL_2
+			ora #%00010000 
+			sta VIC.SCREEN_CONTROL_2
+
+			lda #<MainIRQ    
+			ldx #>MainIRQ
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$e2
+			sta $d012
+			lda $d011
+			and #%01111111
+			sta $d011	
+
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState();
 		rti

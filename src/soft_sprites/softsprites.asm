@@ -48,21 +48,7 @@ SOFTSPRITES: {
 			rts
 	}
 
-	GetFontLookup: {
-			ldy #$00
-			sty TEMP6
-			asl
-			rol TEMP6
-			asl
-			rol TEMP6
-			asl
-			rol TEMP6
-			sta VECTOR5
-			lda TEMP6
-			adc #>CHAR_SET
-			sta VECTOR5 + 1
-			rts
-	}
+
 
 	AddSprite: {
 			stx TEMP1
@@ -101,7 +87,7 @@ SOFTSPRITES: {
 			bne !+
 			ldx #$00
 		!:
-			sty CurrentSpriteIndex
+			stx CurrentSpriteIndex
 
 
 
@@ -110,13 +96,19 @@ SOFTSPRITES: {
 	}
 
 	MoveSprite: {
-
 			sty TEMP1
 			tay
 			lda TEMP1
 			clc
 			adc SpriteData_Y, y
+			//TEMP
+			cmp #168
+			bcc !+
+			lda #$00
+		!:
+			/////////////////
 			sta SpriteData_Y, y
+
 
 			txa
 			clc
@@ -125,9 +117,34 @@ SOFTSPRITES: {
 			lda SpriteData_X_MSB, y
 			adc #$00
 			sta SpriteData_X_MSB, y
+			beq !+
+			//TEMP
+			lda SpriteData_X_LSB, y
+			cmp #56
+			bcc !+
+			lda #$00
+			sta SpriteData_X_LSB, y
+			sta SpriteData_X_MSB, y
+			//////////////////
+		!:
 			rts
 	}
 
+	GetFontLookup: {
+			ldy #$00
+			sty TEMP6
+			asl
+			rol TEMP6
+			asl
+			rol TEMP6
+			asl
+			rol TEMP6
+			sta VECTOR5
+			lda TEMP6
+			adc #>CHAR_SET
+			sta VECTOR5 + 1
+			rts
+	}
 
 	UpdateSprites: {
 			.label OFFSET_X = TEMP1
@@ -191,6 +208,7 @@ SOFTSPRITES: {
 
 
 				stx TEMP //Store x iterator to retrieve at end
+
 
 				//Draw the char data in the left column
 				lda SpriteData_Lookup_LSB, x
@@ -362,7 +380,7 @@ SOFTSPRITES: {
 			.label SCREEN_ROW = VECTOR4
 			.label SCREEN_X = TEMP5
 			.label TEMP = TEMP6
-			
+				
 				//0,0
 				clc
 				lda SpriteData_CharStart, x

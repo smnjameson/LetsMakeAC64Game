@@ -62,6 +62,7 @@ Entry:
 		//Setup generated tables
 		jsr SOFTSPRITES.CreateMaskTable
 
+
 		jsr MAPLOADER.DrawMap
 
 		jsr PLAYER.Initialise
@@ -90,39 +91,26 @@ Entry:
 
 			inc ZP_COUNTER
 
-			jsr PLAYER.DrawPlayer
-			jsr PLAYER.PlayerControl
-			jsr PLAYER.JumpAndFall
-			jsr PLAYER.GetCollisions
-
-
-			inc $d020
 			jsr SOFTSPRITES.ClearSprites
 
-			inc $d020
 			lda #$00
 			ldx #$02
 			ldy #$01
 			jsr SOFTSPRITES.MoveSprite
 
-			inc $d020
 			lda #$01
 			ldx #$02
 			ldy #$01
 			jsr SOFTSPRITES.MoveSprite
 
-			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
 			
-			lda #BLACK
-			sta $d020
 
-			//Reset Values set by IRQ	
-			lda #BLACK
-			sta VIC.BACKGROUND_COLOR
-			lda VIC.SCREEN_CONTROL_2
-			ora #%00010000 
-			sta VIC.SCREEN_CONTROL_2
+			jsr PLAYER.DrawPlayer
+			jsr PLAYER.PlayerControl
+			jsr PLAYER.JumpAndFall
+			jsr PLAYER.GetCollisions
+
 
 		jmp !Loop-
 
