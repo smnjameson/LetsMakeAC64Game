@@ -2,13 +2,16 @@
 .label TEMP2 = $03
 .label TEMP3 = $04
 .label TEMP4 = $05
+.label TEMP5 = $06
+.label TEMP6 = $07
 
 .label VECTOR1 = $0A
 .label VECTOR2 = $0C
 .label VECTOR3 = $0e
 .label VECTOR4 = $10
+.label VECTOR5 = $12
 
-.label IRQ_TEMP1 = $12
+
 
 
 .label COLLISION_X1 = $21
@@ -22,3 +25,4 @@
 .label JOY_ZP2 = $32
 
 
+.label IRQ_TEMP1 = $40

@@ -59,6 +59,8 @@ Entry:
 		lda #%00001100
 		sta VIC.MEMORY_SETUP
 
+		//Setup generated tables
+		jsr SOFTSPRITES.CreateMaskTable
 
 		jsr MAPLOADER.DrawMap
 
@@ -67,12 +69,17 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 
 		//DEBUG
-		ldx #$0 //SpriteX
+		ldx #$06 //SpriteX
 		clc		 //Carry = bit 9 of Sprite X
-		ldy #$0 //SpriteY
+		ldy #$05 //SpriteY
 		lda #180 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
+		ldx #$86 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$55 //SpriteY
+		lda #180 //Character ID
+		jsr SOFTSPRITES.AddSprite
 
 
 	//Inf loop
@@ -89,14 +96,26 @@ Entry:
 			jsr PLAYER.GetCollisions
 
 
-			
-
+			inc $d020
 			jsr SOFTSPRITES.ClearSprites
-			// lda #$00
-			// ldx #$01
-			// ldy #$01
-			// jsr SOFTSPRITES.MoveSprite
-			jsr SOFTSPRITES.DrawSprites
+
+			inc $d020
+			lda #$00
+			ldx #$02
+			ldy #$01
+			jsr SOFTSPRITES.MoveSprite
+
+			inc $d020
+			lda #$01
+			ldx #$02
+			ldy #$01
+			jsr SOFTSPRITES.MoveSprite
+
+			inc $d020
+			jsr SOFTSPRITES.UpdateSprites
+			
+			lda #BLACK
+			sta $d020
 
 			//Reset Values set by IRQ	
 			lda #BLACK
