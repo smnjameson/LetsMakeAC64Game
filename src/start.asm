@@ -1,8 +1,8 @@
+#import "zeropage.asm"
 .segment Code [outPrg="start.prg"]
 
 BasicUpstart2(Entry)
 
-#import "zeropage.asm"
 #import "../libs/vic.asm"
 #import "../libs/tables.asm"
 #import "../libs/macros.asm"
@@ -95,13 +95,16 @@ Entry:
 
 			inc ZP_COUNTER
 
+			inc $d020
 			jsr SOFTSPRITES.ClearSprites
 
+			inc $d020
 			lda #$00
 			ldx #$02
 			ldy #$01
 			jsr SOFTSPRITES.MoveSprite
 
+			inc $d020
 			lda #$01
 			ldx #$02
 			ldy #$ff
@@ -109,7 +112,8 @@ Entry:
 
 			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
-			dec $d020
+			lda #$00
+			sta $d020
 
 			jsr PLAYER.DrawPlayer
 			jsr PLAYER.PlayerControl

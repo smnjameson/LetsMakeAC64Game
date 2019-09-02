@@ -1,29 +1,34 @@
-.label TEMP1 = $02
-.label TEMP2 = $03
-.label TEMP3 = $04
-.label TEMP4 = $05
-.label TEMP5 = $06
-.label TEMP6 = $07
-.label TEMP7 = $08
+*=$02 "Temp vars zero page" virtual
 
-.label VECTOR1 = $0A
-.label VECTOR2 = $0C
-.label VECTOR3 = $0e
-.label VECTOR4 = $10
-.label VECTOR5 = $12
+TEMP1:		.byte $00
+TEMP2:		.byte $00
+TEMP3:		.byte $00
+TEMP4:		.byte $00
+TEMP5:		.byte $00
+TEMP6:		.byte $00
+TEMP7:		.byte $00
 
+VECTOR1: 	.word $00
+VECTOR2: 	.word $00
+VECTOR3: 	.word $00
+VECTOR4: 	.word $00
+VECTOR5: 	.word $00
 
-
-
-.label COLLISION_X1 = $21
-.label COLLISION_Y1 = $22
-.label COLLISION_X2 = $23
-.label COLLISION_Y2 = $24
-
-.label ZP_COUNTER = $30
-
-.label JOY_ZP1 = $31
-.label JOY_ZP2 = $32
+IRQ_TEMP1: 	.byte $00
 
 
-.label IRQ_TEMP1 = $40
+COLLISION_X1: 	.byte $00
+COLLISION_X2: 	.byte $00
+COLLISION_Y1: 	.byte $00
+COLLISION_Y2: 	.byte $00
+
+ZP_COUNTER: 	.byte $00
+
+JOY_ZP1: 	.byte $00
+JOY_ZP2: 	.byte $00
+
+
+.label MAX_SPRITES = 8
+SPRITE_SCREEN_ROW:	.fill MAX_SPRITES * 2, $00
+SPRITE_SCREEN_X:	.fill MAX_SPRITES, $00
+

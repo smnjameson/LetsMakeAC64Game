@@ -1,7 +1,7 @@
 SOFTSPRITES: {
 	.label MAX_UNIQUE_CHARS = 4
 
-	.label MAX_SPRITES = 8
+	
 	.label SPRITE_FONT_START = 187
 	.label SPRITE_FONT_DATA_START = CHAR_SET + SPRITE_FONT_START * 8
 
@@ -11,6 +11,7 @@ SOFTSPRITES: {
 		.fill 256, 00
 	Sprite_MaskTable_Inverted:
 		.fill 256, 00
+
 	CurrentSpriteIndex:
 		.byte $00
 	SpriteData_ID: //180 = Player Projectile
@@ -73,7 +74,6 @@ SOFTSPRITES: {
 			sta SpriteData_X_MSB, x
 
 			stx TEMP1
-
 			inx
 			cpx #MAX_SPRITES
 			bne !+
@@ -81,20 +81,20 @@ SOFTSPRITES: {
 		!:
 			stx CurrentSpriteIndex
 
-
-
 			lda TEMP1
 			rts
 	}
 
 	MoveSprite: {
+			//Preserve Y
 			sty TEMP1
-			tay
+			tay //Set index
+
+			//Do movements
 			lda TEMP1
 			clc
 			adc SpriteData_Y, y
 			sta SpriteData_Y, y
-
 
 			txa
 			clc
@@ -103,8 +103,11 @@ SOFTSPRITES: {
 			lda SpriteData_X_MSB, y
 			adc #$00
 			sta SpriteData_X_MSB, y
+
 			rts
 	}
+
+
 
 
 
@@ -130,6 +133,8 @@ SOFTSPRITES: {
 			bne !+
 			jmp !Skip+
 		!:
+inc $d020
+
 				lda SpriteData_X_LSB, x
 				and #$07
 				sta OFFSET_X
@@ -159,17 +164,16 @@ SOFTSPRITES: {
 
 				//Get target location for font data in current charset
 				lda SpriteData_CharStart_LSB, x
-				sta CHAR_DATA_LEFT
+				sta CDATA_01 + 1
+				sta CDATA_02 + 1
+				sta CDATA_03 + 1
+				sta CDATA_04 + 1
 				lda SpriteData_CharStart_MSB, x
-				sta CHAR_DATA_LEFT + 1
+				sta CDATA_01 + 2
+				sta CDATA_02 + 2
+				sta CDATA_03 + 2
+				sta CDATA_04 + 2
 
-				clc
-				lda SpriteData_CharStart_LSB, x
-				adc #$10
-				sta CHAR_DATA_RIGHT
-				lda SpriteData_CharStart_MSB, x
-				adc #$00
-				sta CHAR_DATA_RIGHT + 1
 
 
 				stx TEMP //Store x iterator to retrieve at end
@@ -195,29 +199,44 @@ SOFTSPRITES: {
 				clc
 				adc BLIT_LOOKUP
 				sta BLIT_LOOKUP
+				sta BLIT_01 + 1
+				sta BLIT_02 + 1
+				sta BLIT_03 + 1
+				sta BLIT_04 + 1
 				lda BlitLookup_MSB,x
 				adc BLIT_LOOKUP + 1
 				sta BLIT_LOOKUP + 1
+				sta BLIT_01 + 2
+				sta BLIT_02 + 2
+				sta BLIT_03 + 2
+				sta BLIT_04 + 2
 
 
 
 
 
-
+inc $d020
 				//TOP LEFT
 				ldy SCREEN_X
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
+
 				ldy #$00
 			!:
-				lda (BLIT_LOOKUP), y
-				tax
+				// LAX (BLIT_LOOKUP), y
+				.byte $b3, BLIT_LOOKUP
+				// lda (BLIT_LOOKUP), y
+				// tax
+			ORIG_01:
 				lda (ORIGINAL_DATA), y
 				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
-				ora (BLIT_LOOKUP), y
+			BLIT_01:
+				ora $BEEF, y
 				eor #$ff				//So we can flip it back using the negative blit image
-				sta (CHAR_DATA_LEFT), y
+			CDATA_01:
+				sta $BEEF, y
+
 
 				iny
 				cpy #$08
@@ -239,21 +258,27 @@ SOFTSPRITES: {
 				sec
 				lda ORIGINAL_DATA
 				sbc #$08
-				sta ORIGINAL_DATA
+				sta ORIG_02 + 1
 				lda ORIGINAL_DATA + 1
 				sbc #$00
-				sta ORIGINAL_DATA + 1
+				sta ORIG_02 + 2
 
 				ldy #$08
 			!:
-				lda (BLIT_LOOKUP), y
-				tax
-				lda (ORIGINAL_DATA), y
+				// LAX (BLIT_LOOKUP), y
+				.byte $b3, BLIT_LOOKUP
+				// lda (BLIT_LOOKUP), y
+				// tax
+			ORIG_02:
+				lda $BEEF, y
 				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
-				ora (BLIT_LOOKUP), y
+			BLIT_02:
+				ora $BEEF, y
 				eor #$ff				//So we can flip it back using the negative blit image
-				sta (CHAR_DATA_LEFT), y
+			CDATA_02:
+				sta $BEEF, y
+
 
 				iny
 				cpy #$10
@@ -274,21 +299,28 @@ SOFTSPRITES: {
 				sec
 				lda ORIGINAL_DATA
 				sbc #$10
-				sta ORIGINAL_DATA
+				sta ORIG_03 + 1
 				lda ORIGINAL_DATA + 1
 				sbc #$00
-				sta ORIGINAL_DATA + 1
+				sta ORIG_03 + 2
 
 				ldy #$10
 			!:
-				lda (BLIT_LOOKUP), y
-				tax
-				lda (ORIGINAL_DATA), y
+				// LAX (BLIT_LOOKUP), y
+				.byte $b3, BLIT_LOOKUP
+				// lda (BLIT_LOOKUP), y
+				// tax
+
+			ORIG_03:
+				lda $BEEF, y
 				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
-				ora (BLIT_LOOKUP), y
+			BLIT_03:
+				ora $BEEF, y
 				eor #$ff				//So we can flip it back using the negative blit image
-				sta (CHAR_DATA_LEFT), y
+			CDATA_03:
+				sta $BEEF, y
+
 
 				iny
 				cpy #$18
@@ -309,21 +341,27 @@ SOFTSPRITES: {
 				sec
 				lda ORIGINAL_DATA
 				sbc #$18
-				sta ORIGINAL_DATA
+				sta ORIG_04 + 1
 				lda ORIGINAL_DATA + 1
 				sbc #$00
-				sta ORIGINAL_DATA + 1
+				sta ORIG_04 + 2
 
 				ldy #$18
 			!:
-				lda (BLIT_LOOKUP), y
-				tax
-				lda (ORIGINAL_DATA), y
-				eor #$ff				//Flip the data here
+				// LAX (BLIT_LOOKUP), y
+				.byte $b3, BLIT_LOOKUP
+				// lda (BLIT_LOOKUP), y
+				// tax
+
+			ORIG_04:
+				lda $BEEF, y
+				eor #$ff			   //2  Flip the data here
 				and Sprite_MaskTable, x
-				ora (BLIT_LOOKUP), y
+			BLIT_04:
+				ora $BEEF, y
 				eor #$ff				//So we can flip it back using the negative blit image
-				sta (CHAR_DATA_LEFT), y
+			CDATA_04:
+				sta $BEEF, y
 
 				iny
 				cpy #$20
@@ -334,6 +372,7 @@ SOFTSPRITES: {
 
 				//Restore x iterator
 				ldx TEMP
+inc $d020
 				jsr DrawSprites
 		!Skip:
 			inx
@@ -451,6 +490,9 @@ SOFTSPRITES: {
 	}
 
 
+
+
+
 	CreateMaskTable: {
 		    ldx #$00
 		Loop:
@@ -500,11 +542,16 @@ SOFTSPRITES: {
 
 
 
+
 	BLIT_DATA_LSB:
 		.byte <BLIT_TABLE_START
 	BLIT_DATA_MSB:
 		.byte >BLIT_TABLE_START
 
+	/*
+		Creates a blitting table upfron for a given projectile
+		takes a Character ID in accumulator
+	*/
 	CreateSpriteBlitTable: {
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
@@ -598,8 +645,6 @@ SOFTSPRITES: {
 			cpy #16
 			bne !-
 	
-
-
 			//Now fix the char color/transparency
 			ldy #$00
 		!:
@@ -628,8 +673,6 @@ SOFTSPRITES: {
 		!:
 			sty OFFSET_Y
 			
-
-
 
 			//Increase Table offset by 32 bytes
 			clc
