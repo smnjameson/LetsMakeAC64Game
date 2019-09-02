@@ -9,6 +9,8 @@ SOFTSPRITES: {
 
 	Sprite_MaskTable:
 		.fill 256, 00
+	Sprite_MaskTable_Inverted:
+		.fill 256, 00
 	CurrentSpriteIndex:
 		.byte $00
 	SpriteData_ID: //180 = Player Projectile
@@ -110,7 +112,7 @@ SOFTSPRITES: {
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
 			.label TEMP = TEMP3
-			.label SHIFT_TEMP = TEMP4
+			.label EOR_TEMP = TEMP4
 			.label SCREEN_X = TEMP5
 
 
@@ -211,13 +213,17 @@ SOFTSPRITES: {
 				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
+				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
 				ora (BLIT_LOOKUP), y
+				eor #$ff				//So we can flip it back using the negative blit image
 				sta (CHAR_DATA_LEFT), y
 
 				iny
 				cpy #$08
 				bne !-
+
+
 
 				//BOTTOM LEFT
 				lda SCREEN_X
@@ -243,8 +249,10 @@ SOFTSPRITES: {
 				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
+				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
 				ora (BLIT_LOOKUP), y
+				eor #$ff				//So we can flip it back using the negative blit image
 				sta (CHAR_DATA_LEFT), y
 
 				iny
@@ -276,8 +284,10 @@ SOFTSPRITES: {
 				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
+				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
 				ora (BLIT_LOOKUP), y
+				eor #$ff				//So we can flip it back using the negative blit image
 				sta (CHAR_DATA_LEFT), y
 
 				iny
@@ -309,8 +319,10 @@ SOFTSPRITES: {
 				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
+				eor #$ff				//Flip the data here
 				and Sprite_MaskTable, x
 				ora (BLIT_LOOKUP), y
+				eor #$ff				//So we can flip it back using the negative blit image
 				sta (CHAR_DATA_LEFT), y
 
 				iny
@@ -457,14 +469,17 @@ SOFTSPRITES: {
 		    ora TEMP2
 		    ora TEMP1
 
+			sta Sprite_MaskTable_Inverted, x
 		    eor #$ff
-
 		    sta Sprite_MaskTable, x
+		    
 		    inx    
 		    bne Loop
 
 		    rts
 	}
+
+
 
 	GetFontLookup: {
 			ldy #$00
@@ -481,6 +496,8 @@ SOFTSPRITES: {
 			sta VECTOR5 + 1
 			rts
 	}
+
+
 
 
 	BLIT_DATA_LSB:
@@ -542,7 +559,7 @@ SOFTSPRITES: {
 			ldy #$00
 			ldx #$00
 		!:
-			lda #$00
+			lda #$ff
 			cpy OFFSET_Y
 			bcc !NoDataYet+
 			cpx #$08
@@ -561,13 +578,14 @@ SOFTSPRITES: {
 			//Shift horizontally now
 			ldy #$00
 		!:	
-			lda #$00
+			lda #$ff
 			sta SHIFT_TEMP
 			lda (BLIT_DATA), y
 			ldx OFFSET_X
 			beq !EndLoop+
 		!InnerLoop:
-			lsr
+			sec
+			ror
 			ror SHIFT_TEMP
 			dex
 			bne !InnerLoop-
@@ -579,10 +597,23 @@ SOFTSPRITES: {
 			iny
 			cpy #16
 			bne !-
+	
+
+
+			//Now fix the char color/transparency
+			ldy #$00
+		!:
+			lda (BLIT_DATA), y
+			eor #$ff
+			tax
+			and Sprite_MaskTable_Inverted, x
+			sta (BLIT_DATA), y
+			iny
+			cpy #$20
+			bne !-
 
 
 			//Update the offsets top to bottom, Left to right , 32 total (1024 byte blit table)
-
 			ldy OFFSET_Y
 			iny
 			cpy #$08
@@ -616,5 +647,3 @@ SOFTSPRITES: {
 			rts
 	}
 }
-
-

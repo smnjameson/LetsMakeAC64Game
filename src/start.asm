@@ -117,7 +117,7 @@ Entry:
 			jsr PLAYER.GetCollisions
 
 
-		jmp !Loop-
+		jmp !Loop- 
 
 
 	PerformFrameCodeFlag:
