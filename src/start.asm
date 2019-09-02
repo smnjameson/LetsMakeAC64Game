@@ -1,3 +1,5 @@
+.segment Code [outPrg="start.prg"]
+
 BasicUpstart2(Entry)
 
 #import "zeropage.asm"
@@ -61,6 +63,8 @@ Entry:
 
 		//Setup generated tables
 		jsr SOFTSPRITES.CreateMaskTable
+		lda #180
+		jsr SOFTSPRITES.CreateSpriteBlitTable
 
 
 		jsr MAPLOADER.DrawMap
@@ -73,13 +77,13 @@ Entry:
 		ldx #$06 //SpriteX
 		clc		 //Carry = bit 9 of Sprite X
 		ldy #$05 //SpriteY
-		lda #180 //Character ID
+		lda #1 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
 		ldx #$02 //SpriteX
 		clc		 //Carry = bit 9 of Sprite X
 		ldy #$55 //SpriteY
-		lda #180 //Character ID
+		lda #1 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
 
@@ -103,8 +107,9 @@ Entry:
 			ldy #$ff
 			jsr SOFTSPRITES.MoveSprite
 
+			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
-			
+			dec $d020
 
 			jsr PLAYER.DrawPlayer
 			jsr PLAYER.PlayerControl

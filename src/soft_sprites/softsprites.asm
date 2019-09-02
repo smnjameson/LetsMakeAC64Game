@@ -1,8 +1,11 @@
 SOFTSPRITES: {
+	.label MAX_UNIQUE_CHARS = 4
 
 	.label MAX_SPRITES = 8
 	.label SPRITE_FONT_START = 187
 	.label SPRITE_FONT_DATA_START = CHAR_SET + SPRITE_FONT_START * 8
+
+	.label BLIT_TABLE_START = $b000
 
 	Sprite_MaskTable:
 		.fill 256, 00
@@ -16,10 +19,6 @@ SOFTSPRITES: {
 		.fill MAX_SPRITES, $00
 	SpriteData_Y:  
 		.fill MAX_SPRITES, $00
-	SpriteData_Lookup_LSB:
-		.fill MAX_SPRITES, $00
-	SpriteData_Lookup_MSB:
-		.fill MAX_SPRITES, $00
 
 	//Constants	
 	SpriteData_CharStart:
@@ -30,6 +29,13 @@ SOFTSPRITES: {
 	SpriteData_CharStart_MSB:
 		.fill MAX_SPRITES, >[SPRITE_FONT_DATA_START + 32 * i]
 	
+
+	BlitLookupCount:
+		.byte $00
+	BlitLookup_LSB:
+		.fill MAX_UNIQUE_CHARS, 0
+	BlitLookup_MSB:
+		.fill MAX_UNIQUE_CHARS, 0
 
 
 	Initialise: {
@@ -55,22 +61,6 @@ SOFTSPRITES: {
 			ldx CurrentSpriteIndex
 
 			sta SpriteData_ID, x
-			//Calculate font data lookup
-			sta SpriteData_Lookup_LSB, x
-			lda #$00
-			sta SpriteData_Lookup_MSB, x
-			asl SpriteData_Lookup_LSB, x
-			rol SpriteData_Lookup_MSB, x
-			asl SpriteData_Lookup_LSB, x
-			rol SpriteData_Lookup_MSB, x
-			asl SpriteData_Lookup_LSB, x
-			rol SpriteData_Lookup_MSB, x
-			clc
-			lda #>CHAR_SET
-			adc SpriteData_Lookup_MSB, x
-			sta SpriteData_Lookup_MSB, x
-
-
 
 			tya 
 			sta SpriteData_Y, x
@@ -114,21 +104,7 @@ SOFTSPRITES: {
 			rts
 	}
 
-	GetFontLookup: {
-			ldy #$00
-			sty TEMP6
-			asl
-			rol TEMP6
-			asl
-			rol TEMP6
-			asl
-			rol TEMP6
-			sta VECTOR5
-			lda TEMP6
-			adc #>CHAR_SET
-			sta VECTOR5 + 1
-			rts
-	}
+
 
 	UpdateSprites: {
 			.label OFFSET_X = TEMP1
@@ -139,10 +115,12 @@ SOFTSPRITES: {
 
 
 			.label CHAR_DATA_LEFT = VECTOR1
-			.label SPRITE_LOOKUP = VECTOR2
+			.label BLIT_LOOKUP = VECTOR2
 			.label CHAR_DATA_RIGHT = VECTOR3
 			.label SCREEN_ROW = VECTOR4
 			.label ORIGINAL_DATA = VECTOR5
+
+
 
 			ldx #$00
 		!Loop:
@@ -177,7 +155,7 @@ SOFTSPRITES: {
 				sta SCREEN_ROW + 1
 
 
-
+				//Get target location for font data in current charset
 				lda SpriteData_CharStart_LSB, x
 				sta CHAR_DATA_LEFT
 				lda SpriteData_CharStart_MSB, x
@@ -195,52 +173,32 @@ SOFTSPRITES: {
 				stx TEMP //Store x iterator to retrieve at end
 
 
-				//Draw the char data in the left column
-				lda SpriteData_Lookup_LSB, x
-				sta SelfModLookup + 1
-				lda SpriteData_Lookup_MSB, x
-				sta SelfModLookup + 2
-
-				
-				ldy #$00
-				ldx #$00
-			!:
-				lda #$00
-				cpy OFFSET_Y
-				bcc !NoDataYet+
-				cpx #$08
-				bcs !NoDataYet+
-			SelfModLookup:
-				lda $BEEF, x
-				inx
-
-			!NoDataYet:
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #16
-				bne !-
-
-				//Shift character horizontally
-				ldy #$00
-			!:	
-				lda #$00
-				sta SHIFT_TEMP
-				lda (CHAR_DATA_LEFT), y
-				ldx OFFSET_X
-				beq !EndLoop+
-			!InnerLoop:
+				//Get blit data lookup based on OFFSET X & Y
+				//
+				lda OFFSET_X
 				lsr
-				ror SHIFT_TEMP
+				sta BLIT_LOOKUP + 1
+				lda OFFSET_Y
+				asl
+				asl
+				asl
+				asl
+				asl
+				sta BLIT_LOOKUP
+
+				lda SpriteData_ID, x
+				tax
 				dex
-				bne !InnerLoop-
-			!EndLoop:
-				sta (CHAR_DATA_LEFT), y
-				lda SHIFT_TEMP
-				sta (CHAR_DATA_RIGHT), y
-				
-				iny
-				cpy #16
-				bne !-
+				lda BlitLookup_LSB,x
+				clc
+				adc BLIT_LOOKUP
+				sta BLIT_LOOKUP
+				lda BlitLookup_MSB,x
+				adc BLIT_LOOKUP + 1
+				sta BLIT_LOOKUP + 1
+
+
+
 
 
 
@@ -250,11 +208,11 @@ SOFTSPRITES: {
 				jsr GetFontLookup
 				ldy #$00
 			!:
-				lda (CHAR_DATA_LEFT), y
+				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
 				and Sprite_MaskTable, x
-				ora (CHAR_DATA_LEFT), y
+				ora (BLIT_LOOKUP), y
 				sta (CHAR_DATA_LEFT), y
 
 				iny
@@ -269,26 +227,32 @@ SOFTSPRITES: {
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 				
-				lda CHAR_DATA_LEFT
-				clc
-				adc #$08
-				sta CHAR_DATA_LEFT
-				lda CHAR_DATA_LEFT + 1
-				adc #$00
-				sta CHAR_DATA_LEFT + 1
+				//Instead of advancing through the target data
+				//we keep the y register advancing sequentially and 
+				//instead offset the original data
+				sec
+				lda ORIGINAL_DATA
+				sbc #$08
+				sta ORIGINAL_DATA
+				lda ORIGINAL_DATA + 1
+				sbc #$00
+				sta ORIGINAL_DATA + 1
 
-				ldy #$00
+				ldy #$08
 			!:
-				lda (CHAR_DATA_LEFT), y
+				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
 				and Sprite_MaskTable, x
-				ora (CHAR_DATA_LEFT), y
+				ora (BLIT_LOOKUP), y
 				sta (CHAR_DATA_LEFT), y
 
 				iny
-				cpy #$08
+				cpy #$10
 				bne !-
+
+
+
 
 				//TOP RIGHT
 				ldy SCREEN_X
@@ -296,25 +260,28 @@ SOFTSPRITES: {
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 				
-				lda CHAR_DATA_LEFT
-				clc
-				adc #$08
-				sta CHAR_DATA_LEFT
-				lda CHAR_DATA_LEFT + 1
-				adc #$00
-				sta CHAR_DATA_LEFT + 1
+				//Instead of advancing through the target data
+				//we keep the y register advancing sequentially and 
+				//instead offset the original data
+				sec
+				lda ORIGINAL_DATA
+				sbc #$10
+				sta ORIGINAL_DATA
+				lda ORIGINAL_DATA + 1
+				sbc #$00
+				sta ORIGINAL_DATA + 1
 
-				ldy #$00
+				ldy #$10
 			!:
-				lda (CHAR_DATA_LEFT), y
+				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
 				and Sprite_MaskTable, x
-				ora (CHAR_DATA_LEFT), y
+				ora (BLIT_LOOKUP), y
 				sta (CHAR_DATA_LEFT), y
 
 				iny
-				cpy #$08
+				cpy #$18
 				bne !-
 
 
@@ -326,26 +293,31 @@ SOFTSPRITES: {
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 				
-				lda CHAR_DATA_LEFT
-				clc
-				adc #$08
-				sta CHAR_DATA_LEFT
-				lda CHAR_DATA_LEFT + 1
-				adc #$00
-				sta CHAR_DATA_LEFT + 1
+				//Instead of advancing through the target data
+				//we keep the y register advancing sequentially and 
+				//instead offset the original data
+				sec
+				lda ORIGINAL_DATA
+				sbc #$18
+				sta ORIGINAL_DATA
+				lda ORIGINAL_DATA + 1
+				sbc #$00
+				sta ORIGINAL_DATA + 1
 
-				ldy #$00
+				ldy #$18
 			!:
-				lda (CHAR_DATA_LEFT), y
+				lda (BLIT_LOOKUP), y
 				tax
 				lda (ORIGINAL_DATA), y
 				and Sprite_MaskTable, x
-				ora (CHAR_DATA_LEFT), y
+				ora (BLIT_LOOKUP), y
 				sta (CHAR_DATA_LEFT), y
 
 				iny
-				cpy #$08
+				cpy #$20
 				bne !-
+
+
 
 
 				//Restore x iterator
@@ -471,7 +443,6 @@ SOFTSPRITES: {
 		    ldx #$00
 		Loop:
 		    txa
-
 		    and #%10101010
 		    sta TEMP1
 
@@ -493,6 +464,156 @@ SOFTSPRITES: {
 		    bne Loop
 
 		    rts
+	}
+
+	GetFontLookup: {
+			ldy #$00
+			sty TEMP6
+			asl
+			rol TEMP6
+			asl
+			rol TEMP6
+			asl
+			rol TEMP6
+			sta VECTOR5
+			lda TEMP6
+			adc #>CHAR_SET
+			sta VECTOR5 + 1
+			rts
+	}
+
+
+	BLIT_DATA_LSB:
+		.byte <BLIT_TABLE_START
+	BLIT_DATA_MSB:
+		.byte >BLIT_TABLE_START
+
+	CreateSpriteBlitTable: {
+			.label OFFSET_X = TEMP1
+			.label OFFSET_Y = TEMP2
+			.label SHIFT_TEMP = TEMP3
+
+			.label BLIT_DATA = VECTOR1
+			.label BLIT_DATA_RIGHT = VECTOR2
+			.label FONT_DATA_LOOKUP = VECTOR5
+
+			jsr GetFontLookup //Get the font data lookup into VECTOR5
+
+			//Set the font lookup
+			lda FONT_DATA_LOOKUP
+			sta SelfModLookup + 1
+			lda FONT_DATA_LOOKUP + 1
+			sta SelfModLookup + 2
+
+			//Set the startlookup for BlitLookup_LSB/MSB tables
+			ldx BlitLookupCount
+			lda BLIT_DATA_LSB
+			sta BlitLookup_LSB, x 
+			lda BLIT_DATA_MSB
+			sta BlitLookup_MSB, x
+			inx
+			stx BlitLookupCount
+
+
+			//Reset the offsets
+			lda #$00
+			sta OFFSET_X
+			sta OFFSET_Y
+
+
+		!FullLoop:
+			//Set the blitdata position
+			lda BLIT_DATA_LSB
+			sta BLIT_DATA 
+			lda BLIT_DATA_MSB
+			sta BLIT_DATA + 1
+
+
+			lda BLIT_DATA_LSB
+			clc
+			adc #$10
+			sta BLIT_DATA_RIGHT
+			lda BLIT_DATA_MSB
+			adc #$00
+			sta BLIT_DATA_RIGHT + 1
+
+
+			//Do vertical shift first
+			ldy #$00
+			ldx #$00
+		!:
+			lda #$00
+			cpy OFFSET_Y
+			bcc !NoDataYet+
+			cpx #$08
+			bcs !NoDataYet+
+		SelfModLookup:
+			lda $BEEF, x
+			inx
+
+		!NoDataYet:
+			sta (BLIT_DATA), y
+			iny
+			cpy #16
+			bne !-
+
+
+			//Shift horizontally now
+			ldy #$00
+		!:	
+			lda #$00
+			sta SHIFT_TEMP
+			lda (BLIT_DATA), y
+			ldx OFFSET_X
+			beq !EndLoop+
+		!InnerLoop:
+			lsr
+			ror SHIFT_TEMP
+			dex
+			bne !InnerLoop-
+		!EndLoop:
+			sta (BLIT_DATA), y
+			lda SHIFT_TEMP
+			sta (BLIT_DATA_RIGHT), y
+			
+			iny
+			cpy #16
+			bne !-
+
+
+			//Update the offsets top to bottom, Left to right , 32 total (1024 byte blit table)
+
+			ldy OFFSET_Y
+			iny
+			cpy #$08
+			bne !+
+			ldy #$00
+			ldx OFFSET_X
+			inx
+			inx
+			cpx #$08
+			beq !Exit+
+			stx OFFSET_X
+		!:
+			sty OFFSET_Y
+			
+
+
+
+			//Increase Table offset by 32 bytes
+			clc
+			lda BLIT_DATA_LSB
+			adc #$20
+			sta BLIT_DATA_LSB
+			lda BLIT_DATA_MSB
+			adc #$00
+			sta BLIT_DATA_MSB
+
+			//Repeat
+			jmp !FullLoop-
+
+		!Exit:
+			rts
 	}
 }
 
