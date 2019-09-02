@@ -86,7 +86,6 @@ Entry:
 		lda #1 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
-
 	//Inf loop
 	!Loop:
 		lda PerformFrameCodeFlag
@@ -95,20 +94,19 @@ Entry:
 
 			inc ZP_COUNTER
 
-			inc $d020
+			
 			jsr SOFTSPRITES.ClearSprites
 
-			inc $d020
 			lda #$00
-			ldx #$02
-			ldy #$01
+			ldx #$04
+			ldy #$02
 			jsr SOFTSPRITES.MoveSprite
 
-			inc $d020
 			lda #$01
-			ldx #$02
-			ldy #$ff
+			ldx #$04
+			ldy #$fe
 			jsr SOFTSPRITES.MoveSprite
+
 
 			inc $d020
 			jsr SOFTSPRITES.UpdateSprites

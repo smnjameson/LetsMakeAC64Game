@@ -7,6 +7,8 @@ SOFTSPRITES: {
 
 	.label BLIT_TABLE_START = $b000
 
+.align $100
+*=*"MASK TABLES"
 	Sprite_MaskTable:
 		.fill 256, 00
 	Sprite_MaskTable_Inverted:
@@ -86,6 +88,14 @@ SOFTSPRITES: {
 	}
 
 	MoveSprite: {
+			pha
+			and #$01
+			cmp Toggle
+			beq !+
+			pla
+			rts
+		!:
+			pla
 			//Preserve Y
 			sty TEMP1
 			tay //Set index
@@ -110,7 +120,8 @@ SOFTSPRITES: {
 
 
 
-
+	Toggle:
+		.byte $00
 	UpdateSprites: {
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
@@ -127,13 +138,13 @@ SOFTSPRITES: {
 
 
 
-			ldx #$00
+			// ldx #$00
+			ldx Toggle
 		!Loop:
 			lda SpriteData_ID, x
 			bne !+
 			jmp !Skip+
 		!:
-inc $d020
 
 				lda SpriteData_X_LSB, x
 				and #$07
@@ -192,9 +203,11 @@ inc $d020
 				asl
 				sta BLIT_LOOKUP
 
+
 				lda SpriteData_ID, x
 				tax
 				dex
+
 				lda BlitLookup_LSB,x
 				clc
 				adc BLIT_LOOKUP
@@ -203,6 +216,7 @@ inc $d020
 				sta BLIT_02 + 1
 				sta BLIT_03 + 1
 				sta BLIT_04 + 1
+
 				lda BlitLookup_MSB,x
 				adc BLIT_LOOKUP + 1
 				sta BLIT_LOOKUP + 1
@@ -212,36 +226,23 @@ inc $d020
 				sta BLIT_04 + 2
 
 
-
-
-
-inc $d020
 				//TOP LEFT
 				ldy SCREEN_X
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 
-				ldy #$00
+				ldy #$07
 			!:
-				// LAX (BLIT_LOOKUP), y
-				.byte $b3, BLIT_LOOKUP
-				// lda (BLIT_LOOKUP), y
-				// tax
-			ORIG_01:
-				lda (ORIGINAL_DATA), y
-				eor #$ff				//Flip the data here
-				and Sprite_MaskTable, x
 			BLIT_01:
-				ora $BEEF, y
-				eor #$ff				//So we can flip it back using the negative blit image
+				ldx $BEEF, y
+			ORIG_01:
+				lda (ORIGINAL_DATA), y			   //5
+				and Sprite_MaskTable, x            //4
+				ora Sprite_MaskTable_Inverted, X   //3	
 			CDATA_01:
 				sta $BEEF, y
-
-
-				iny
-				cpy #$08
-				bne !-
-
+				dey
+				bpl !-
 
 
 				//BOTTOM LEFT
@@ -263,23 +264,18 @@ inc $d020
 				sbc #$00
 				sta ORIG_02 + 2
 
+
 				ldy #$08
 			!:
-				// LAX (BLIT_LOOKUP), y
-				.byte $b3, BLIT_LOOKUP
-				// lda (BLIT_LOOKUP), y
-				// tax
-			ORIG_02:
-				lda $BEEF, y
-				eor #$ff				//Flip the data here
-				and Sprite_MaskTable, x
 			BLIT_02:
-				ora $BEEF, y
-				eor #$ff				//So we can flip it back using the negative blit image
+				ldx $BEEF, y
+			ORIG_02:
+				lda $BEEF, y			   //5
+				and Sprite_MaskTable, x            //4
+				ora Sprite_MaskTable_Inverted, x					   //3	
 			CDATA_02:
 				sta $BEEF, y
-
-
+	
 				iny
 				cpy #$10
 				bne !-
@@ -306,25 +302,20 @@ inc $d020
 
 				ldy #$10
 			!:
-				// LAX (BLIT_LOOKUP), y
-				.byte $b3, BLIT_LOOKUP
-				// lda (BLIT_LOOKUP), y
-				// tax
-
-			ORIG_03:
-				lda $BEEF, y
-				eor #$ff				//Flip the data here
-				and Sprite_MaskTable, x
 			BLIT_03:
-				ora $BEEF, y
-				eor #$ff				//So we can flip it back using the negative blit image
+				ldx $BEEF, y         
+			ORIG_03:
+				lda $BEEF, y	
+				and Sprite_MaskTable, x           
+				ora Sprite_MaskTable_Inverted, x					   
 			CDATA_03:
 				sta $BEEF, y
-
 
 				iny
 				cpy #$18
 				bne !-
+
+
 
 
 				//BOTTOM RIGHT
@@ -348,18 +339,12 @@ inc $d020
 
 				ldy #$18
 			!:
-				// LAX (BLIT_LOOKUP), y
-				.byte $b3, BLIT_LOOKUP
-				// lda (BLIT_LOOKUP), y
-				// tax
-
+			BLIT_04:
+				ldx $BEEF, y        
 			ORIG_04:
 				lda $BEEF, y
-				eor #$ff			   //2  Flip the data here
-				and Sprite_MaskTable, x
-			BLIT_04:
-				ora $BEEF, y
-				eor #$ff				//So we can flip it back using the negative blit image
+				and Sprite_MaskTable, x           
+				ora Sprite_MaskTable_Inverted, x					   
 			CDATA_04:
 				sta $BEEF, y
 
@@ -368,18 +353,19 @@ inc $d020
 				bne !-
 
 
-
-
 				//Restore x iterator
 				ldx TEMP
-inc $d020
 				jsr DrawSprites
 		!Skip:
 			inx
+			inx
 			cpx #MAX_SPRITES
-			beq !+
+			bcs !+
 			jmp !Loop-
 		!:
+			lda Toggle
+			eor #$01
+			sta Toggle
 			rts			
 	}
 
@@ -429,7 +415,7 @@ inc $d020
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
 
-			ldx #$00
+			ldx Toggle
 		!:
 			lda SpriteData_ID, x
 			beq !Skip+
@@ -483,8 +469,9 @@ inc $d020
 
 		!Skip:
 			inx
+			inx
 			cpx #MAX_SPRITES
-			bne !-
+			bcc !-
 
 			rts	
 	}
@@ -497,6 +484,7 @@ inc $d020
 		    ldx #$00
 		Loop:
 		    txa
+		    eor #$ff
 		    and #%10101010
 		    sta TEMP1
 
@@ -505,15 +493,25 @@ inc $d020
 		    sta TEMP1
 
 		    txa 
+		    eor #$ff
 		    and #%01010101
 		    sta TEMP2
 		    asl
 		    ora TEMP2
 		    ora TEMP1
 
-			sta Sprite_MaskTable_Inverted, x
 		    eor #$ff
 		    sta Sprite_MaskTable, x
+
+		    eor #$ff
+		    // sta TEMP2
+		    // txa
+		    // and TEMP2
+		    // eor #$ff
+		    sta TEMP2
+		    txa
+		    and TEMP2
+			sta Sprite_MaskTable_Inverted, x
 		    
 		    inx    
 		    bne Loop
@@ -645,17 +643,16 @@ inc $d020
 			cpy #16
 			bne !-
 	
-			//Now fix the char color/transparency
-			ldy #$00
-		!:
-			lda (BLIT_DATA), y
-			eor #$ff
-			tax
-			and Sprite_MaskTable_Inverted, x
-			sta (BLIT_DATA), y
-			iny
-			cpy #$20
-			bne !-
+		// 	//Now fix the char color/transparency
+		// 	ldy #$00
+		// !:
+		// 	lda (BLIT_DATA), y
+		// 	tax
+		// 	and Sprite_MaskTable_Inverted, x
+		// 	sta (BLIT_DATA), y
+		// 	iny
+		// 	cpy #$20
+		// 	bne !-
 
 
 			//Update the offsets top to bottom, Left to right , 32 total (1024 byte blit table)
