@@ -13,6 +13,7 @@ VECTOR2: 	.word $00
 VECTOR3: 	.word $00
 VECTOR4: 	.word $00
 VECTOR5: 	.word $00
+VECTOR6: 	.word $00
 
 IRQ_TEMP1: 	.byte $00
 

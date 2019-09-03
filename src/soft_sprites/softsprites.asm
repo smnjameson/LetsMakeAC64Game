@@ -24,6 +24,8 @@ SOFTSPRITES: {
 		.fill MAX_SPRITES, $00
 	SpriteData_Y:  
 		.fill MAX_SPRITES, $00
+	SpriteColor:
+		.fill MAX_SPRITES, $00
 
 	//Constants	
 	SpriteData_CharStart:
@@ -141,6 +143,7 @@ SOFTSPRITES: {
 			.label CHAR_DATA_RIGHT = VECTOR3
 			.label SCREEN_ROW = VECTOR4
 			.label ORIGINAL_DATA = VECTOR5
+			.label COLOR_ROW = VECTOR6
 
 			// ldx #$00
 			ldx Toggle
@@ -177,10 +180,13 @@ SOFTSPRITES: {
 				clc
 				adc SCREEN_X
 				sta SCREEN_ROW
+				sta COLOR_ROW
 
 				lda TABLES.ScreenRowMSB, y
 				adc #$00
 				sta SCREEN_ROW + 1
+				adc #>[VIC.COLOR_RAM-SCREEN_RAM]
+				sta COLOR_ROW + 1
 
 
 				//Get target location for font data in current charset
@@ -238,15 +244,18 @@ SOFTSPRITES: {
 				sta (CHAR_DATA_LEFT), y
 				iny
 				bcc !SIMPLE_BLIT_01-
+
 			!FULL_BLIT_01:
 				lax (BLIT_LOOKUP), y
 				lda (ORIGINAL_DATA), y			   
 				and Sprite_MaskTable, x            
-				ora Sprite_MaskTable_Inverted, X   	
+				ora Sprite_MaskTable_Inverted, x
+
 				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy #$08
 				bne !FULL_BLIT_01-
+
 
 
 
@@ -257,17 +266,21 @@ SOFTSPRITES: {
 				sbc #$01
 				jsr GetFontLookup
 				
+
 				clc
 				lda OFFSET_Y
 				adc #$08
 				sta TEMP_OFFSET
 
 				ldy #$08
+				cpy TEMP_OFFSET
+				bcs !SIMPLE_BLIT_02+				
 			!FULL_BLIT_02:
 				lax (BLIT_LOOKUP), y
 				lda (ORIGINAL_DATA), y			   
 				and Sprite_MaskTable, x            
 				ora Sprite_MaskTable_Inverted, x
+
 				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy TEMP_OFFSET
@@ -279,8 +292,6 @@ SOFTSPRITES: {
 				iny
 				cpy #$10
 				bne !SIMPLE_BLIT_02-
-
-
 
 
 
@@ -308,7 +319,8 @@ SOFTSPRITES: {
 				lax (BLIT_LOOKUP), y        
 				lda (ORIGINAL_DATA), y	
 				and Sprite_MaskTable, x           
-				ora Sprite_MaskTable_Inverted, x					   
+				ora Sprite_MaskTable_Inverted, x
+
 				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy #$18
@@ -330,11 +342,14 @@ SOFTSPRITES: {
 				sta TEMP_OFFSET				
 
 				ldy #$18
+				cpy TEMP_OFFSET
+				bcs !SIMPLE_BLIT_04+					
 			!FULL_BLIT_04:
 				lax (BLIT_LOOKUP), y
-				lda (ORIGINAL_DATA), y			   //5
-				and Sprite_MaskTable, x            //4
-				ora Sprite_MaskTable_Inverted, x					   //3	
+				lda (ORIGINAL_DATA), y			   
+				and Sprite_MaskTable, x            
+				ora Sprite_MaskTable_Inverted, x
+									   
 				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy TEMP_OFFSET
@@ -371,29 +386,39 @@ SOFTSPRITES: {
 
 	DrawSprites: {
 			.label SCREEN_ROW = VECTOR4
+			.label COLOR_ROW = VECTOR6
 				
 				//0,0
 				clc
 				lda SpriteData_CharStart, x
 				ldy #$00
 				sta (SCREEN_ROW), y
+				lda SpriteColor, x
+				sta (COLOR_ROW), y
 
 				//1,0
+				lda SpriteData_CharStart, x
 				adc #$02
 				ldy #$01
 				sta (SCREEN_ROW), y
+				lda SpriteColor, x
+				sta (COLOR_ROW), y
 
 				//0,1
-				sec
-				sbc #$01
+				lda SpriteData_CharStart, x
+				adc #$01
 				ldy #$28
 				sta (SCREEN_ROW), y
+				lda SpriteColor, x
+				sta (COLOR_ROW), y
 
 				//1,1
-				clc
-				adc #$02
+				lda SpriteData_CharStart, x
+				adc #$03
 				ldy #$29
 				sta (SCREEN_ROW), y
+				lda SpriteColor, x
+				sta (COLOR_ROW), y
 
 			rts		
 	}
@@ -406,11 +431,13 @@ SOFTSPRITES: {
 			.label TEMP = TEMP2
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
+			.label COLOR_ROW= VECTOR3
 
 			ldx Toggle
 		!:
 			lda SpriteData_ID, x
 			beq !Skip+
+				stx TEMP
 
 				lda SpriteData_X_MSB, x
 				lsr
@@ -428,8 +455,13 @@ SOFTSPRITES: {
 
 				lda TABLES.ScreenRowLSB, y
 				sta SCREEN_ROW
+				sta COLOR_ROW
 				lda TABLES.ScreenRowMSB, y
 				sta SCREEN_ROW + 1
+				clc
+				adc #>[VIC.COLOR_RAM - SCREEN_RAM]
+				sta COLOR_ROW + 1
+
 				lda TABLES.BufferLSB, y
 				sta BUFFER
 				lda TABLES.BufferMSB, y
@@ -441,11 +473,17 @@ SOFTSPRITES: {
 				ldy SCREEN_X
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				sta (COLOR_ROW), y
 
 				//1,0
 				iny
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				sta (COLOR_ROW), y
 
 				//0,1
 				tya 
@@ -454,13 +492,20 @@ SOFTSPRITES: {
 				tay
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				sta (COLOR_ROW), y
 
 				//1,1
 				iny
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				sta (COLOR_ROW), y
 
 
+				ldx TEMP
 		!Skip:
 			inx
 			inx
@@ -474,8 +519,9 @@ SOFTSPRITES: {
 	CreateMaskTable: {
 		    ldx #$00
 		Loop:
-		    txa
-		    eor #$ff
+		    // txa
+		    lda TABLES.ColorSwapTable, x
+		    // eor #$ff
 		    and #%10101010
 		    sta TEMP1
 
@@ -483,21 +529,25 @@ SOFTSPRITES: {
 		    ora TEMP1    
 		    sta TEMP1
 
-		    txa 
-		    eor #$ff
+		    // txa 
+		    lda TABLES.ColorSwapTable, x
+		    // eor #$ff
 		    and #%01010101
 		    sta TEMP2
 		    asl
 		    ora TEMP2
 		    ora TEMP1
 
+
 		    eor #$ff
 		    sta Sprite_MaskTable, x
+
 
 		    eor #$ff
 		    sta TEMP2
 		    txa
 		    and TEMP2
+		    // lda TABLES.ColorSwapTable, x
 			sta Sprite_MaskTable_Inverted, x
 		    
 		    inx    
@@ -597,13 +647,18 @@ SOFTSPRITES: {
 			ldy #$00
 			ldx #$00
 		!:
-			lda #$ff
+			lda #$00
 			cpy OFFSET_Y
 			bcc !NoDataYet+
 			cpx #$08
 			bcs !NoDataYet+
 		SelfModLookup:
 			lda $BEEF, x
+			// stx SHIFT_TEMP
+			// tax
+			// lda TABLES.ColorSwapTable, x
+
+			// ldx SHIFT_TEMP
 			inx
 
 		!NoDataYet:
@@ -616,15 +671,18 @@ SOFTSPRITES: {
 			//Shift horizontally now
 			ldy #$00
 		!:	
-			lda #$ff
+			lda #$aa
 			sta SHIFT_TEMP
 			lda (BLIT_DATA), y
 			ldx OFFSET_X
 			beq !EndLoop+
 		!InnerLoop:
+			lsr
+			ror SHIFT_TEMP
 			sec
 			ror
 			ror SHIFT_TEMP
+			dex
 			dex
 			bne !InnerLoop-
 		!EndLoop:
