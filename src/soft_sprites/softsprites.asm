@@ -96,6 +96,7 @@ SOFTSPRITES: {
 			rts
 		!:
 			pla
+
 			//Preserve Y
 			sty TEMP1
 			tay //Set index
@@ -104,6 +105,10 @@ SOFTSPRITES: {
 			lda TEMP1
 			clc
 			adc SpriteData_Y, y
+			cmp #[200-40]
+			bcc !+
+			lda #$00
+		!:
 			sta SpriteData_Y, y
 
 			txa
@@ -112,6 +117,7 @@ SOFTSPRITES: {
 			sta SpriteData_X_LSB, y
 			lda SpriteData_X_MSB, y
 			adc #$00
+			and #$01
 			sta SpriteData_X_MSB, y
 
 			rts
@@ -123,11 +129,10 @@ SOFTSPRITES: {
 	Toggle:
 		.byte $00
 	UpdateSprites: {
-		.break
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
 			.label TEMP = TEMP3
-			.label EOR_TEMP = TEMP4
+			.label TEMP_OFFSET = TEMP4
 			.label SCREEN_X = TEMP5
 
 
@@ -136,8 +141,6 @@ SOFTSPRITES: {
 			.label CHAR_DATA_RIGHT = VECTOR3
 			.label SCREEN_ROW = VECTOR4
 			.label ORIGINAL_DATA = VECTOR5
-
-
 
 			// ldx #$00
 			ldx Toggle
@@ -163,28 +166,28 @@ SOFTSPRITES: {
 				lsr
 				sta SCREEN_X
 
+
 				lda SpriteData_Y, x
 				lsr
 				lsr
 				lsr
-				tay 
+				tay
+
 				lda TABLES.ScreenRowLSB, y
+				clc
+				adc SCREEN_X
 				sta SCREEN_ROW
+
 				lda TABLES.ScreenRowMSB, y
+				adc #$00
 				sta SCREEN_ROW + 1
 
 
 				//Get target location for font data in current charset
 				lda SpriteData_CharStart_LSB, x
-				sta CDATA_01 + 1
-				sta CDATA_02 + 1
-				sta CDATA_03 + 1
-				sta CDATA_04 + 1
+				sta CHAR_DATA_LEFT
 				lda SpriteData_CharStart_MSB, x
-				sta CDATA_01 + 2
-				sta CDATA_02 + 2
-				sta CDATA_03 + 2
-				sta CDATA_04 + 2
+				sta CHAR_DATA_LEFT + 1
 
 
 
@@ -213,127 +216,144 @@ SOFTSPRITES: {
 				clc
 				adc BLIT_LOOKUP
 				sta BLIT_LOOKUP
-				sta BLIT_01 + 1
-				sta BLIT_02 + 1
-				sta BLIT_03 + 1
-				sta BLIT_04 + 1
 
 				lda BlitLookup_MSB,x
 				adc BLIT_LOOKUP + 1
 				sta BLIT_LOOKUP + 1
-				sta BLIT_01 + 2
-				sta BLIT_02 + 2
-				sta BLIT_03 + 2
-				sta BLIT_04 + 2
+
+
 
 
 				//TOP LEFT
-				ldy SCREEN_X
+				ldy #$00
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 
 
-				ldy #$07
-			!:
-			BLIT_01:
-				ldx $BEEF, y
+				ldy #$00
+			!SIMPLE_BLIT_01:
+				cpy OFFSET_Y
+				bcs !FULL_BLIT_01+
+				lda (ORIGINAL_DATA), y	
+				sta (CHAR_DATA_LEFT), y
+				iny
+				bcc !SIMPLE_BLIT_01-
+			!FULL_BLIT_01:
+				lax (BLIT_LOOKUP), y
 				lda (ORIGINAL_DATA), y			   
 				and Sprite_MaskTable, x            
 				ora Sprite_MaskTable_Inverted, X   	
-			CDATA_01:
-				sta $BEEF, y
-				dey
-				bpl !-
-
+				sta (CHAR_DATA_LEFT), y
+				iny
+				cpy #$08
+				bne !FULL_BLIT_01-
 
 
 
 				//BOTTOM LEFT
-				lda SCREEN_X
-				clc
-				adc #$28
-				tay
+				ldy #$28
 				lda (SCREEN_ROW), y
 				sec
 				sbc #$01
 				jsr GetFontLookup
 				
+				clc
+				lda OFFSET_Y
+				adc #$08
+				sta TEMP_OFFSET
+
 				ldy #$08
-			!:
-			BLIT_02:
-				ldx $BEEF, y
-				lda (ORIGINAL_DATA), y			   //5
-				and Sprite_MaskTable, x            //4
-				ora Sprite_MaskTable_Inverted, x					   //3	
-			CDATA_02:
-				sta $BEEF, y
-	
+			!FULL_BLIT_02:
+				lax (BLIT_LOOKUP), y
+				lda (ORIGINAL_DATA), y			   
+				and Sprite_MaskTable, x            
+				ora Sprite_MaskTable_Inverted, x
+				sta (CHAR_DATA_LEFT), y
+				iny
+				cpy TEMP_OFFSET
+				bcc !FULL_BLIT_02-
+
+			!SIMPLE_BLIT_02:	
+				lda (ORIGINAL_DATA), y	
+				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy #$10
-				bne !-
+				bne !SIMPLE_BLIT_02-
+
 
 
 
 
 				//TOP RIGHT
-				ldy SCREEN_X
-				iny
+				ldy #$01
 				lda (SCREEN_ROW), y
 				sec
 				sbc #$02
-
 				jsr GetFontLookup
 				
-				//Instead of advancing through the target data
-				//we keep the y register advancing sequentially and 
-				//instead offset the original data
+				clc
+				lda OFFSET_Y
+				adc #$10
+				sta TEMP_OFFSET
+
 				ldy #$10
-			!:
-			BLIT_03:
-				ldx $BEEF, y         
+			!SIMPLE_BLIT_03:
+				cpy TEMP_OFFSET
+				bcs !FULL_BLIT_03+
+				lda (ORIGINAL_DATA), y	
+				sta (CHAR_DATA_LEFT), y
+				iny
+				bcc !SIMPLE_BLIT_03-
+			!FULL_BLIT_03:
+				lax (BLIT_LOOKUP), y        
 				lda (ORIGINAL_DATA), y	
 				and Sprite_MaskTable, x           
 				ora Sprite_MaskTable_Inverted, x					   
-			CDATA_03:
-				sta $BEEF, y
-
+				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy #$18
-				bne !-
+				bne !FULL_BLIT_03-
 
 
 
 
 				//BOTTOM RIGHT
-				lda SCREEN_X
-				clc
-				adc #$29
-				tay
+				ldy #$29
 				lda (SCREEN_ROW), y
 				sec
 				sbc #$03
 				jsr GetFontLookup
 				
-				//Instead of advancing through the target data
-				//we keep the y register advancing sequentially and 
-				//instead offset the original data
+				clc
+				lda OFFSET_Y
+				adc #$18
+				sta TEMP_OFFSET				
+
 				ldy #$18
-			!:
-			BLIT_04:
-				ldx $BEEF, y        
-				lda (ORIGINAL_DATA), y
-				and Sprite_MaskTable, x           
-				ora Sprite_MaskTable_Inverted, x					   
-			CDATA_04:
-				sta $BEEF, y
+			!FULL_BLIT_04:
+				lax (BLIT_LOOKUP), y
+				lda (ORIGINAL_DATA), y			   //5
+				and Sprite_MaskTable, x            //4
+				ora Sprite_MaskTable_Inverted, x					   //3	
+				sta (CHAR_DATA_LEFT), y
+				iny
+				cpy TEMP_OFFSET
+				bcc !FULL_BLIT_04-
+
+			!SIMPLE_BLIT_04:	
+				lda (ORIGINAL_DATA), y	
+				sta (CHAR_DATA_LEFT), y
 				iny
 				cpy #$20
-				bne !-
+				bne !SIMPLE_BLIT_04-
+
+
 
 
 				//Restore x iterator
 				ldx TEMP
 				jsr DrawSprites
+
 		!Skip:
 			inx
 			inx
@@ -345,42 +365,34 @@ SOFTSPRITES: {
 			eor #$01
 			sta Toggle
 
-			.break
 			rts			
 	}
 
 
 	DrawSprites: {
 			.label SCREEN_ROW = VECTOR4
-			.label SCREEN_X = TEMP5
-			.label TEMP = TEMP6
 				
 				//0,0
 				clc
 				lda SpriteData_CharStart, x
-				ldy SCREEN_X
+				ldy #$00
 				sta (SCREEN_ROW), y
 
 				//1,0
 				adc #$02
-				iny
+				ldy #$01
 				sta (SCREEN_ROW), y
 
 				//0,1
 				sec
 				sbc #$01
-				sta TEMP
-				tya 
-				clc
-				adc #$27
-				tay
-				lda TEMP
+				ldy #$28
 				sta (SCREEN_ROW), y
 
 				//1,1
 				clc
 				adc #$02
-				iny
+				ldy #$29
 				sta (SCREEN_ROW), y
 
 			rts		
@@ -413,6 +425,7 @@ SOFTSPRITES: {
 				lsr
 				lsr
 				tay 
+
 				lda TABLES.ScreenRowLSB, y
 				sta SCREEN_ROW
 				lda TABLES.ScreenRowMSB, y
@@ -421,6 +434,7 @@ SOFTSPRITES: {
 				sta BUFFER
 				lda TABLES.BufferMSB, y
 				sta BUFFER + 1
+
 
 
 				//0,0

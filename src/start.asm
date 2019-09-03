@@ -80,12 +80,50 @@ Entry:
 		lda #1 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
-		ldx #$02 //SpriteX
+		ldx #$22 //SpriteX
 		clc		 //Carry = bit 9 of Sprite X
 		ldy #$55 //SpriteY
 		lda #1 //Character ID
 		jsr SOFTSPRITES.AddSprite
 
+		ldx #$3e //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$05 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		ldx #$58 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$55 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		//DEBUG
+		ldx #$78 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$05 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		ldx #$98 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$55 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		ldx #$b8 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$05 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		ldx #$d8 //SpriteX
+		clc		 //Carry = bit 9 of Sprite X
+		ldy #$55 //SpriteY
+		lda #1 //Character ID
+		jsr SOFTSPRITES.AddSprite
+
+		
 	//Inf loop
 	!Loop:
 		lda PerformFrameCodeFlag
@@ -98,13 +136,43 @@ Entry:
 			jsr SOFTSPRITES.ClearSprites
 
 			lda #$00
-			ldx #$04
+			ldx #$00
 			ldy #$02
 			jsr SOFTSPRITES.MoveSprite
 
 			lda #$01
-			ldx #$04
-			ldy #$fe
+			ldx #$00
+			ldy #$01
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$02
+			ldx #$00
+			ldy #$03
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$03
+			ldx #$00
+			ldy #$02
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$04
+			ldx #$00
+			ldy #$02
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$05
+			ldx #$00
+			ldy #$01
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$06
+			ldx #$00
+			ldy #$03
+			jsr SOFTSPRITES.MoveSprite
+
+			lda #$07
+			ldx #$00
+			ldy #$02
 			jsr SOFTSPRITES.MoveSprite
 
 
