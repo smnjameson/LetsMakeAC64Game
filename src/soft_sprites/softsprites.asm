@@ -123,6 +123,7 @@ SOFTSPRITES: {
 	Toggle:
 		.byte $00
 	UpdateSprites: {
+		.break
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
 			.label TEMP = TEMP3
@@ -231,18 +232,20 @@ SOFTSPRITES: {
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 
+
 				ldy #$07
 			!:
 			BLIT_01:
 				ldx $BEEF, y
-			ORIG_01:
-				lda (ORIGINAL_DATA), y			   //5
-				and Sprite_MaskTable, x            //4
-				ora Sprite_MaskTable_Inverted, X   //3	
+				lda (ORIGINAL_DATA), y			   
+				and Sprite_MaskTable, x            
+				ora Sprite_MaskTable_Inverted, X   	
 			CDATA_01:
 				sta $BEEF, y
 				dey
 				bpl !-
+
+
 
 
 				//BOTTOM LEFT
@@ -251,26 +254,15 @@ SOFTSPRITES: {
 				adc #$28
 				tay
 				lda (SCREEN_ROW), y
+				sec
+				sbc #$01
 				jsr GetFontLookup
 				
-				//Instead of advancing through the target data
-				//we keep the y register advancing sequentially and 
-				//instead offset the original data
-				sec
-				lda ORIGINAL_DATA
-				sbc #$08
-				sta ORIG_02 + 1
-				lda ORIGINAL_DATA + 1
-				sbc #$00
-				sta ORIG_02 + 2
-
-
 				ldy #$08
 			!:
 			BLIT_02:
 				ldx $BEEF, y
-			ORIG_02:
-				lda $BEEF, y			   //5
+				lda (ORIGINAL_DATA), y			   //5
 				and Sprite_MaskTable, x            //4
 				ora Sprite_MaskTable_Inverted, x					   //3	
 			CDATA_02:
@@ -287,25 +279,19 @@ SOFTSPRITES: {
 				ldy SCREEN_X
 				iny
 				lda (SCREEN_ROW), y
+				sec
+				sbc #$02
+
 				jsr GetFontLookup
 				
 				//Instead of advancing through the target data
 				//we keep the y register advancing sequentially and 
 				//instead offset the original data
-				sec
-				lda ORIGINAL_DATA
-				sbc #$10
-				sta ORIG_03 + 1
-				lda ORIGINAL_DATA + 1
-				sbc #$00
-				sta ORIG_03 + 2
-
 				ldy #$10
 			!:
 			BLIT_03:
 				ldx $BEEF, y         
-			ORIG_03:
-				lda $BEEF, y	
+				lda (ORIGINAL_DATA), y	
 				and Sprite_MaskTable, x           
 				ora Sprite_MaskTable_Inverted, x					   
 			CDATA_03:
@@ -324,30 +310,22 @@ SOFTSPRITES: {
 				adc #$29
 				tay
 				lda (SCREEN_ROW), y
+				sec
+				sbc #$03
 				jsr GetFontLookup
 				
 				//Instead of advancing through the target data
 				//we keep the y register advancing sequentially and 
 				//instead offset the original data
-				sec
-				lda ORIGINAL_DATA
-				sbc #$18
-				sta ORIG_04 + 1
-				lda ORIGINAL_DATA + 1
-				sbc #$00
-				sta ORIG_04 + 2
-
 				ldy #$18
 			!:
 			BLIT_04:
 				ldx $BEEF, y        
-			ORIG_04:
-				lda $BEEF, y
+				lda (ORIGINAL_DATA), y
 				and Sprite_MaskTable, x           
 				ora Sprite_MaskTable_Inverted, x					   
 			CDATA_04:
 				sta $BEEF, y
-
 				iny
 				cpy #$20
 				bne !-
@@ -366,6 +344,8 @@ SOFTSPRITES: {
 			lda Toggle
 			eor #$01
 			sta Toggle
+
+			.break
 			rts			
 	}
 
@@ -477,9 +457,6 @@ SOFTSPRITES: {
 	}
 
 
-
-
-
 	CreateMaskTable: {
 		    ldx #$00
 		Loop:
@@ -504,10 +481,6 @@ SOFTSPRITES: {
 		    sta Sprite_MaskTable, x
 
 		    eor #$ff
-		    // sta TEMP2
-		    // txa
-		    // and TEMP2
-		    // eor #$ff
 		    sta TEMP2
 		    txa
 		    and TEMP2
@@ -522,6 +495,8 @@ SOFTSPRITES: {
 
 
 	GetFontLookup: {
+			clc
+			adc #$03
 			ldy #$00
 			sty TEMP6
 			asl
@@ -530,8 +505,12 @@ SOFTSPRITES: {
 			rol TEMP6
 			asl
 			rol TEMP6
+			sec
+			sbc #$18
 			sta VECTOR5
 			lda TEMP6
+			sbc #$00
+			clc
 			adc #>CHAR_SET
 			sta VECTOR5 + 1
 			rts
@@ -643,18 +622,6 @@ SOFTSPRITES: {
 			cpy #16
 			bne !-
 	
-		// 	//Now fix the char color/transparency
-		// 	ldy #$00
-		// !:
-		// 	lda (BLIT_DATA), y
-		// 	tax
-		// 	and Sprite_MaskTable_Inverted, x
-		// 	sta (BLIT_DATA), y
-		// 	iny
-		// 	cpy #$20
-		// 	bne !-
-
-
 			//Update the offsets top to bottom, Left to right , 32 total (1024 byte blit table)
 			ldy OFFSET_Y
 			iny
