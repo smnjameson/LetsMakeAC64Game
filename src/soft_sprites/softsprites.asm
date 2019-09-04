@@ -18,12 +18,23 @@ SOFTSPRITES: {
 		.byte $00
 	SpriteData_ID: //180 = Player Projectile
 		.fill MAX_SPRITES, $00
+
+	SpriteData_TARGET_X_MSB:  
+		.fill MAX_SPRITES, $00
+	SpriteData_TARGET_X_LSB:  
+		.fill MAX_SPRITES, $00
+	SpriteData_TARGET_Y:  
+		.fill MAX_SPRITES, $00
+
+
 	SpriteData_X_MSB:  
 		.fill MAX_SPRITES, $00
 	SpriteData_X_LSB:  
 		.fill MAX_SPRITES, $00
 	SpriteData_Y:  
 		.fill MAX_SPRITES, $00
+
+
 	SpriteColor:
 		.fill MAX_SPRITES, $00
 
@@ -71,11 +82,14 @@ SOFTSPRITES: {
 
 			tya 
 			sta SpriteData_Y, x
+			sta SpriteData_TARGET_Y, x
 			lda TEMP1
 			sta SpriteData_X_LSB, x
+			sta SpriteData_TARGET_X_LSB, x
 			lda #$00
 			rol
 			sta SpriteData_X_MSB, x
+			sta SpriteData_TARGET_X_MSB, x
 
 			stx TEMP1
 			inx
@@ -89,43 +103,6 @@ SOFTSPRITES: {
 			rts
 	}
 
-	MoveSprite: {
-			pha
-			and #$01
-			cmp Toggle
-			beq !+
-			pla
-			rts
-		!:
-			pla
-
-			//Preserve Y
-			sty TEMP1
-			tay //Set index
-
-			//Do movements
-			lda TEMP1
-			clc
-			adc SpriteData_Y, y
-			cmp #[200-40]
-			bcc !+
-			lda #$00
-		!:
-			sta SpriteData_Y, y
-
-			txa
-			clc
-			adc SpriteData_X_LSB, y
-			sta SpriteData_X_LSB, y
-			lda SpriteData_X_MSB, y
-			adc #$00
-			and #$01
-			sta SpriteData_X_MSB, y
-
-			rts
-	}
-
-
 
 
 	Toggle:
@@ -137,7 +114,6 @@ SOFTSPRITES: {
 			.label TEMP_OFFSET = TEMP4
 			.label SCREEN_X = TEMP5
 
-
 			.label CHAR_DATA_LEFT = VECTOR1
 			.label BLIT_LOOKUP = VECTOR2
 			.label CHAR_DATA_RIGHT = VECTOR3
@@ -145,13 +121,49 @@ SOFTSPRITES: {
 			.label ORIGINAL_DATA = VECTOR5
 			.label COLOR_ROW = VECTOR6
 
+
+			//PRE CLEAR
+			ldx #$00
+		!Loop:
+			txa
+			and #$01
+			cmp Toggle
+			bne !+			
+			jsr ClearSprite
+		!:
+			inx
+			cpx #$08
+			bne !Loop-
+
+			
 			// ldx #$00
-			ldx Toggle
+			ldx #$00
 		!Loop:
 			lda SpriteData_ID, x
 			bne !+
 			jmp !Skip+
 		!:
+
+
+				//Only update on alternate frames
+				txa
+				and #$01
+				cmp Toggle
+				beq !+
+				jmp !NoApplyUpdate+
+			!:
+
+				
+
+				//Apply new target locations
+				lda SpriteData_TARGET_X_LSB, x
+				sta SpriteData_X_LSB, x
+				lda SpriteData_TARGET_X_MSB, x
+				sta SpriteData_X_MSB, x
+				lda SpriteData_TARGET_Y, x
+				sta SpriteData_Y, x
+			!NoApplyUpdate:
+
 
 				lda SpriteData_X_LSB, x
 				and #$07
@@ -189,11 +201,20 @@ SOFTSPRITES: {
 				sta COLOR_ROW + 1
 
 
+				//Only update on alternate frames
+				txa
+				and #$01
+				cmp Toggle
+				beq !+
+				jmp !OnlyDraw+
+			!:
+
 				//Get target location for font data in current charset
 				lda SpriteData_CharStart_LSB, x
 				sta CHAR_DATA_LEFT
 				lda SpriteData_CharStart_MSB, x
 				sta CHAR_DATA_LEFT + 1
+
 
 
 
@@ -364,17 +385,18 @@ SOFTSPRITES: {
 
 
 
-
 				//Restore x iterator
 				ldx TEMP
+		!OnlyDraw:				
 				jsr DrawSprites
 
 		!Skip:
 			inx
-			inx
 			cpx #MAX_SPRITES
 			bcs !+
 			jmp !Loop-
+
+
 		!:
 			lda Toggle
 			eor #$01
@@ -426,17 +448,13 @@ SOFTSPRITES: {
 
 
 
-	ClearSprites: {
+	ClearSprite: {
 			.label SCREEN_X = TEMP1
 			.label TEMP = TEMP2
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
 			.label COLOR_ROW= VECTOR3
 
-			ldx Toggle
-		!:
-			lda SpriteData_ID, x
-			beq !Skip+
 				stx TEMP
 
 				lda SpriteData_X_MSB, x
@@ -506,22 +524,19 @@ SOFTSPRITES: {
 
 
 				ldx TEMP
-		!Skip:
-			inx
-			inx
-			cpx #MAX_SPRITES
-			bcc !-
 
 			rts	
 	}
 
 
+
+
+
+
 	CreateMaskTable: {
 		    ldx #$00
 		Loop:
-		    // txa
 		    lda TABLES.ColorSwapTable, x
-		    // eor #$ff
 		    and #%10101010
 		    sta TEMP1
 
@@ -529,9 +544,7 @@ SOFTSPRITES: {
 		    ora TEMP1    
 		    sta TEMP1
 
-		    // txa 
 		    lda TABLES.ColorSwapTable, x
-		    // eor #$ff
 		    and #%01010101
 		    sta TEMP2
 		    asl
@@ -547,7 +560,6 @@ SOFTSPRITES: {
 		    sta TEMP2
 		    txa
 		    and TEMP2
-		    // lda TABLES.ColorSwapTable, x
 			sta Sprite_MaskTable_Inverted, x
 		    
 		    inx    
@@ -654,11 +666,6 @@ SOFTSPRITES: {
 			bcs !NoDataYet+
 		SelfModLookup:
 			lda $BEEF, x
-			// stx SHIFT_TEMP
-			// tax
-			// lda TABLES.ColorSwapTable, x
-
-			// ldx SHIFT_TEMP
 			inx
 
 		!NoDataYet:

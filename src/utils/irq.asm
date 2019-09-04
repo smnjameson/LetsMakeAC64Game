@@ -49,42 +49,6 @@ IRQ: {
 			sty VIC.SCREEN_CONTROL_2
 
 
-
-			////////
-			:waitForRasterLine($ea)
-
-			lda #$07
-			sta IRQ_TEMP1
-
-			ldy RampIndex
-		!:
-			tya
-			and #$0f
-			tax
-
-			lda ColorRamp1, x
-			sta VIC.BACKGROUND_COLOR
-
-
-			lda VIC.RASTER_Y
-			cmp VIC.RASTER_Y
-			beq *-3
-
-			dey
-			dec IRQ_TEMP1
-			bne !-
-			
-
-
-			lda ZP_COUNTER
-			and #$01
-			beq !+
-			dec RampIndex
-		!:
-
-			lda #$01
-			sta VIC.BACKGROUND_COLOR
-
 			lda #$01
 			sta PerformFrameCodeFlag
 

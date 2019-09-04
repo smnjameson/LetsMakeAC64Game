@@ -69,84 +69,41 @@ Entry:
 
 		jsr MAPLOADER.DrawMap
 
+
 		jsr PLAYER.Initialise
 		jsr HUD.Initialise
 		jsr SOFTSPRITES.Initialise
 
 
-
-		//DEBUG
-		ldx #$04 	//SpriteX
+		//DEBUG - Create sprites
+		lda #$04
+		sta TEMP2
+		sta TEMP3
+		lda #$08
+		sta TEMP4
+	!:
 		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$05 	//SpriteY
 		lda #1 		//Character ID
+		ldx TEMP2
+		ldy TEMP3
 		jsr SOFTSPRITES.AddSprite
 		tax
-		lda #$0f
+		lda TEMP4
 		sta SOFTSPRITES.SpriteColor, X
 
-		ldx #$24 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$25 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0e
-		sta SOFTSPRITES.SpriteColor, X
+		lda TEMP2
+		clc
+		adc #$08
+		sta TEMP2
+		sta TEMP3
+		lda TEMP4
+		adc #$01
+		sta TEMP4
+		cmp #$10
+		bne !-
 
-		ldx #$44 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$45 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0d
-		sta SOFTSPRITES.SpriteColor, X
 
-		ldx #$64 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$85 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0c
-		sta SOFTSPRITES.SpriteColor, X
-		
-		ldx #$84 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$05 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0b
-		sta SOFTSPRITES.SpriteColor, X
 
-		ldx #$a4 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$25 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0a
-		sta SOFTSPRITES.SpriteColor, X
-
-		ldx #$c4 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$45 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0d
-		sta SOFTSPRITES.SpriteColor, X
-
-		ldx #$e4 	//SpriteX
-		clc	 		//Carry = bit 9 of Sprite X
-		ldy #$85 	//SpriteY
-		lda #1 		//Character ID
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda #$0c
-		sta SOFTSPRITES.SpriteColor, X
 
 	//Inf loop
 	!Loop:
@@ -157,66 +114,55 @@ Entry:
 			inc ZP_COUNTER
 
 			
-			jsr SOFTSPRITES.ClearSprites
 
-			lda #$00
-			ldx #$02
-			ldy #$00
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$01
-			ldx #$00
-			ldy #$02
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$02
-			ldx #$00
-			ldy #$03
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$03
-			ldx #$04
-			ldy #$00
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$04
-			ldx #$02
-			ldy #$00
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$05
-			ldx #$00
-			ldy #$02
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$06
-			ldx #$04
-			ldy #$00
-			jsr SOFTSPRITES.MoveSprite
-
-			lda #$07
-			ldx #$00
-			ldy #$03
-			jsr SOFTSPRITES.MoveSprite
-
-
-			inc $d020
+			// inc $d020
 			jsr SOFTSPRITES.UpdateSprites
-			lda #$00
-			sta $d020
 
+			// inc $d020
 			jsr PLAYER.DrawPlayer
+			// inc $d020
 			jsr PLAYER.PlayerControl
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
 
 
+
+			//DEBUG SPRITE ROTATION PATTERN
+			// inc $d020
+			lda Counter
+			sta Counter + 1
+			ldx #$00
+		!:
+			ldy Counter + 1
+			lda SinTableX, y
+			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x
+			lda CosTableY, y
+			sta SOFTSPRITES.SpriteData_TARGET_Y, x
+			lda Counter + 1
+			clc
+			adc #$08
+			sta Counter + 1
+			inx
+			cpx #$08
+			bne !-
+			inc Counter
+			////////////////////////////////
+
+
+			lda #$00
+			sta $d020
 		jmp !Loop- 
 
 
 	PerformFrameCodeFlag:
 		.byte $00
 
+	Counter:
+		.byte $00, $00
+	SinTableX:
+		.fill 256, (sin((i/256) * (PI * 2)) * cos((i/128) * (PI * 2)) * 60 + 150) & $fe 
+	CosTableY:
+		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 #import "maps/assets.asm"
 
 
