@@ -1,10 +1,10 @@
 SOFTSPRITES: {
-	.label MAX_UNIQUE_CHARS = 4
+	.label MAX_UNIQUE_CHARS = 4			//Maximum number of unique char IDs 
+	.label MAX_SPRITES_PER_FRAME = 4	//Maximum number of sprites to update per frame
+	//.label MAX_SPRITES //DEFINED in ZERO PAGE file
 
-	
 	.label SPRITE_FONT_START = 187
 	.label SPRITE_FONT_DATA_START = CHAR_SET + SPRITE_FONT_START * 8
-
 	.label BLIT_TABLE_START = $b000
 
 .align $100
@@ -17,6 +17,8 @@ SOFTSPRITES: {
 	CurrentSpriteIndex:
 		.byte $00
 	SpriteData_ID: //180 = Player Projectile
+		.fill MAX_SPRITES, $00
+	SpriteColor:
 		.fill MAX_SPRITES, $00
 
 	SpriteData_TARGET_X_MSB:  
@@ -35,8 +37,7 @@ SOFTSPRITES: {
 		.fill MAX_SPRITES, $00
 
 
-	SpriteColor:
-		.fill MAX_SPRITES, $00
+
 
 	//Constants	
 	SpriteData_CharStart:
@@ -105,14 +106,18 @@ SOFTSPRITES: {
 
 
 
-	Toggle:
+	
+	SpriteUpdateIndex:
 		.byte $00
+		
 	UpdateSprites: {
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
 			.label TEMP = TEMP3
 			.label TEMP_OFFSET = TEMP4
 			.label SCREEN_X = TEMP5
+			.label UPDATE_COUNTER = TEMP6
+			.label UPDATE_INDEX = TEMP7
 
 			.label CHAR_DATA_LEFT = VECTOR1
 			.label BLIT_LOOKUP = VECTOR2
@@ -122,22 +127,27 @@ SOFTSPRITES: {
 			.label COLOR_ROW = VECTOR6
 
 
-			//PRE CLEAR
+			//PRE CLEAR SCREEN BUFFER
 			ldx #$00
 		!Loop:
-			txa
-			and #$01
-			cmp Toggle
-			bne !+			
+			lda SpriteData_ID, x
+			beq !+
 			jsr ClearSprite
 		!:
 			inx
-			cpx #$08
+			cpx #MAX_SPRITES
 			bne !Loop-
 
-			
+
+
+			lda #MAX_SPRITES_PER_FRAME		//Max to update per frame
+			sta UPDATE_COUNTER
+			ldx SpriteUpdateIndex
+			stx UPDATE_INDEX
+
+
+
 			// ldx #$00
-			ldx #$00
 		!Loop:
 			lda SpriteData_ID, x
 			bne !+
@@ -146,14 +156,11 @@ SOFTSPRITES: {
 
 
 				//Only update on alternate frames
-				txa
-				and #$01
-				cmp Toggle
-				beq !+
+				lda UPDATE_COUNTER
+				bne !+
 				jmp !NoApplyUpdate+
 			!:
-
-				
+			
 
 				//Apply new target locations
 				lda SpriteData_TARGET_X_LSB, x
@@ -201,11 +208,9 @@ SOFTSPRITES: {
 				sta COLOR_ROW + 1
 
 
-				//Only update on alternate frames
-				txa
-				and #$01
-				cmp Toggle
-				beq !+
+				//Only update a few per frame
+				lda UPDATE_COUNTER
+				bne !+
 				jmp !OnlyDraw+
 			!:
 
@@ -257,25 +262,27 @@ SOFTSPRITES: {
 				jsr GetFontLookup
 
 
-				ldy #$00
-			!SIMPLE_BLIT_01:
-				cpy OFFSET_Y
-				bcs !FULL_BLIT_01+
-				lda (ORIGINAL_DATA), y	
-				sta (CHAR_DATA_LEFT), y
-				iny
-				bcc !SIMPLE_BLIT_01-
 
-			!FULL_BLIT_01:
-				lax (BLIT_LOOKUP), y
-				lda (ORIGINAL_DATA), y			   
-				and Sprite_MaskTable, x            
-				ora Sprite_MaskTable_Inverted, x
 
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #$08
-				bne !FULL_BLIT_01-
+						ldy #$00
+					!SIMPLE_BLIT_01:
+						cpy OFFSET_Y
+						bcs !FULL_BLIT_01+
+						lda (ORIGINAL_DATA), y	
+						sta (CHAR_DATA_LEFT), y
+						iny
+						bcc !SIMPLE_BLIT_01-
+
+					!FULL_BLIT_01:
+						lax (BLIT_LOOKUP), y
+						lda (ORIGINAL_DATA), y			   
+						and Sprite_MaskTable, x            
+						ora Sprite_MaskTable_Inverted, x
+
+						sta (CHAR_DATA_LEFT), y
+						iny
+						cpy #$08
+						bne !FULL_BLIT_01-
 
 
 
@@ -384,23 +391,42 @@ SOFTSPRITES: {
 				bne !SIMPLE_BLIT_04-
 
 
-
+			
+				dec UPDATE_COUNTER
 				//Restore x iterator
 				ldx TEMP
 		!OnlyDraw:				
 				jsr DrawSprites
 
 		!Skip:
-			inx
-			cpx #MAX_SPRITES
-			bcs !+
+			lda UPDATE_INDEX
+			clc
+			adc #$01
+			cmp #MAX_SPRITES
+			bcc !NoWrap+
+			sec
+			sbc #MAX_SPRITES
+		!NoWrap:
+			sta UPDATE_INDEX
+			tax
+			cmp SpriteUpdateIndex
+			beq !+
 			jmp !Loop-
 
 
 		!:
-			lda Toggle
-			eor #$01
-			sta Toggle
+			lda SpriteUpdateIndex
+			clc
+			adc #MAX_SPRITES_PER_FRAME //max per frame
+			sec
+			sbc UPDATE_COUNTER
+			cmp #MAX_SPRITES
+			bcc !NoWrap+
+			sec
+			sbc #MAX_SPRITES
+		!NoWrap:
+			sta SpriteUpdateIndex
+			
 
 			rts			
 	}
@@ -574,17 +600,17 @@ SOFTSPRITES: {
 			clc
 			adc #$03
 			ldy #$00
-			sty TEMP6
+			sty TEMP8
 			asl
-			rol TEMP6
+			rol TEMP8
 			asl
-			rol TEMP6
+			rol TEMP8
 			asl
-			rol TEMP6
+			rol TEMP8
 			sec
 			sbc #$18
 			sta VECTOR5
-			lda TEMP6
+			lda TEMP8
 			sbc #$00
 			clc
 			adc #>CHAR_SET

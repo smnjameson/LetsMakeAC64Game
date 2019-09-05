@@ -99,7 +99,7 @@ Entry:
 		lda TEMP4
 		adc #$01
 		sta TEMP4
-		cmp #$10
+		cmp #MAX_SPRITES + 8
 		bne !-
 
 
@@ -115,8 +115,9 @@ Entry:
 
 			
 
-			// inc $d020
+			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
+			dec $d020
 
 			// inc $d020
 			jsr PLAYER.DrawPlayer
@@ -143,7 +144,7 @@ Entry:
 			adc #$08
 			sta Counter + 1
 			inx
-			cpx #$08
+			cpx #MAX_SPRITES
 			bne !-
 			inc Counter
 			////////////////////////////////
