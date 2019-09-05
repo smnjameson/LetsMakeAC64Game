@@ -117,11 +117,11 @@ Entry:
 
 			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
-			dec $d020
 
-			// inc $d020
+			ldx #$00
+			stx $d020
+			
 			jsr PLAYER.DrawPlayer
-			// inc $d020
 			jsr PLAYER.PlayerControl
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
@@ -129,7 +129,6 @@ Entry:
 
 
 			//DEBUG SPRITE ROTATION PATTERN
-			// inc $d020
 			lda Counter
 			sta Counter + 1
 			ldx #$00

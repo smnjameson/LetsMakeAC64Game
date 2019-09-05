@@ -21,12 +21,18 @@ SOFTSPRITES: {
 	SpriteColor:
 		.fill MAX_SPRITES, $00
 
+	SpriteData_CLEAR_LSB:
+		.fill MAX_SPRITES, $00
+	SpriteData_CLEAR_MSB:
+		.fill MAX_SPRITES, $00
+
 	SpriteData_TARGET_X_MSB:  
 		.fill MAX_SPRITES, $00
 	SpriteData_TARGET_X_LSB:  
 		.fill MAX_SPRITES, $00
 	SpriteData_TARGET_Y:  
 		.fill MAX_SPRITES, $00
+
 
 
 	SpriteData_X_MSB:  
@@ -145,7 +151,7 @@ SOFTSPRITES: {
 			ldx SpriteUpdateIndex
 			stx UPDATE_INDEX
 
-
+			inc $d020
 
 			// ldx #$00
 		!Loop:
@@ -256,45 +262,41 @@ SOFTSPRITES: {
 
 
 
-				//TOP LEFT
+				// TOP LEFT ////////////////////////
 				ldy #$00
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 
+				ldy #$00
+			!SIMPLE_BLIT_01:
+				cpy OFFSET_Y
+				bcs !FULL_BLIT_01+
+				lda (ORIGINAL_DATA), y	
+				sta (CHAR_DATA_LEFT), y
+				iny
+				bcc !SIMPLE_BLIT_01-
+
+			!FULL_BLIT_01:
+				lax (BLIT_LOOKUP), y
+				lda (ORIGINAL_DATA), y			   
+				and Sprite_MaskTable, x            
+				ora Sprite_MaskTable_Inverted, x
+
+				sta (CHAR_DATA_LEFT), y
+				iny
+				cpy #$08
+				bne !FULL_BLIT_01-
+				////////////////////////////////////
 
 
 
-						ldy #$00
-					!SIMPLE_BLIT_01:
-						cpy OFFSET_Y
-						bcs !FULL_BLIT_01+
-						lda (ORIGINAL_DATA), y	
-						sta (CHAR_DATA_LEFT), y
-						iny
-						bcc !SIMPLE_BLIT_01-
-
-					!FULL_BLIT_01:
-						lax (BLIT_LOOKUP), y
-						lda (ORIGINAL_DATA), y			   
-						and Sprite_MaskTable, x            
-						ora Sprite_MaskTable_Inverted, x
-
-						sta (CHAR_DATA_LEFT), y
-						iny
-						cpy #$08
-						bne !FULL_BLIT_01-
-
-
-
-
-				//BOTTOM LEFT
+				//BOTTOM LEFT ////////////////////////
 				ldy #$28
 				lda (SCREEN_ROW), y
 				sec
 				sbc #$01
 				jsr GetFontLookup
 				
-
 				clc
 				lda OFFSET_Y
 				adc #$08
@@ -320,10 +322,10 @@ SOFTSPRITES: {
 				iny
 				cpy #$10
 				bne !SIMPLE_BLIT_02-
+				////////////////////////////////////
 
 
-
-				//TOP RIGHT
+				//TOP RIGHT ////////////////////////////////////
 				ldy #$01
 				lda (SCREEN_ROW), y
 				sec
@@ -353,11 +355,11 @@ SOFTSPRITES: {
 				iny
 				cpy #$18
 				bne !FULL_BLIT_03-
+				////////////////////////////////////
 
 
 
-
-				//BOTTOM RIGHT
+				//BOTTOM RIGHT ////////////////////////////////////
 				ldy #$29
 				lda (SCREEN_ROW), y
 				sec
@@ -389,10 +391,11 @@ SOFTSPRITES: {
 				iny
 				cpy #$20
 				bne !SIMPLE_BLIT_04-
-
+				////////////////////////////////////
 
 			
 				dec UPDATE_COUNTER
+
 				//Restore x iterator
 				ldx TEMP
 		!OnlyDraw:				
@@ -409,12 +412,14 @@ SOFTSPRITES: {
 		!NoWrap:
 			sta UPDATE_INDEX
 			tax
-			cmp SpriteUpdateIndex
+			cmp SpriteUpdateIndex //When we are back to the index we started at we've done all sprites
 			beq !+
 			jmp !Loop-
 
 
+
 		!:
+			//Make sure next sprite index is the first sprite that was not updated
 			lda SpriteUpdateIndex
 			clc
 			adc #MAX_SPRITES_PER_FRAME //max per frame
@@ -426,16 +431,21 @@ SOFTSPRITES: {
 			sbc #MAX_SPRITES
 		!NoWrap:
 			sta SpriteUpdateIndex
-			
 
 			rts			
 	}
+
 
 
 	DrawSprites: {
 			.label SCREEN_ROW = VECTOR4
 			.label COLOR_ROW = VECTOR6
 				
+				lda VECTOR4
+				sta SpriteData_CLEAR_LSB, x
+				lda VECTOR4 + 1
+				sta SpriteData_CLEAR_MSB, x
+
 				//0,0
 				clc
 				lda SpriteData_CharStart, x
@@ -468,6 +478,7 @@ SOFTSPRITES: {
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
 
+
 			rts		
 	}
 
@@ -475,7 +486,6 @@ SOFTSPRITES: {
 
 
 	ClearSprite: {
-			.label SCREEN_X = TEMP1
 			.label TEMP = TEMP2
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
@@ -483,74 +493,52 @@ SOFTSPRITES: {
 
 				stx TEMP
 
-				lda SpriteData_X_MSB, x
-				lsr
-				lda SpriteData_X_LSB, x
-				ror
-				lsr
-				lsr
-				sta SCREEN_X
-
-				lda SpriteData_Y, x
-				lsr
-				lsr
-				lsr
-				tay 
-
-				lda TABLES.ScreenRowLSB, y
-				sta SCREEN_ROW
-				sta COLOR_ROW
-				lda TABLES.ScreenRowMSB, y
+				lda SpriteData_CLEAR_MSB, x
+				bne !+
+				rts
+			!:
 				sta SCREEN_ROW + 1
 				clc
 				adc #>[VIC.COLOR_RAM - SCREEN_RAM]
-				sta COLOR_ROW + 1
-
-				lda TABLES.BufferLSB, y
-				sta BUFFER
-				lda TABLES.BufferMSB, y
+				sta COLOR_ROW + 1	
+				sec
+				sbc #>[VIC.COLOR_RAM - MAPLOADER.BUFFER]
 				sta BUFFER + 1
 
-
+				lda SpriteData_CLEAR_LSB, x
+				sta SCREEN_ROW
+				sta COLOR_ROW
+				sta BUFFER
 
 				//0,0
-				ldy SCREEN_X
-				lda (BUFFER), y
+				ldy #$00
+				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				tax
 				lda CHAR_COLORS, x
 				sta (COLOR_ROW), y
 
 				//1,0
-				iny
-				lda (BUFFER), y
+				ldy #$01
+				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				tax
 				lda CHAR_COLORS, x
 				sta (COLOR_ROW), y
 
 				//0,1
-				tya 
-				clc
-				adc #$27
-				tay
-				lda (BUFFER), y
+				ldy #$28
+				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				tax
 				lda CHAR_COLORS, x
 				sta (COLOR_ROW), y
 
 				//1,1
-				iny
-				lda (BUFFER), y
+				ldy #$29
+				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				tax
 				lda CHAR_COLORS, x
 				sta (COLOR_ROW), y
 
-
 				ldx TEMP
-
 			rts	
 	}
 
@@ -580,7 +568,6 @@ SOFTSPRITES: {
 
 		    eor #$ff
 		    sta Sprite_MaskTable, x
-
 
 		    eor #$ff
 		    sta TEMP2
