@@ -18,6 +18,13 @@ PLAYER: {
 	.label JOY_FR = %10000
 
 
+	Player_Proj_Speed_X:
+				//Fractional /LSB /MSB
+			.byte $80, $02
+	Player_Proj_Gravity:
+			.byte $00, $80
+
+
 	PlayersActive:
 			.byte $00
 
@@ -32,19 +39,60 @@ PLAYER: {
 
 	Player1_FirePressed:
 			.byte $00
+
+
 	Player1_Proj_Type:
 			.byte $00, $00
+	Player2_Proj_Type:
+			.byte $00, $00
+
 	Player1_Proj_X0:
 			.byte $00, $00
+	Player2_Proj_X0:
+			.byte $00, $00
+
 	Player1_Proj_X1:
 			.byte $00, $00
+	Player2_Proj_X1:
+			.byte $00, $00
+
 	Player1_Proj_X2:
 			.byte $00, $00
+	Player2_Proj_X2:
+			.byte $00, $00
+
 	Player1_Proj_Y0:
 			.byte $00, $00
+	Player2_Proj_Y0:
+			.byte $00, $00
+
 	Player1_Proj_Y1:
 			.byte $00, $00
-				
+	Player2_Proj_Y1:
+			.byte $00, $00
+
+*=* "SPEED"
+	Player1_Proj_Speed_X0:
+			.byte $00, $00
+	Player2_Proj_Speed_X0:
+			.byte $00, $00
+
+	Player1_Proj_Speed_X1:
+			.byte $00, $00
+	Player2_Proj_Speed_X1:
+			.byte $00, $00
+
+	Player1_Proj_Speed_Y0:
+			.byte $00, $00
+	Player2_Proj_Speed_Y0:
+			.byte $00, $00
+
+	Player1_Proj_Speed_Y1:
+			.byte $00, $00
+	Player2_Proj_Speed_Y1:
+			.byte $00, $00
+
+
 
 	Player2_X:
 			// Fractional / LSB / MSB
@@ -54,18 +102,7 @@ PLAYER: {
 
 	Player2_FirePressed:
 			.byte $00
-	Player2_Proj_Type:
-			.byte $00, $00
-	Player2_Proj_X0:
-			.byte $00, $00
-	Player2_Proj_X1:
-			.byte $00, $00
-	Player2_Proj_X2:
-			.byte $00, $00
-	Player2_Proj_Y0:
-			.byte $00, $00
-	Player2_Proj_Y1:
-			.byte $00, $00
+
 
 	Player1_FloorCollision:
 			.byte $00
@@ -622,6 +659,10 @@ PLAYER: {
 			jsr CheckPlayer1CanShoot
 			bmi !+
 
+			//X is available index
+			txa
+			sta SOFTSPRITES.CurrentSpriteIndex
+
 			//Set the player projectile values
 			lda #$01
 			sta Player1_Proj_Type, x
@@ -657,6 +698,13 @@ PLAYER: {
 			adc #$07 //Y Offset to move to player eye level
 			sta Player1_Proj_Y1, x
 
+			lda Player_Proj_Speed_X + 0
+			sta Player1_Proj_Speed_X0, x
+			lda Player_Proj_Speed_X + 1
+			sta Player1_Proj_Speed_X1, x
+			lda #$00
+			sta Player1_Proj_Speed_Y0, x
+			sta Player1_Proj_Speed_Y1, x
 
 			//Create the sprite
 			lda Player1_Proj_X2, x
@@ -786,6 +834,12 @@ PLAYER: {
 			jsr CheckPlayer2CanShoot
 			bmi !+
 
+			// x is available index
+			txa
+			clc
+			adc #$02
+			sta SOFTSPRITES.CurrentSpriteIndex
+
 			//Set the player projectile values
 			lda #$01
 			sta Player2_Proj_Type, x
@@ -820,6 +874,14 @@ PLAYER: {
 			clc
 			adc #$07 //Y Offset to move to player eye level
 			sta Player2_Proj_Y1, x
+
+			lda Player_Proj_Speed_X + 0
+			sta Player2_Proj_Speed_X0, x
+			lda Player_Proj_Speed_X + 1
+			sta Player2_Proj_Speed_X1, x
+			lda #$00
+			sta Player2_Proj_Speed_Y0, x
+			sta Player2_Proj_Speed_Y1, x
 
 
 			//Create the sprite
@@ -1075,6 +1137,32 @@ PLAYER: {
 			jmp !Loop-
 		!:
 
+			rts
+	}
+
+
+	UpdateProjectiles: {
+			ldx #$03
+		!:
+			clc
+			lda Player1_Proj_X0, x
+			adc Player1_Proj_Speed_X0, x
+			sta Player1_Proj_X0, x
+			lda Player1_Proj_X1, x
+			adc Player1_Proj_Speed_X1, x
+			sta Player1_Proj_X1, x
+			lda Player1_Proj_X2, x
+			adc #$00
+			sta Player1_Proj_X2, X
+
+			//TODO: Should we just use softsprite x,y directly?
+			lda Player1_Proj_X1, x
+			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x 
+			lda Player1_Proj_X2, x
+			sta SOFTSPRITES.SpriteData_TARGET_X_MSB, x 
+
+			dex
+			bpl !-
 			rts
 	}
 }

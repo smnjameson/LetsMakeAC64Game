@@ -92,6 +92,7 @@ Entry:
 			jsr PLAYER.PlayerControl
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
+			jsr PLAYER.UpdateProjectiles
 
 
 

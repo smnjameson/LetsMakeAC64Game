@@ -82,7 +82,7 @@ SOFTSPRITES: {
 	AddSprite: {
 			stx TEMP1
 			ldx CurrentSpriteIndex
-
+	
 			sta SpriteData_ID, x
 
 			tya 
