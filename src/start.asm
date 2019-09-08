@@ -75,36 +75,6 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 
 
-		//DEBUG - Create sprites
-		lda #$04
-		sta TEMP2
-		sta TEMP3
-		lda #$08
-		sta TEMP4
-	!:
-		clc	 		//Carry = bit 9 of Sprite X
-		lda #1 		//Character ID
-		ldx TEMP2
-		ldy TEMP3
-		jsr SOFTSPRITES.AddSprite
-		tax
-		lda TEMP4
-		sta SOFTSPRITES.SpriteColor, X
-
-		lda TEMP2
-		clc
-		adc #$08
-		sta TEMP2
-		sta TEMP3
-		lda TEMP4
-		adc #$01
-		sta TEMP4
-		cmp #MAX_SPRITES + 8
-		bne !-
-
-
-
-
 	//Inf loop
 	!Loop:
 		lda PerformFrameCodeFlag
@@ -115,11 +85,8 @@ Entry:
 
 			
 
-			inc $d020
 			jsr SOFTSPRITES.UpdateSprites
 
-			ldx #$00
-			stx $d020
 			
 			jsr PLAYER.DrawPlayer
 			jsr PLAYER.PlayerControl
@@ -128,29 +95,8 @@ Entry:
 
 
 
-			//DEBUG SPRITE ROTATION PATTERN
-			lda Counter
-			sta Counter + 1
-			ldx #$00
-		!:
-			ldy Counter + 1
-			lda SinTableX, y
-			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x
-			lda CosTableY, y
-			sta SOFTSPRITES.SpriteData_TARGET_Y, x
-			lda Counter + 1
-			clc
-			adc #$08
-			sta Counter + 1
-			inx
-			cpx #MAX_SPRITES
-			bne !-
-			inc Counter
-			////////////////////////////////
 
 
-			lda #$00
-			sta $d020
 		jmp !Loop- 
 
 

@@ -5,6 +5,8 @@ PLAYER: {
 	.label STATE_FALL 		= %00000010
 	.label STATE_WALK_LEFT  = %00000100
 	.label STATE_WALK_RIGHT = %00001000
+	.label STATE_FACE_LEFT  = %00010000
+	.label STATE_FACE_RIGHT = %00100000
 
 	.label PLAYER_1 = %00000001
 	.label PLAYER_2 = %00000010
@@ -19,15 +21,51 @@ PLAYER: {
 	PlayersActive:
 			.byte $00
 
+	Player_Projectile_XOffset:
+			.byte $20, $08
+
 	Player1_X:
+			// Fractional / LSB / MSB
 			.byte $00, $48, $00 // 1/256th pixel accuracy
 	Player1_Y:
 			.byte $70 // 1 pixel accuracy
 
+	Player1_FirePressed:
+			.byte $00
+	Player1_Proj_Type:
+			.byte $00, $00
+	Player1_Proj_X0:
+			.byte $00, $00
+	Player1_Proj_X1:
+			.byte $00, $00
+	Player1_Proj_X2:
+			.byte $00, $00
+	Player1_Proj_Y0:
+			.byte $00, $00
+	Player1_Proj_Y1:
+			.byte $00, $00
+				
+
 	Player2_X:
+			// Fractional / LSB / MSB
 			.byte $00, $48, $00 // 1/256th pixel accuracy
 	Player2_Y:
 			.byte $70 // 1 pixel accuracy
+
+	Player2_FirePressed:
+			.byte $00
+	Player2_Proj_Type:
+			.byte $00, $00
+	Player2_Proj_X0:
+			.byte $00, $00
+	Player2_Proj_X1:
+			.byte $00, $00
+	Player2_Proj_X2:
+			.byte $00, $00
+	Player2_Proj_Y0:
+			.byte $00, $00
+	Player2_Proj_Y1:
+			.byte $00, $00
 
 	Player1_FloorCollision:
 			.byte $00
@@ -95,6 +133,9 @@ PLAYER: {
 			lda #[PLAYER_1 + PLAYER_2]
 			sta PlayersActive
 
+			lda #STATE_FACE_RIGHT
+			sta Player1_State
+			sta Player2_State
 			rts
 	}
 
@@ -510,6 +551,43 @@ PLAYER: {
 			rts
 	}
 
+
+	CheckPlayer1CanShoot: {
+			//Returns in X register: -1 if no available slot for new projectile
+			//otherwise returns the index (0 or 1)
+			ldx #$00
+			lda Player1_Proj_Type, x
+			bne !+
+			rts
+		!:
+			inx
+			lda Player1_Proj_Type, x
+			bne !+
+			rts
+		!:
+			ldx #$ff
+			rts
+	}
+
+
+	CheckPlayer2CanShoot: {
+			//Returns in X register: -1 if no available slot for new projectile
+			//otherwise returns the index (0 or 1)
+			ldx #$00
+			lda Player2_Proj_Type, x
+			bne !+
+			rts
+		!:
+			inx
+			lda Player2_Proj_Type, x
+			bne !+
+			rts
+		!:
+			ldx #$ff
+			rts
+	}
+
+
 	PlayerControl: {
 		jsr Player1Control
 		jsr Player2Control
@@ -527,11 +605,85 @@ PLAYER: {
 			and #[255 - STATE_WALK_RIGHT - STATE_WALK_LEFT]
 			sta Player1_State
 
+
+		!Fire:
+			lda JOY_ZP1
+			and #JOY_FR
+			beq !FirePressed+
+			lda #$00
+			sta Player1_FirePressed	
+			jmp !+
+
+		!FirePressed:
+			lda Player1_FirePressed	
+			bne !+
+			lda #$01
+			sta Player1_FirePressed	
+			jsr CheckPlayer1CanShoot
+			bmi !+
+
+			//Set the player projectile values
+			lda #$01
+			sta Player1_Proj_Type, x
+			lda #$00
+			sta Player1_Proj_X0, x
+			sta Player1_Proj_Y0, x
+
+			lda Player1_State
+			and #$30
+			lsr
+			lsr
+			lsr
+			lsr
+			tay
+			dey
+
+
+			//Subtract the LEFT border + Projectile Offset
+			lda Player1_X + 1
+			sec
+			sbc Player_Projectile_XOffset, y 	//Subtract border but include x offset
+			sta Player1_Proj_X1, x
+			lda Player1_X + 2
+			sbc #$00
+			sta Player1_Proj_X2, x
+
+
+			//Subtract the top border
+			lda Player1_Y
+			sec
+			sbc #$30
+			clc
+			adc #$07 //Y Offset to move to player eye level
+			sta Player1_Proj_Y1, x
+
+
+			//Create the sprite
+			lda Player1_Proj_X2, x
+			cmp #$01
+			lda Player1_Proj_X1, x
+			sta TEMP1
+
+			lda Player1_Proj_Type, x
+			ldy Player1_Proj_Y1, x
+			ldx TEMP1
+
+			jsr SOFTSPRITES.AddSprite
+			tax
+			lda #$0f
+			sta SOFTSPRITES.SpriteColor, X
+
+
+			///
+
+		!:
+
+
 		!Up:
 			lda Player1_State
 			and #[STATE_FALL + STATE_JUMP]
 			bne !+
-			lda JOY_ZP1
+			lda JOY_ZP1 
 			and #JOY_UP
 			bne !+
 			lda Player1_State
@@ -564,7 +716,8 @@ PLAYER: {
 			sta Player1_X + 2
 
 			lda Player1_State
-			ora #STATE_WALK_LEFT
+			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player1_State
 			lda #80
 			sta DefaultFrame
@@ -594,7 +747,8 @@ PLAYER: {
 			sta Player1_X + 2
 
 			lda Player1_State
-			ora #STATE_WALK_RIGHT
+			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
 			sta Player1_State
 
 			lda #64
@@ -615,6 +769,77 @@ PLAYER: {
 			lda Player2_State	
 			and #[255 - STATE_WALK_RIGHT - STATE_WALK_LEFT]
 			sta Player2_State
+
+		!Fire:
+			lda JOY_ZP2
+			and #JOY_FR
+			beq !FirePressed+
+			lda #$00
+			sta Player2_FirePressed	
+			jmp !+
+
+		!FirePressed:
+			lda Player2_FirePressed	
+			bne !+
+			lda #$01
+			sta Player2_FirePressed	
+			jsr CheckPlayer2CanShoot
+			bmi !+
+
+			//Set the player projectile values
+			lda #$01
+			sta Player2_Proj_Type, x
+			lda #$00
+			sta Player2_Proj_X0, x
+			sta Player2_Proj_Y0, x
+
+			lda Player2_State
+			and #$30
+			lsr
+			lsr
+			lsr
+			lsr
+			tay
+			dey
+
+
+			//Subtract the LEFT border + Projectile Offset
+			lda Player2_X + 1
+			sec
+			sbc Player_Projectile_XOffset, y 	//Subtract border but include x offset
+			sta Player2_Proj_X1, x
+			lda Player2_X + 2
+			sbc #$00
+			sta Player2_Proj_X2, x
+
+
+			//Subtract the top border
+			lda Player2_Y
+			sec
+			sbc #$30
+			clc
+			adc #$07 //Y Offset to move to player eye level
+			sta Player2_Proj_Y1, x
+
+
+			//Create the sprite
+			lda Player2_Proj_X2, x
+			cmp #$01
+			lda Player2_Proj_X1, x
+			sta TEMP1
+
+			lda Player2_Proj_Type, x
+			ldy Player2_Proj_Y1, x
+			ldx TEMP1
+
+			jsr SOFTSPRITES.AddSprite
+			tax
+			lda #$0f
+			sta SOFTSPRITES.SpriteColor, X
+			///
+
+		!:
+
 
 		!Up:
 			lda Player2_State
@@ -653,7 +878,8 @@ PLAYER: {
 			sta Player2_X + 2
 
 			lda Player2_State
-			ora #STATE_WALK_LEFT
+			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player2_State
 			lda #80
 			sta DefaultFrame + 1
@@ -682,7 +908,8 @@ PLAYER: {
 			sta Player2_X + 2
 
 			lda Player2_State
-			ora #STATE_WALK_RIGHT
+			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
 			sta Player2_State
 			lda #64
 			sta DefaultFrame + 1

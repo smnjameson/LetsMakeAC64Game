@@ -79,8 +79,6 @@ SOFTSPRITES: {
 			rts
 	}
 
-
-
 	AddSprite: {
 			stx TEMP1
 			ldx CurrentSpriteIndex
@@ -151,7 +149,6 @@ SOFTSPRITES: {
 			ldx SpriteUpdateIndex
 			stx UPDATE_INDEX
 
-			inc $d020
 
 			// ldx #$00
 		!Loop:
@@ -277,7 +274,8 @@ SOFTSPRITES: {
 				bcc !SIMPLE_BLIT_01-
 
 			!FULL_BLIT_01:
-				lax (BLIT_LOOKUP), y
+				lax (BLIT_LOOKUP), y //4
+
 				lda (ORIGINAL_DATA), y			   
 				and Sprite_MaskTable, x            
 				ora Sprite_MaskTable_Inverted, x
@@ -287,6 +285,7 @@ SOFTSPRITES: {
 				cpy #$08
 				bne !FULL_BLIT_01-
 				////////////////////////////////////
+
 
 
 

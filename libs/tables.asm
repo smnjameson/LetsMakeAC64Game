@@ -58,7 +58,6 @@ TABLES: {
 			.if(d == (SWAP2 * 64)	) .eval d = (SWAP1 * 64);
 			
 
-			.print(""+i+"   "+a+","+b+","+c+","+d)
 			.byte (a+b+c+d)	
 		}
 }
