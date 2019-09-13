@@ -1,12 +1,62 @@
-.label ClearScreen=$8ba {
+.label ClearScreen=$94a {
 }
-.label Entry=$86d {
-  .label Loop=$88c
-  .label InnerLoop=$89b
+.label INVPOT=$bd0
+.label RippleTable=$d39
+.label Wave2Y=$a7e
+.label DoWaves2=$b31 {
 }
+.label RippleCounter=$de5
+.label WaveAnim=$bba
+.label WaveFrame=$a6e
+.label IRQ=$95c {
+  .label SpritePhaseIndex=$989
+  .label Setup=$95c {
+  }
+  .label MainIRQ=$98a {
+  }
+}
+.label Wave2Frame=$a86
+.label Entry=$8bf {
+  .label Loop=$917
+}
+.label Counter=$8bd
+.label Random=$a4d {
+  .label seed=$a5d
+  .label noEor=$a59
+  .label doEor=$a57
+}
+.label CloudXMSB=$c8b
+.label WaveY=$a66
+.label StarFrame=$be8
+.label CloudX=$c83
+.label CloudXF=$c7b
+.label TEMP1=$2
+.label CloudY=$c93
+.label StarY=$be0
+.label StarX=$bd8
+.label GlobalTimer=$3
+.label StarAnim=$bc1
+.label DoWaves=$a8e {
+}
+.label WaveX=$a5e
+.label ColorIndexLoop=$91a {
+  .label InnerLoop=$92f
+}
+.label SPRITE_POINTERS=$7f8
+.label DoStars=$bf0 {
+}
+.label CloudSpeedXF=$ca3
+.label CalculateRipple=$de6 {
+}
+.label CloudSpeedX=$c9b
+.label POT=$bc8
+.label CloudColor=$cab
 .label SCREEN_RAM=$400
-.label ColorRamp=$85e
-.label ColorIndex=$86c
-.label TextMap=$80e
-.label COLOR_RAM=$d800 {
+.label ColorRamp=$8ae
+.label ColorIndex=$8bc
+.label DoClouds=$cb3 {
 }
+.label TextMap=$80e
+.label RippleColTable=$d49
+.label COLOR_RAM=$d800
+.label Wave2X=$a76

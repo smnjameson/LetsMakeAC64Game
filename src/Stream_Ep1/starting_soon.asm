@@ -1,5 +1,8 @@
+// #define NIGHT
+
 .label SCREEN_RAM = $0400
 .label COLOR_RAM = $d800
+.label SPRITE_POINTERS = SCREEN_RAM + $03f8
 
 .macro StoreState() {
 		pha //A
@@ -17,57 +20,46 @@
 		pla 
 }
 
+.macro WaitForNextLine() {
+		lda $d012
+		cmp $d012
+		beq *-3
+}
 
-*=$02 "Temp vars zero page" virtual
-.label maxSprites = $18
-.label maxSprites_space = $18
-.label spritePadding = $04
-//SPRITES
-SpriteSortedIndexes:
-	.fill maxSprites_space, 0
-spriteXpos:
-	.fill maxSprites_space, 0
-spriteXMSB:
-	.fill maxSprites_space, 0
-spriteYpos:
-	.fill maxSprites_space, 0
-spriteFrame:
-	.fill maxSprites_space, 0
-spriteColor:
-	.fill maxSprites_space, 0
-spritePriority:
-	.fill maxSprites_space, 0
+.macro WaitForLine(line) {
+		lda #line
+		cmp $d012
+		bne *-3
+}
 
-IRQ_TEMP1: 	.byte $00
-IRQ_TEMP2: 	.byte $00
-IRQ_TEMP3:	.byte $00
-IRQ_TEMP4:	.byte $00
+* = $02 "Zeropage setup" virtual
+TEMP1:	.byte $00
+GlobalTimer: .byte $00
 
-IRQ_TEMP5:	.byte $00
 
 BasicUpstart2(Entry)
 
 TextMap:
+	#if NIGHT
 	.import binary "../../assets/starting/map2.bin"
+	#else
+		.import binary "../../assets/starting/map.bin"
+	#endif
 
 ColorRamp:
-	.byte $01,$07,$0f,$0a,$0c,$04,$0b,$06,$0b,$04,$0c,$0a,$0f,$07
+	#if NIGHT
+		.byte $01,$0d,$03,$0e,$04,$0b,$06,$00,$06,$0b,$04,$0e,$03,$0d
+	#else
+		.byte $01,$07,$0f,$0a,$0c,$04,$0b,$06,$0b,$04,$0c,$0a,$0f,$07
+	#endif
+	
 
 ColorIndex:
 	.byte $00
 
 Counter:
 	.byte $00, $00
-SinTableX:
-	// .fill 256, (sin((i/256) * (PI * 2)) ) * 80 + 150 + 24
-	.fill 256, (sin((i/256) * (PI * 2))* cos((i/128) * (PI * 2) ) )* 80 * 1 + 150 + 24
-CosTableY:
-	// .fill 256, cos((i/256) * (PI * 2)) * 85 + 80 + 64
-	.fill 256, (cos((i/256) * (PI * 2)) * sin((i/256) * (PI * 2) ))* 85 * 2 + 80 + 64
 
-
-.label SPRITE_POINTERS = SCREEN_RAM + $03f8
-	
 
 Entry: {
 	// .break
@@ -85,7 +77,7 @@ Entry: {
 		jsr IRQ.Setup
 
 
-		lda #131
+		lda #255
 		jsr ClearScreen
 
 		//Set charset
@@ -99,42 +91,55 @@ Entry: {
 	!:
 		lda TextMap, x
 		sta SCREEN_RAM + 12 * 40, x
+		lda #$06
+		sta COLOR_RAM + 12 * 40, x
+		inx
+		cpx #160
+		bne !-
+
+
+		ldx #0
+	!:
+		#if NIGHT
+			lda #$00
+		#else
+			lda #$0e
+		#endif
+		sta COLOR_RAM + 12 * 40, x
 		inx
 		cpx #80
 		bne !-
 
 
-		//Setup sprites
-		ldx #$00
-	!:
-		txa
-		and #$0f
-		bne !Skip+
-		lda #$07
-	!Skip:
-		sta spriteColor, x
-		lda #$c0
-		sta spriteFrame, x
-		txa
-		sta SpriteSortedIndexes, x
-		inx
-		cpx #maxSprites
-		bne !-
+		#if NIGHT
+			.for(var i=0; i< 30; i++) {
+				.var pos = random() * 400
+				lda #[105 + random() * 4]
+				sta SCREEN_RAM + pos
+				.if(pos > 80) {
+					sta SCREEN_RAM + 999 - (pos -  mod(pos,40)) + 82 - (40 - mod(pos,40))
+				}
+				lda #1
+				sta COLOR_RAM + pos
+			}
+		#endif
 
+		//Setup sprites
 		lda #$ff
 		sta $d015
 		sta $d01c
-		sta $d01b
-
-		lda #$0b
-		sta $d025
 		lda #$01
+		sta $d025
+		lda #$0e
 		sta $d026
+		lda #$0c
+		ldx #$07
+	!:
+		sta $d027, x
+		dex
+		bpl !-
 
 	Loop:
-		//Wait for raster
-
-
 		//Repeat
 		jmp Loop
 }
@@ -143,102 +148,37 @@ Entry: {
 ColorIndexLoop: {
 		//Increment our color ramp index
 		ldx ColorIndex
+
+		lda GlobalTimer
+		and #$03
+		bne !NoAnim+
+
 		inx
 		cpx #14    
 		bne !+ 
 		ldx #0
 	!:
 		stx ColorIndex
+	!NoAnim:
+
 
 		//Begin plotting colors in a loop
 		ldy #0
 	InnerLoop:
 		lda ColorRamp, x
-		sta COLOR_RAM + 12 * 40 + 8, y
-		sta COLOR_RAM + 13 * 40 + 8, y
-
+		sta $d021
 		inx //Color index
 		cpx #14
 		bne !+
 		ldx #0
 	!:
+		:WaitForNextLine()
 		iny	//Screen column index
-		cpy #24
+		cpy #12
 		bne InnerLoop
+
 		rts
 }
-
-UpdateSprites: {
-			//DEBUG SPRITE ROTATION PATTERN
-			lda Counter
-			sta Counter + 1
-			ldx #$00
-		!Loop:
-			ldy Counter + 1
-			lda SinTableX, y
-			sta spriteXpos, x
-			lda CosTableY, y
-			sta spriteYpos, x
-			
-
-			lda #$00
-			cpy #$80
-			bcs !+
-			lda #$01
-		!:
-			sta spritePriority, x
-
-			lda Counter + 1
-			clc
-			adc #[[256 + maxSprites/2] / maxSprites]
-			sta Counter + 1
-			inx
-			cpx #maxSprites
-			bne !Loop-
-			inc Counter
-			////////////////////////////////
-			rts
-}
-
-SortSprites: {
-			restart:
-				//SWIV adapted SORT
-                ldy #$00 
-                tya 
-		sortloop:       
-				ldx SpriteSortedIndexes,y
-                cmp spriteYpos,x 
-                beq noswap2 
-                bcc noswap1 
-                sty IRQ_TEMP1 
-                stx IRQ_TEMP2 
-                lda spriteYpos,x 
-                ldx SpriteSortedIndexes-1,y
-                stx SpriteSortedIndexes,y 
-                dex 
-                beq swapdone 
-		swaploop:       
-				ldx SpriteSortedIndexes-1,y 
-                stx SpriteSortedIndexes,y 
-                cmp spriteYpos,x 
-                bcs swapdone 
-                dey 
-                bne swaploop 
-		swapdone:       
-				ldx IRQ_TEMP2 
-                stx SpriteSortedIndexes,y
-                ldy IRQ_TEMP1 
-                ldx SpriteSortedIndexes,y 
-		noswap1:
-	 	    	lda spriteYpos, x 
-
-		noswap2:
-		        iny
-                cpy #maxSprites
-                bne sortloop 
-               	rts
-}
-
 
 
 ClearScreen: {
@@ -283,140 +223,621 @@ IRQ: {
 	}
 
 
+
+
 	SpritePhaseIndex:
 		.byte $00
 	MainIRQ: {		
 		:StoreState()
+
+			#if NIGHT
+				lda #$00
+			#else
+				lda #$0e
+			#endif
+			sta $d021	
+			lda #$c4
+			sta $d016
+
+			#if NIGHT
+				jsr DoStars
+			#else
+				jsr DoClouds
+			#endif
+
 			
-			
-			lda SpritePhaseIndex
-			bne !+
-			jsr UpdateSprites
-			jsr SortSprites
-		!:
-			
+			jsr CalculateRipple
+			inc GlobalTimer
 
+			:WaitForLine($7c)
+			jsr DoWaves
 
-
-			ldx #$04
-			stx IRQ_TEMP4
-			
-			ldx #$00
-			lda SpritePhaseIndex
-			and #$04
-			beq !+
-			ldx #$04
-			txa
-			clc
-			adc #$04
-			sta IRQ_TEMP4
-		!:
-
-
-			lda #$00
-			sta IRQ_TEMP5
-
-
-			ldy SpritePhaseIndex	
-		!Loop:
-			sty IRQ_TEMP3
-			lda SpriteSortedIndexes, y
-			tay
-
-			lda spriteFrame, y
-			bne !+
-			clc
-			txa
-			asl
-			tax
-			lda #$00
-			sta $d000, x
-			sta $d001, x
-			txa
-			lsr
-			tax
-			jmp !Skip+
-		!:
-			sta SPRITE_POINTERS, x
-			lda spriteColor, y
-			sta $d027, x
-
-			lda spriteYpos, y
-			pha
-			lda spriteXpos, y
-			pha
-
-			clc
-			txa
-			asl
-			tax
-			pla
-			sta $d000, x
-			pla
-			sta $d001, x
-			txa
-			lsr
-			tax
-
-		!Skip:
-
-			ldy IRQ_TEMP3
-			inx
-			iny
-			cpx IRQ_TEMP4
-			bne !Loop-
-
-
-			lda SpritePhaseIndex	
-			clc
-			adc #$04
-			cmp #maxSprites
-			bcs !ResetIRQ+
-
-
-			sta SpritePhaseIndex 
-			// jsr ColorIndexLoop
-
-			lda SpritePhaseIndex
-			tax
-			lda SpriteSortedIndexes, x
-			tax
-			lda spriteYpos, x
-			sec
-			sbc #spritePadding	//PADDING
-			sta $d012
-			// jmp !EndIRQ+
-
-
-
-			asl $d019 //Acknowledging the interrupt
-			:RestoreState();
-			rti
-
-
-		!ResetIRQ:
-			lda #$00
-			sta SpritePhaseIndex
-
-			lda #$ff
-			sta $d012
-			lda $d011
-			and #%11111111
-			sta $d011	
-
-		!EndIRQ:
+			:WaitForLine($91)
+			ldx #$12
+			dex
+			bne *-1
 
 			jsr ColorIndexLoop
 
+
+
+			inc $d020
+			// 
+
+			lda #$00
+			sta $d020
+
+			:WaitForLine($a2)
+			ldx #$03
+			dex
+			bne *-1
+
+			lda #$06
+			sta $d021
+
+
+			ldy ColorIndex
+			:WaitForNextLine()
+			ldx #$01
+		!:
+			lda RippleTable,x
+			sta $d016
+
+
+			lda RippleColTable, y
+			// lda #$0e
+			sta $d021
+			iny
+			inx
+			cpx #$0e
+			beq !+
+			:WaitForNextLine()
+			bne !-
+		!:
+
+			lda #$06
+			sta $d021
+			:WaitForNextLine()			
+			:WaitForNextLine()
+
+			lda #$c4
+			sta $d016
+
+			:WaitForLine(200)
+			jsr DoWaves2
+			
+		
+			jsr Random
+			tax
+			lda #$0e
+			sta COLOR_RAM + 16 * 40,x
+			jsr Random
+			tax
+			lda #$0f
+			sta COLOR_RAM + 18 * 40 + 24,x
+			jsr Random
+			tax
+			lda #$0f
+			sta COLOR_RAM + 16 * 40,x
+			jsr Random
+			tax
+			lda #$06
+			sta COLOR_RAM + 18 * 40 + 24,x
 
 
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState();
 		rti
 	}
-
-
 }
+
+
+
+Random: {
+        lda seed
+        beq doEor
+        asl
+        beq noEor
+        bcc noEor
+    doEor:    
+        eor #$1d
+    noEor:  
+        sta seed
+        rts
+    seed:
+        .byte $76
+}
+
+
+*=*"wave data"
+WaveX:
+	.fill 8, random() * 160
+WaveY:
+	.fill 8, random() * 44 + 172
+WaveFrame:
+	.fill 8, random()* 64
+Wave2X:
+	.fill 8, random() * 160
+Wave2Y:
+	.fill 8, random() * 40 + 216
+Wave2Frame:
+	.fill 8, random()* 64
+
+
+DoWaves: {
+
+
+		lda #$24
+		sta $d00e
+		lda #$a4
+		sta $d00f
+		lda #$06
+		sta $d02e
+		lda #205
+		sta SPRITE_POINTERS + 7
+
+
+		lda #$00
+		sta $d010
+		lda #$80
+		sta $d01d
+		lda #$ff
+		sta $d01c
+
+		ldx #$00
+		ldy #$00
+	!Loop:
+		lda WaveY, x
+		sta $d001, y
+		lda WaveX, x
+		asl
+		sta $d000, y
+
+		lda $d010 
+		bcc !NoMSB+
+	!MSB:
+		ora POT, x
+	!NoMSB:
+	!Set:
+		sta $d010
+
+		lda WaveFrame, x
+		cmp #$07
+		bcs !NoWave+
+
+		txa 
+		pha
+			lda WaveFrame, x
+			tax
+			lda WaveAnim, x	
+			sta TEMP1
+		pla
+		tax 
+			lda TEMP1			
+			// lda #192
+			sta SPRITE_POINTERS, x
+
+		jmp !SpriteDone+
+	!NoWave:
+		lda #191
+		sta SPRITE_POINTERS, x
+	!SpriteDone:
+		iny
+		iny
+		inx
+		cpx #$07
+		bne !Loop-
+
+
+		//UPDATE?
+		lda GlobalTimer
+		and #$07
+		beq !+
+		rts
+	!:
+
+		ldx #$00
+	!Loop:
+		dec WaveFrame, x
+
+		lda WaveFrame,x
+		cmp #$ff
+		bne !Next+
+
+		jsr Random
+		and #$1f
+		clc 
+		adc #$07
+		sta WaveFrame, x
+
+	!:
+		jsr Random
+		and #$1f
+		// cmp #44
+		// bcs !-
+		adc #172
+		sta WaveY, x
+!:
+		jsr Random
+		asl
+		sta WaveX, x
+
+	!Next:
+		cmp #$07
+		bcs !+
+			dec WaveY, x
+	!:	
+		inx
+		cpx #$07
+		bne !Loop-
+
+
+
+		rts
+}
+
+DoWaves2: {
+
+		ldx #$00
+		ldy #$00
+	!Loop:
+		lda Wave2Y, x
+		sta $d001, y
+		lda Wave2X, x
+		asl
+		sta $d000, y
+
+		lda $d010 
+		bcc !NoMSB+
+	!MSB:
+		ora POT, x
+		jmp !Set+
+	!NoMSB:
+		and INVPOT, x
+	!Set:
+		sta $d010
+
+		lda Wave2Frame, x
+		cmp #$07
+		bcs !NoWave+
+
+		txa 
+		pha
+			lda Wave2Frame, x
+			tax
+			lda WaveAnim, x	
+			sta TEMP1
+		pla
+		tax 
+			lda TEMP1			
+			// lda #192
+			sta SPRITE_POINTERS, x
+
+		jmp !SpriteDone+
+	!NoWave:
+		lda #191
+		sta SPRITE_POINTERS, x
+	!SpriteDone:
+		iny
+		iny
+		inx
+		cpx #$07
+		bne !Loop-
+
+		//UPDATE?
+		lda GlobalTimer
+		and #$03
+		beq !+
+		rts
+	!:
+
+
+		ldx #$00
+	!Loop:
+		dec Wave2Frame, x
+
+		lda Wave2Frame,x
+		cmp #$ff
+		bne !Next+
+
+		jsr Random
+		and #$1f
+		clc 
+		adc #$07
+		sta Wave2Frame, x
+
+	!:
+		jsr Random
+		and #$1f
+		// bcs !-
+		adc #216
+		sta Wave2Y, x
+!:
+		jsr Random
+		asl
+		sta Wave2X, x
+
+	!Next:
+		cmp #$07
+		bcs !+
+			dec Wave2Y, x
+			dec Wave2Y, x
+	!:
+		inx
+		cpx #$07
+		bne !Loop-
+		rts
+}
+
+WaveAnim:
+	.byte 195,194,193,192,193,194,195
+StarAnim:
+	.byte 204,203,202,201,202,203,204
+POT:
+	.byte 1,2,4,8,16,32,64,128
+INVPOT:
+	.byte 255-1,255-2,255-4,255-8, 255-16,255-32,255-64,255-128
+
+
+
+
+
+
+StarX:
+	.fill 8, random() * 160
+StarY:
+	.fill 8, random() * 40 + 64
+StarFrame:
+	.fill 3, random()* 64
+	.fill 5, 191
+DoStars: {
+		lda #$00
+		sta $d010
+		sta $d01d
+		lda #$00
+		sta $d01c
+
+		ldx #$00
+		ldy #$00
+	!Loop:
+		lda StarY, x
+		sta $d001, y
+		lda StarX, x
+		asl
+		sta $d000, y
+
+		lda $d010 
+		bcc !NoMSB+
+	!MSB:
+		ora POT, x
+	!NoMSB:
+	!Set:
+		sta $d010
+
+		lda StarFrame, x
+		cmp #$07
+		bcs !NoWave+
+
+		txa 
+		pha
+			lda StarFrame, x
+			tax
+			lda StarAnim, x	
+			sta TEMP1
+		pla
+		tax 
+			lda TEMP1			
+			// lda #192
+			sta SPRITE_POINTERS, x
+
+		jmp !SpriteDone+
+	!NoWave:
+		lda #191
+		sta SPRITE_POINTERS, x
+
+	!SpriteDone:
+		lda #$01
+		sta $d027, x
+		iny
+		iny
+		inx
+		cpx #$08
+		bne !Loop-
+
+
+		//UPDATE?
+		lda GlobalTimer
+		and #$03
+		beq !+
+		rts
+	!:
+
+		ldx #$00
+	!Loop:
+		dec StarFrame, x
+
+		lda StarFrame,x
+		cmp #$ff
+		bne !Next+
+
+		jsr Random
+		and #$3f
+		clc 
+		adc #$07
+		sta StarFrame, x
+
+	!:
+		jsr Random
+		and #$3f
+		// cmp #44
+		// bcs !-
+		adc #40
+		sta StarY, x
+!:
+		jsr Random
+		asl
+		sta StarX, x
+
+	!Next:
+		inx
+		cpx #$03
+		bne !Loop-
+		rts
+}
+
+
+CloudXF:
+	.fill 8, 0
+CloudX:
+	.fill 8, random() * 256
+CloudXMSB:
+	.fill 8, random() * 2
+CloudY:
+	.fill 8, random() * 40 + 64
+CloudSpeedX:
+	.byte 1,1,1,0,0,0,0,0
+CloudSpeedXF:
+	.fill 3, random() * 128
+	.fill 2, random() * 96 + 160
+	.fill 3, random() * 32 + 128
+
+CloudColor:
+	.byte 1,1,1,15,15,12,12,12
+
+
+DoClouds: {
+		lda #$00
+		sta $d010
+		lda #$00
+		sta $d01c
+		lda #$ff
+		sta $d01d
+
+		ldy #$0a
+		ldx #$05
+	!:
+		lda #200
+		sta SPRITE_POINTERS, x
+		lda CloudColor, x
+		sta $d027, x
+		lda CloudY, x
+		sta $d001, y
+		lda CloudX, x
+		sta $d000, y
+		lda CloudXMSB, x
+		beq !Skip+
+		lda POT, x
+		ora $d010
+		sta $d010
+	!Skip:
+
+
+		lda CloudXF, x
+		sec
+		sbc CloudSpeedXF, x
+		sta CloudXF, x
+		lda CloudX, x
+		sbc CloudSpeedX, x
+		sta CloudX, x
+		bcs !NoBorrow+
+		lda CloudXMSB, x
+		eor #$01
+		sta CloudXMSB, x
+		beq !NoBorrow+
+		lda CloudX, x
+		sec
+		sbc #$08
+		sta CloudX, x
+	!NoBorrow:
+
+		lda CloudXMSB, x
+		beq !NoRepos+
+		lda CloudX, x
+		cmp #200
+		bcc !NoRepos+
+		cmp #220
+		bcs !NoRepos+
+		jsr Random
+		and #$3f
+		clc
+		adc #40
+		sta CloudY, x
+		lda #199
+		sta CloudX, x
+	!NoRepos:
+		dey
+		dey
+		dex
+		bpl !-
+		rts
+}	
+
+
+
+
+
+
+
+
+
+
+
+
+RippleTable: 
+	.fill 16, $c8
+RippleColTable: 
+	.byte 14,6,14,6,6,14,14,6,14,6,14,6,6,14
+	.byte 14,6,14,6,6,14,14,6,14,6,14,6,6,14
+SinTables:
+	.for(var j = 3.5; j >= 0; j-=0.5) {
+		.fill 16, sin((i/16) * PI * 2) * j + 4 + $c0
+	}
+RippleCounter:
+	.byte $00
+
+CalculateRipple: {
+		
+		lda GlobalTimer
+		and #$03
+		beq !+
+		rts
+	!:
+		ldx RippleCounter
+		
+		inx
+		txa
+		and #$0f
+		sta RippleCounter
+
+	!:
+		ldy #$00
+
+		.for(var i=0; i< 8; i++) {
+			lda SinTables + 16 * (7-i), x
+			sta RippleTable, y
+			iny
+			sta RippleTable, y
+			iny
+
+			inx
+			txa
+			and #$0f
+			tax
+		}
+		
+		rts
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 * = $2000
@@ -424,12 +845,10 @@ IRQ: {
 
 
 
-
+* = $2fc0
+	.fill 64, 0 //Blank sprite
 * = $3000
-.byte $00,$54,$00,$01,$a9,$00,$06,$aa,$40,$05,$ae,$40,$16,$ab,$90,$19
-.byte $ab,$90,$16,$aa,$90,$19,$aa,$90,$16,$6a,$90,$19,$aa,$90,$16,$6a
-.byte $90,$05,$9a,$40,$06,$66,$40,$01,$99,$00,$00,$54,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$85
+.import binary "../../assets/starting/sprites.bin"
 
 
 

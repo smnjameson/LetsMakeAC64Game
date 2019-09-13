@@ -1,0 +1,20 @@
+parsing
+flex pass 1
+flex pass 2
+flex pass 3
+Output pass
+Writing prg file: C:\Users\Simon\Desktop\LetsMakeAC64Game\src\Stream_Ep1\bin\starting_soon.prg
+
+Memory Map
+----------
+Default-segment:
+  *$0002-$0003 Zeropage setup
+  $0801-$080c Basic
+  $080e-$0a5d Basic End
+  $0a5e-$0e79 wave data
+  $2000-$27ff Unnamed
+  $2fc0-$2fff Unnamed
+  $3000-$33ff Unnamed
+
+Writing Vice symbol file: C:\Users\Simon\Desktop\LetsMakeAC64Game\src\Stream_Ep1\bin\starting_soon.vs
+Writing Symbol file: starting_soon.sym

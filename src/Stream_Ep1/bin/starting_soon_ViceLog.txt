@@ -39,13 +39,13 @@ Loading system file `C:\C64\Tools\Vice\DRIVES\dos3040'.
 Loading system file `C:\C64\Tools\Vice\DRIVES\dos4040'.
 Loading system file `C:\C64\Tools\Vice\DRIVES\dos1001'.
 Drive: Finished loading ROM images.
-VIC-II: Initializing chip model "MOS6569R3" (63 cycles per line, 312 raster lines).
-Palette: Loading palette `C:\C64\Tools\Vice\C64\ptoing.vpl'.
+VIC-II: Initializing chip model "MOS8565" (63 cycles per line, 312 raster lines).
+Palette: Loading palette `C:\C64\Tools\Vice\C64\pepto-pal.vpl'.
 video_dx9: Failed to prepare for rendering!
 Sound: Available sound devices: dx wmm dummy fs dump wav voc iff aiff mp3 flac ogg soundmovie
 Keyboard: Loading keymap `C:\C64\Tools\Vice\C64\win_sym.vkm'.
 AUTOSTART: Autodetecting image type of `bin/starting_soon.prg'.
-Filesystem Image Probe: Error - Import GCR: Unknown GCR image version 49.
+Filesystem Image Probe: Error - Import GCR: Unknown GCR image version 50.
 Filesystem Image: Unknown disk image `bin/starting_soon.prg'.
 Tape: Error - Cannot open file `bin/starting_soon.prg'
 Error - CRT header invalid.
@@ -56,10 +56,12 @@ AUTOSTART: `bin/starting_soon.prg' recognized as program/p00 file.
 Main CPU: starting at ($FFFC).
 Main CPU: RESET.
 Drive 8: RESET.
-AUTOSTART: Injecting program data at $0801 (size $1fff)
+AUTOSTART: Injecting program data at $0801 (size $2bff)
 AUTOSTART: Ready
 AUTOSTART: Starting program.
 AUTOSTART: Done.
+video_dx9: Failed to create the DirectX9 device!
+video_dx9: Failed to create the DirectX9 device!
 Writing configuration file `C:\Users\Simon\AppData\Roaming\vice\3.1\vice.ini'.
 
 Exiting...
