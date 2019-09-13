@@ -8,13 +8,15 @@ Writing prg file: C:\Users\Simon\Desktop\LetsMakeAC64Game\src\Stream_Ep1\bin\sta
 Memory Map
 ----------
 Default-segment:
-  *$0002-$0003 Zeropage setup
+  *$0002-$005a Zeropage setup
+  *$005b-$00aa LOOKUP
   $0801-$080c Basic
-  $080e-$0a5d Basic End
-  $0a5e-$0e79 wave data
+  $080e-$0b01 Basic End
+  $0b02-$0e73 DYCP
+  $0e74-$128f wave data
   $2000-$27ff Unnamed
-  $2fc0-$2fff Unnamed
   $3000-$33ff Unnamed
+  $4000-$5f9d Unnamed
 
 Writing Vice symbol file: C:\Users\Simon\Desktop\LetsMakeAC64Game\src\Stream_Ep1\bin\starting_soon.vs
 Writing Symbol file: starting_soon.sym

@@ -4,6 +4,8 @@
 .label COLOR_RAM = $d800
 .label SPRITE_POINTERS = SCREEN_RAM + $03f8
 
+.label CLEAR_CHAR = 228
+
 .macro StoreState() {
 		pha //A
 		txa 
@@ -34,7 +36,19 @@
 
 * = $02 "Zeropage setup" virtual
 TEMP1:	.byte $00
+VECTOR1: .word $0000
+VECTOR2: .word $0000
+MESSAGE_LOC: .word $0000
 GlobalTimer: .byte $00
+VerticalPositions:
+		.fill 40, 19
+VerticalPositionsMinor:
+		.fill 40, 19	
+NonIRQFlag:
+		.byte $00
+*=*"LOOKUP" virtual
+CHARLOOKUP:
+	.fill 80, 0
 
 
 BasicUpstart2(Entry)
@@ -116,13 +130,54 @@ Entry: {
 				.var pos = random() * 400
 				lda #[105 + random() * 4]
 				sta SCREEN_RAM + pos
-				.if(pos > 80) {
-					sta SCREEN_RAM + 999 - (pos -  mod(pos,40)) + 82 - (40 - mod(pos,40))
-				}
 				lda #1
 				sta COLOR_RAM + pos
 			}
 		#endif
+
+
+		
+		ldx #$00
+	!:
+		lda TextFadeIn, x
+		sta COLOR_RAM + 19 * 40, x
+		sta COLOR_RAM + 20 * 40, x
+		sta COLOR_RAM + 21 * 40, x
+		sta COLOR_RAM + 22 * 40, x
+		sta COLOR_RAM + 23 * 40, x
+		sta COLOR_RAM + 24 * 40, x
+		lda #0
+		sta VerticalPositions,x
+
+		inx
+		cpx #40
+		bne !-
+
+
+		ldx #$00
+		ldy #$00
+	!:
+		tya
+		sta SCREEN_RAM + 19 * 40, x
+		iny
+		tya
+		sta SCREEN_RAM + 20 * 40, x
+		iny
+		tya
+		sta SCREEN_RAM + 21 * 40, x
+		iny
+		tya
+		sta SCREEN_RAM + 22 * 40, x
+		iny
+		tya
+		sta SCREEN_RAM + 23 * 40, x
+		iny
+		tya
+		sta SCREEN_RAM + 24 * 40, x
+		iny
+		inx
+		cpx #40
+		bne !-
 
 		//Setup sprites
 		lda #$ff
@@ -139,11 +194,170 @@ Entry: {
 		dex
 		bpl !-
 
-	Loop:
+
+
+	.for(var i=0;i<40; i++) {
+		lda #<[$2800  + 48 * i]
+		sta CHARLOOKUP + i * 2
+		lda #>[$2800  + 48 * i]
+		sta CHARLOOKUP + i * 2 + 1
+	}
+
+		lda #<MESSAGE
+		sta MESSAGE_LOC + 0
+		lda #>MESSAGE
+		sta MESSAGE_LOC + 1
+
+
+	!Loop:
+		lda NonIRQFlag
+		beq !Loop-
+		dec NonIRQFlag	
+
+
+		jsr UpdateVerticalTextPositions	
+
 		//Repeat
-		jmp Loop
+		jmp !Loop-
 }
 
+ScrollMessage: {
+		clc
+		ldy #$00
+		lda (MESSAGE_LOC), y
+		bne !+
+
+		lda #<MESSAGE
+		sta MESSAGE_LOC + 0
+		lda #>MESSAGE
+		sta MESSAGE_LOC + 1		
+		rts
+
+	!:
+
+		lda MESSAGE_LOC + 0
+		adc #$01
+		sta MESSAGE_LOC + 0
+		lda MESSAGE_LOC + 1
+		adc #$00
+		sta MESSAGE_LOC + 1
+
+		rts
+}
+
+ROW_LSB:
+		.fill 25, <[$0400 + [i * 40]]
+ROW_MSB:
+		.fill 25, >[$0400 + [i * 40]]
+DYCPIndex:
+		.byte $00
+*=*"DYCP"
+DYCPWaveMajor:
+		.label WAVE_LENGTH = 4;
+		.fill 256, floor((sin((i/256) * PI * 2 * WAVE_LENGTH) + 1) * 18.99) + 1
+DYCP_XScroll:
+		.byte $07
+
+UpdateVerticalTextPositions: {
+		inc DYCPIndex
+
+		dec DYCP_XScroll
+		lda DYCP_XScroll
+		and #$07
+		sta DYCP_XScroll
+		cmp #$07
+		bne !+
+		jsr ScrollMessage
+	!:
+
+		ldy DYCPIndex	
+		ldx #$00
+	!:
+		lda DYCPWaveMajor, y
+		sta VerticalPositions, x
+		iny
+		inx
+		cpx #40
+		bne !-
+
+
+
+       	clc
+       	ldx #$00 //Column
+	!Loop:
+       	txa
+       	asl
+       	tax
+
+		lda CHARLOOKUP, x
+       	sta VECTOR1 + 0
+       	lda CHARLOOKUP + 1, x
+       	sta VECTOR1 + 1
+
+       	txa
+       	lsr
+       	tax
+
+    	tay
+		lda (MESSAGE_LOC), y
+		// txa
+		asl
+		asl
+		asl
+       	sta VECTOR2 + 0
+       	lda #$00
+       	adc #$40
+       	sta VECTOR2 + 1
+
+       	sec
+       	lda VECTOR2 + 0
+       	sbc VerticalPositions, x
+       	sta VECTOR2 + 0
+       	lda VECTOR2 + 1
+       	sbc #00
+       	sta VECTOR2 + 1
+
+       	ldy VerticalPositions, x
+       	// tay
+       	dey
+       	dey
+
+
+		
+	SelfMod:
+		lda #$00
+		sta (VECTOR1), y
+		iny
+		lda #$00
+		sta (VECTOR1), y
+		iny
+		.for(var i=0; i<8; i++) {
+			lda (VECTOR2), y
+			sta (VECTOR1), y
+			iny
+		}
+		lda #$00
+		sta (VECTOR1), y
+		iny
+		lda #$00
+		sta (VECTOR1), y
+		iny
+
+
+		inx
+		cpx #40
+		bne !Loop-
+
+		rts
+}
+
+
+
+
+TextFadeIn: 
+		.byte $06,$0e,$03,$0d,$01
+		.fill 29, $01
+		.byte $01,$0d,$03,$0e,$06,$06
 
 ColorIndexLoop: {
 		//Increment our color ramp index
@@ -229,6 +443,11 @@ IRQ: {
 		.byte $00
 	MainIRQ: {		
 		:StoreState()
+			//Set BASE charset
+			lda #%00011000
+			sta $d018
+
+
 
 			#if NIGHT
 				lda #$00
@@ -244,16 +463,46 @@ IRQ: {
 			#else
 				jsr DoClouds
 			#endif
-
-			
+		
 			jsr CalculateRipple
 			inc GlobalTimer
 
-			:WaitForLine($7c)
-			jsr DoWaves
+			lda #<MainIRQ2  
+			ldx #>MainIRQ2
+			sta $fffe   // 0314
+			stx $ffff	// 0315
 
-			:WaitForLine($91)
-			ldx #$12
+			lda #$7c
+			sta $d012
+
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+	MainIRQ2:{
+			:StoreState()
+
+			jsr DoWaves
+			lda #<MainIRQ2a 
+			ldx #>MainIRQ2a
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$91
+			sta $d012
+
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+	MainIRQ2a:{
+			:StoreState()	
+
+			ldx #$0f
 			dex
 			bne *-1
 
@@ -261,13 +510,23 @@ IRQ: {
 
 
 
-			inc $d020
-			// 
 
-			lda #$00
-			sta $d020
 
-			:WaitForLine($a2)
+			lda #<MainIRQ3  
+			ldx #>MainIRQ3
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$a2
+			sta $d012
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+	MainIRQ3:{
+		:StoreState()
 			ldx #$03
 			dex
 			bne *-1
@@ -303,27 +562,61 @@ IRQ: {
 			lda #$c4
 			sta $d016
 
-			:WaitForLine(200)
-			jsr DoWaves2
-			
-		
-			jsr Random
-			tax
-			lda #$0e
-			sta COLOR_RAM + 16 * 40,x
-			jsr Random
-			tax
-			lda #$0f
-			sta COLOR_RAM + 18 * 40 + 24,x
-			jsr Random
-			tax
-			lda #$0f
-			sta COLOR_RAM + 16 * 40,x
-			jsr Random
-			tax
-			lda #$06
-			sta COLOR_RAM + 18 * 40 + 24,x
+		lda DYCP_XScroll
+		ora #$c0
+		sta $d016
 
+			//Set DYCP charset
+			lda #%00011010
+			sta $d018	
+
+			lda #<MainIRQ4 
+			ldx #>MainIRQ4
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$c8
+			sta $d012
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+	MainIRQ4:{
+		:StoreState()
+
+			jsr DoWaves2
+
+
+
+
+			lda #<MainIRQ5 
+			ldx #>MainIRQ5
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$ff
+			sta $d012
+
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState();
+		rti
+	}
+
+	MainIRQ5:{
+		:StoreState()
+
+			lda #$01
+			sta NonIRQFlag
+
+			lda #<MainIRQ  
+			ldx #>MainIRQ
+			sta $fffe   // 0314
+			stx $ffff	// 0315
+
+			lda #$00
+			sta $d012
 
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState();
@@ -844,13 +1137,30 @@ CalculateRipple: {
 .import binary "../../assets/starting/chars.bin"
 
 
-
-* = $2fc0
-	.fill 64, 0 //Blank sprite
 * = $3000
 .import binary "../../assets/starting/sprites.bin"
 
+* = $4000
+.import binary "../../assets/starting/smallfont.bin"
 
 
 
 
+
+ClearDYCP: {
+	lda #00
+
+	.for(var i=0; i<240 * 8; i++) {
+		sta $2800 + i
+	}
+	rts
+}
+
+
+MESSAGE:
+		.text "                                        "
+		.import text "../../assets/starting/message.txt"
+		// .text "LET'S MAKE A COMMODORE 64 GAME - EPISODE 10 - 14/09/2019"
+		.text "                                        "
+		.text "@"
+		.text "                                        "

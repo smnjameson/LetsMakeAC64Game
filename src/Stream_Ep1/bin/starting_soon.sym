@@ -1,62 +1,94 @@
-.label ClearScreen=$94a {
+.label ClearScreen=$cf2 {
 }
-.label INVPOT=$bd0
-.label RippleTable=$d39
-.label Wave2Y=$a7e
-.label DoWaves2=$b31 {
+.label DYCP_XScroll=$c02
+.label ScrollMessage=$ab2 {
 }
-.label RippleCounter=$de5
-.label WaveAnim=$bba
-.label WaveFrame=$a6e
-.label IRQ=$95c {
-  .label SpritePhaseIndex=$989
-  .label Setup=$95c {
-  }
-  .label MainIRQ=$98a {
-  }
+.label RippleCounter=$11fb
+.label WaveAnim=$fd0
+.label UpdateVerticalTextPositions=$c03 {
+  .label SelfMod=$c58
 }
-.label Wave2Frame=$a86
-.label Entry=$8bf {
-  .label Loop=$917
-}
+.label ROW_LSB=$acf
 .label Counter=$8bd
-.label Random=$a4d {
-  .label seed=$a5d
-  .label noEor=$a59
-  .label doEor=$a57
+.label MESSAGE_LOC=$7
+.label VerticalPositionsMinor=$32
+.label Random=$e63 {
+  .label seed=$e73
+  .label noEor=$e6f
+  .label doEor=$e6d
 }
-.label CloudXMSB=$c8b
-.label WaveY=$a66
-.label StarFrame=$be8
-.label CloudX=$c83
-.label CloudXF=$c7b
+.label CloudXMSB=$10a1
+.label WaveY=$e7c
+.label StarFrame=$ffe
+.label CloudX=$1099
+.label CloudXF=$1091
 .label TEMP1=$2
-.label CloudY=$c93
-.label StarY=$be0
-.label StarX=$bd8
-.label GlobalTimer=$3
-.label StarAnim=$bc1
-.label DoWaves=$a8e {
+.label CloudY=$10a9
+.label TextFadeIn=$c9a
+.label VECTOR2=$5
+.label VECTOR1=$3
+.label DoWaves=$ea4 {
 }
-.label WaveX=$a5e
-.label ColorIndexLoop=$91a {
-  .label InnerLoop=$92f
-}
+.label WaveX=$e74
 .label SPRITE_POINTERS=$7f8
-.label DoStars=$bf0 {
+.label DoStars=$1006 {
 }
-.label CloudSpeedXF=$ca3
-.label CalculateRipple=$de6 {
+.label CloudSpeedXF=$10b9
+.label CalculateRipple=$11fc {
 }
-.label CloudSpeedX=$c9b
-.label POT=$bc8
-.label CloudColor=$cab
+.label CloudSpeedX=$10b1
+.label POT=$fde
+.label CloudColor=$10c1
 .label SCREEN_RAM=$400
-.label ColorRamp=$8ae
 .label ColorIndex=$8bc
-.label DoClouds=$cb3 {
+.label COLOR_RAM=$d800
+.label Wave2X=$e8c
+.label CHARLOOKUP=$5b
+.label INVPOT=$fe6
+.label RippleTable=$114f
+.label DYCPIndex=$b01
+.label Wave2Y=$e94
+.label DoWaves2=$f47 {
+}
+.label ClearDYCP=$4800 {
+}
+.label WaveFrame=$e84
+.label IRQ=$d04 {
+  .label MainIRQ3=$dab {
+  }
+  .label MainIRQ4=$e22 {
+  }
+  .label MainIRQ5=$e42 {
+  }
+  .label MainIRQ2=$d66 {
+  }
+  .label SpritePhaseIndex=$d31
+  .label MainIRQ2a=$d86 {
+  }
+  .label Setup=$d04 {
+  }
+  .label MainIRQ=$d32 {
+  }
+}
+.label DYCPWaveMajor=$b02
+.label Wave2Frame=$e9c
+.label MESSAGE=$5e83
+.label Entry=$8bf {
+}
+.label ROW_MSB=$ae8
+.label CLEAR_CHAR=$e4
+.label StarY=$ff6
+.label StarX=$fee
+.label GlobalTimer=$9
+.label StarAnim=$fd7
+.label ColorIndexLoop=$cc2 {
+  .label InnerLoop=$cd7
+}
+.label VerticalPositions=$a
+.label WAVE_LENGTH=$4
+.label ColorRamp=$8ae
+.label DoClouds=$10c9 {
 }
 .label TextMap=$80e
-.label RippleColTable=$d49
-.label COLOR_RAM=$d800
-.label Wave2X=$a76
+.label RippleColTable=$115f
+.label NonIRQFlag=$5a
