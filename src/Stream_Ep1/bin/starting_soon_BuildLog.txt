@@ -16,7 +16,7 @@ Default-segment:
   $0e74-$128f wave data
   $2000-$27ff Unnamed
   $3000-$33ff Unnamed
-  $4000-$5f9d Unnamed
+  $4000-$5f7d Unnamed
 
 Writing Vice symbol file: C:\Users\Simon\Desktop\LetsMakeAC64Game\src\Stream_Ep1\bin\starting_soon.vs
 Writing Symbol file: starting_soon.sym

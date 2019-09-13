@@ -1158,9 +1158,8 @@ ClearDYCP: {
 
 
 MESSAGE:
-		.text "                                        "
+		.text "                                            "
 		.import text "../../assets/starting/message.txt"
 		// .text "LET'S MAKE A COMMODORE 64 GAME - EPISODE 10 - 14/09/2019"
-		.text "                                        "
 		.text "@"
-		.text "                                        "
+		.text "                                            "
