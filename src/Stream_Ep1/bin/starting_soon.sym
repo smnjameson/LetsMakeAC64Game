@@ -6,7 +6,6 @@
 .label RippleCounter=$11fb
 .label WaveAnim=$fd0
 .label UpdateVerticalTextPositions=$c03 {
-  .label SelfMod=$c58
 }
 .label ROW_LSB=$acf
 .label Counter=$8bd

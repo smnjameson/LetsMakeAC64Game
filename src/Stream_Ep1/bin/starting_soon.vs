@@ -59,7 +59,6 @@ al C:e9c .Wave2Frame
 al C:5e83 .MESSAGE
 al C:8bf .Entry
 al C:ae8 .ROW_MSB
-al C:c58 .SelfMod
 al C:e4 .CLEAR_CHAR
 al C:ff6 .StarY
 al C:fee .StarX

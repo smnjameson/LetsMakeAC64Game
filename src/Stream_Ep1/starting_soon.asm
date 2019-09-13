@@ -318,13 +318,10 @@ UpdateVerticalTextPositions: {
        	sta VECTOR2 + 1
 
        	ldy VerticalPositions, x
-       	// tay
        	dey
        	dey
 
 
-		
-	SelfMod:
 		lda #$00
 		sta (VECTOR1), y
 		iny
