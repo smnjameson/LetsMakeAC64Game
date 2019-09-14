@@ -130,6 +130,9 @@ PROJECTILES: {
 	// A register = Player number (0-1)
 	SpawnProjectile: {
 			.label TEMP = TEMP1
+			.label PLAYER_NUM = TEMP2
+
+			sta PLAYER_NUM
 
 			//Works out and stores the softsprite index based on 
 			//available player proj. and player number
@@ -149,7 +152,9 @@ PROJECTILES: {
 			sta PROJECTILES.Player1_Proj_X0, x
 			sta PROJECTILES.Player1_Proj_Y0, x
 
+
 			// Get the players facing direction 
+			ldy PLAYER_NUM
 			lda PLAYER.Player1_State, y
 			and #$30
 			lsr
@@ -162,6 +167,7 @@ PROJECTILES: {
 
 
 			//Subtract the LEFT border + Projectile Offset
+			ldy PLAYER_NUM
 			cpy #$00
 			bne !PlayerTwo+
 		!PlayerOne:
@@ -188,7 +194,8 @@ PROJECTILES: {
 
 			//Set the projectiles Y position
 			//Subtract the top border
-			lda PLAYER.Player1_Y
+			ldy PLAYER_NUM
+			lda PLAYER.Player1_Y, y
 			sec
 			sbc #$30
 			clc

@@ -23,22 +23,23 @@ PLAYER: {
 	Player1_X:
 			// Fractional / LSB / MSB
 			.byte $00, $48, $00 // 1/256th pixel accuracy
-	Player1_Y:
-			.byte $70 // 1 pixel accuracy
-
-	Player1_FirePressed:
-			.byte $00
-
-
-
 	Player2_X:
 			// Fractional / LSB / MSB
 			.byte $00, $48, $00 // 1/256th pixel accuracy
+
+	Player1_Y:
+			.byte $70 // 1 pixel accuracy
 	Player2_Y:
 			.byte $70 // 1 pixel accuracy
 
+
+	Player1_FirePressed:
+			.byte $00
 	Player2_FirePressed:
 			.byte $00
+
+
+
 
 
 	Player1_FloorCollision:
@@ -680,71 +681,10 @@ PLAYER: {
 			jsr PROJECTILES.CheckPlayer2CanShoot
 			bmi !+
 
-			// x is available index
-			txa
-			clc
-			adc #$02
-			sta SOFTSPRITES.CurrentSpriteIndex
-
-			//Set the player projectile values
-			lda #$01
-			sta PROJECTILES.Player2_Proj_Type, x
-			lda #$00
-			sta PROJECTILES.Player2_Proj_X0, x
-			sta PROJECTILES.Player2_Proj_Y0, x
-
-			lda Player2_State
-			and #$30
-			lsr
-			lsr
-			lsr
-			lsr
-			tay
-			dey
-
-
-			//Subtract the LEFT border + Projectile Offset
-			lda Player2_X + 1
-			sec
-			sbc PROJECTILES.Player_Projectile_XOffset, y 	//Subtract border but include x offset
-			sta PROJECTILES.Player2_Proj_X1, x
-			lda Player2_X + 2
-			sbc #$00
-			sta PROJECTILES.Player2_Proj_X2, x
-
-
-			//Subtract the top border
-			lda Player2_Y
-			sec
-			sbc #$30
-			clc
-			adc #$07 //Y Offset to move to player eye level
-			sta PROJECTILES.Player2_Proj_Y1, x
-
-
-			lda PROJECTILES.Player_Proj_Speed_X + 0
-			sta PROJECTILES.Player2_Proj_Speed_X0, x
-			lda PROJECTILES.Player_Proj_Speed_X + 1
-			sta PROJECTILES.Player2_Proj_Speed_X1, x
-			lda #$00
-			sta PROJECTILES.Player2_Proj_Speed_Y0, x
-			sta PROJECTILES.Player2_Proj_Speed_Y1, x
-
-
-			//Create the sprite
-			lda PROJECTILES.Player2_Proj_X2, x
-			cmp #$01
-			lda PROJECTILES.Player2_Proj_X1, x
-			sta TEMP1
-
-			lda PROJECTILES.Player2_Proj_Type, x
-			ldy PROJECTILES.Player2_Proj_Y1, x
-			ldx TEMP1
-
-			jsr SOFTSPRITES.AddSprite
-			tax
-			lda #$0f
-			sta SOFTSPRITES.SpriteColor, X
+			//X is available index
+			lda #$01 //Player 1 = 00
+			ldy #$01
+			jsr PROJECTILES.SpawnProjectile
 			///
 
 		!:
