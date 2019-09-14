@@ -56,6 +56,10 @@ AUTOSTART: `bin/starting_soon.prg' recognized as program/p00 file.
 Main CPU: starting at ($FFFC).
 Main CPU: RESET.
 Drive 8: RESET.
+AUTOSTART: Injecting program data at $0801 (size $577d)
+AUTOSTART: Ready
+AUTOSTART: Starting program.
+AUTOSTART: Done.
 Writing configuration file `C:\Users\Simon\AppData\Roaming\vice\3.1\vice.ini'.
 
 Exiting...

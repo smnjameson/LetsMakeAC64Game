@@ -12,8 +12,8 @@ Default-segment:
   *$005b-$00aa LOOKUP
   $0801-$080c Basic
   $080e-$0b01 Basic End
-  $0b02-$0e73 DYCP
-  $0e74-$128f wave data
+  $0b02-$0e72 DYCP
+  $0e73-$128e wave data
   $2000-$27ff Unnamed
   $3000-$33ff Unnamed
   $4000-$5f7d Unnamed

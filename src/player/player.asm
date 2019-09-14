@@ -17,19 +17,8 @@ PLAYER: {
 	.label JOY_RT = %01000
 	.label JOY_FR = %10000
 
-
-	Player_Proj_Speed_X:
-				//Fractional /LSB /MSB
-			.byte $80, $02
-	Player_Proj_Gravity:
-			.byte $00, $80
-
-
 	PlayersActive:
 			.byte $00
-
-	Player_Projectile_XOffset:
-			.byte $20, $08
 
 	Player1_X:
 			// Fractional / LSB / MSB
@@ -39,58 +28,6 @@ PLAYER: {
 
 	Player1_FirePressed:
 			.byte $00
-
-
-	Player1_Proj_Type:
-			.byte $00, $00
-	Player2_Proj_Type:
-			.byte $00, $00
-
-	Player1_Proj_X0:
-			.byte $00, $00
-	Player2_Proj_X0:
-			.byte $00, $00
-
-	Player1_Proj_X1:
-			.byte $00, $00
-	Player2_Proj_X1:
-			.byte $00, $00
-
-	Player1_Proj_X2:
-			.byte $00, $00
-	Player2_Proj_X2:
-			.byte $00, $00
-
-	Player1_Proj_Y0:
-			.byte $00, $00
-	Player2_Proj_Y0:
-			.byte $00, $00
-
-	Player1_Proj_Y1:
-			.byte $00, $00
-	Player2_Proj_Y1:
-			.byte $00, $00
-
-*=* "SPEED"
-	Player1_Proj_Speed_X0:
-			.byte $00, $00
-	Player2_Proj_Speed_X0:
-			.byte $00, $00
-
-	Player1_Proj_Speed_X1:
-			.byte $00, $00
-	Player2_Proj_Speed_X1:
-			.byte $00, $00
-
-	Player1_Proj_Speed_Y0:
-			.byte $00, $00
-	Player2_Proj_Speed_Y0:
-			.byte $00, $00
-
-	Player1_Proj_Speed_Y1:
-			.byte $00, $00
-	Player2_Proj_Speed_Y1:
-			.byte $00, $00
 
 
 
@@ -141,6 +78,7 @@ PLAYER: {
 
 	DefaultFrame:
 			.byte $40, $40
+
 
 
 	Initialise: {
@@ -589,40 +527,7 @@ PLAYER: {
 	}
 
 
-	CheckPlayer1CanShoot: {
-			//Returns in X register: -1 if no available slot for new projectile
-			//otherwise returns the index (0 or 1)
-			ldx #$00
-			lda Player1_Proj_Type, x
-			bne !+
-			rts
-		!:
-			inx
-			lda Player1_Proj_Type, x
-			bne !+
-			rts
-		!:
-			ldx #$ff
-			rts
-	}
 
-
-	CheckPlayer2CanShoot: {
-			//Returns in X register: -1 if no available slot for new projectile
-			//otherwise returns the index (0 or 1)
-			ldx #$00
-			lda Player2_Proj_Type, x
-			bne !+
-			rts
-		!:
-			inx
-			lda Player2_Proj_Type, x
-			bne !+
-			rts
-		!:
-			ldx #$ff
-			rts
-	}
 
 
 	PlayerControl: {
@@ -656,72 +561,13 @@ PLAYER: {
 			bne !+
 			lda #$01
 			sta Player1_FirePressed	
-			jsr CheckPlayer1CanShoot
-			bmi !+
+			jsr PROJECTILES.CheckPlayer1CanShoot
+			bmi !+ //If negative player cannot shoot
 
 			//X is available index
-			txa
-			sta SOFTSPRITES.CurrentSpriteIndex
-
-			//Set the player projectile values
-			lda #$01
-			sta Player1_Proj_Type, x
-			lda #$00
-			sta Player1_Proj_X0, x
-			sta Player1_Proj_Y0, x
-
-			lda Player1_State
-			and #$30
-			lsr
-			lsr
-			lsr
-			lsr
-			tay
-			dey
-
-
-			//Subtract the LEFT border + Projectile Offset
-			lda Player1_X + 1
-			sec
-			sbc Player_Projectile_XOffset, y 	//Subtract border but include x offset
-			sta Player1_Proj_X1, x
-			lda Player1_X + 2
-			sbc #$00
-			sta Player1_Proj_X2, x
-
-
-			//Subtract the top border
-			lda Player1_Y
-			sec
-			sbc #$30
-			clc
-			adc #$07 //Y Offset to move to player eye level
-			sta Player1_Proj_Y1, x
-
-			lda Player_Proj_Speed_X + 0
-			sta Player1_Proj_Speed_X0, x
-			lda Player_Proj_Speed_X + 1
-			sta Player1_Proj_Speed_X1, x
-			lda #$00
-			sta Player1_Proj_Speed_Y0, x
-			sta Player1_Proj_Speed_Y1, x
-
-			//Create the sprite
-			lda Player1_Proj_X2, x
-			cmp #$01
-			lda Player1_Proj_X1, x
-			sta TEMP1
-
-			lda Player1_Proj_Type, x
-			ldy Player1_Proj_Y1, x
-			ldx TEMP1
-
-			jsr SOFTSPRITES.AddSprite
-			tax
-			lda #$0f
-			sta SOFTSPRITES.SpriteColor, X
-
-
+			lda #$00 //Player 1 = 00
+			ldy #$01
+			jsr PROJECTILES.SpawnProjectile
 			///
 
 		!:
@@ -831,7 +677,7 @@ PLAYER: {
 			bne !+
 			lda #$01
 			sta Player2_FirePressed	
-			jsr CheckPlayer2CanShoot
+			jsr PROJECTILES.CheckPlayer2CanShoot
 			bmi !+
 
 			// x is available index
@@ -842,10 +688,10 @@ PLAYER: {
 
 			//Set the player projectile values
 			lda #$01
-			sta Player2_Proj_Type, x
+			sta PROJECTILES.Player2_Proj_Type, x
 			lda #$00
-			sta Player2_Proj_X0, x
-			sta Player2_Proj_Y0, x
+			sta PROJECTILES.Player2_Proj_X0, x
+			sta PROJECTILES.Player2_Proj_Y0, x
 
 			lda Player2_State
 			and #$30
@@ -860,11 +706,11 @@ PLAYER: {
 			//Subtract the LEFT border + Projectile Offset
 			lda Player2_X + 1
 			sec
-			sbc Player_Projectile_XOffset, y 	//Subtract border but include x offset
-			sta Player2_Proj_X1, x
+			sbc PROJECTILES.Player_Projectile_XOffset, y 	//Subtract border but include x offset
+			sta PROJECTILES.Player2_Proj_X1, x
 			lda Player2_X + 2
 			sbc #$00
-			sta Player2_Proj_X2, x
+			sta PROJECTILES.Player2_Proj_X2, x
 
 
 			//Subtract the top border
@@ -873,25 +719,26 @@ PLAYER: {
 			sbc #$30
 			clc
 			adc #$07 //Y Offset to move to player eye level
-			sta Player2_Proj_Y1, x
+			sta PROJECTILES.Player2_Proj_Y1, x
 
-			lda Player_Proj_Speed_X + 0
-			sta Player2_Proj_Speed_X0, x
-			lda Player_Proj_Speed_X + 1
-			sta Player2_Proj_Speed_X1, x
+
+			lda PROJECTILES.Player_Proj_Speed_X + 0
+			sta PROJECTILES.Player2_Proj_Speed_X0, x
+			lda PROJECTILES.Player_Proj_Speed_X + 1
+			sta PROJECTILES.Player2_Proj_Speed_X1, x
 			lda #$00
-			sta Player2_Proj_Speed_Y0, x
-			sta Player2_Proj_Speed_Y1, x
+			sta PROJECTILES.Player2_Proj_Speed_Y0, x
+			sta PROJECTILES.Player2_Proj_Speed_Y1, x
 
 
 			//Create the sprite
-			lda Player2_Proj_X2, x
+			lda PROJECTILES.Player2_Proj_X2, x
 			cmp #$01
-			lda Player2_Proj_X1, x
+			lda PROJECTILES.Player2_Proj_X1, x
 			sta TEMP1
 
-			lda Player2_Proj_Type, x
-			ldy Player2_Proj_Y1, x
+			lda PROJECTILES.Player2_Proj_Type, x
+			ldy PROJECTILES.Player2_Proj_Y1, x
 			ldx TEMP1
 
 			jsr SOFTSPRITES.AddSprite
@@ -1141,30 +988,6 @@ PLAYER: {
 	}
 
 
-	UpdateProjectiles: {
-			ldx #$03
-		!:
-			clc
-			lda Player1_Proj_X0, x
-			adc Player1_Proj_Speed_X0, x
-			sta Player1_Proj_X0, x
-			lda Player1_Proj_X1, x
-			adc Player1_Proj_Speed_X1, x
-			sta Player1_Proj_X1, x
-			lda Player1_Proj_X2, x
-			adc #$00
-			sta Player1_Proj_X2, X
-
-			//TODO: Should we just use softsprite x,y directly?
-			lda Player1_Proj_X1, x
-			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x 
-			lda Player1_Proj_X2, x
-			sta SOFTSPRITES.SpriteData_TARGET_X_MSB, x 
-
-			dex
-			bpl !-
-			rts
-	}
 }
 
 

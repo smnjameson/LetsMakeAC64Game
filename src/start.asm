@@ -12,6 +12,7 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "player/player.asm"
+#import "player/projectiles.asm"
 #import "player/hud.asm"
 #import "animation/charanimations.asm"
 #import "soft_sprites/softsprites.asm"
@@ -92,7 +93,8 @@ Entry:
 			jsr PLAYER.PlayerControl
 			jsr PLAYER.JumpAndFall
 			jsr PLAYER.GetCollisions
-			jsr PLAYER.UpdateProjectiles
+
+			jsr PROJECTILES.UpdateProjectiles
 
 
 

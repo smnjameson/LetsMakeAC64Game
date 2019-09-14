@@ -338,7 +338,7 @@ UpdateVerticalTextPositions: {
 		iny
 		lda #$00
 		sta (VECTOR1), y
-		iny
+		
 
 
 		inx
