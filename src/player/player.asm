@@ -39,9 +39,6 @@ PLAYER: {
 			.byte $00
 
 
-
-
-
 	Player1_FloorCollision:
 			.byte $00
 	Player1_LeftCollision:
@@ -830,8 +827,6 @@ PLAYER: {
 
 		!PlayerSetupComplete:
 		
-
-
 			ldy #$00
 			lda (PlayerState), y
 			and #STATE_JUMP
@@ -926,8 +921,6 @@ PLAYER: {
 
 			rts
 	}
-
-
 }
 
 

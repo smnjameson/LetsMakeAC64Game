@@ -87,7 +87,6 @@ Entry:
 			
 
 			jsr SOFTSPRITES.UpdateSprites
-
 			
 			jsr PLAYER.DrawPlayer
 			jsr PLAYER.PlayerControl

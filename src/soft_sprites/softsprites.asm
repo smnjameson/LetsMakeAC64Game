@@ -134,8 +134,6 @@ SOFTSPRITES: {
 			//PRE CLEAR SCREEN BUFFER
 			ldx #$00
 		!Loop:
-			lda SpriteData_ID, x
-			beq !+
 			jsr ClearSprite
 		!:
 			inx

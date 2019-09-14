@@ -1,7 +1,15 @@
+//Player projectile number in X (0-3)
+.macro DestroyPlayerProjectile() {
+	lda #$00	
+	sta PROJECTILES.Player1_Proj_Type, x
+	sta SOFTSPRITES.SpriteData_ID, x
+}
+
+
 PROJECTILES: {
 
 	Player_Proj_Speed_X: //Fractional /LSB
-			.byte $00, $00
+			.byte $80, $01
 	Player_Proj_Gravity:
 			.byte $80, $00
 
@@ -25,6 +33,7 @@ PROJECTILES: {
 	Player2_Proj_X1:
 			.byte $00, $00
 
+	*=*"CHECK"
 	Player1_Proj_X2:
 			.byte $00, $00
 	Player2_Proj_X2:
@@ -60,6 +69,12 @@ PROJECTILES: {
 	Player1_Proj_Speed_Y1:
 			.byte $00, $00
 	Player2_Proj_Speed_Y1:
+			.byte $00, $00
+
+
+	Player1_Proj_Direction:
+			.byte $00, $00
+	Player2_Proj_Direction:
 			.byte $00, $00
 
 
@@ -102,7 +117,14 @@ PROJECTILES: {
 
 	UpdateProjectiles: {
 			ldx #$03
-		!:
+		!Loop:
+			lda Player1_Proj_Type, x
+			beq !Skip+
+
+			lda Player1_Proj_Direction, x
+			beq !MovingLeft+
+
+		!MovingRight:
 			clc
 			lda Player1_Proj_X0, x
 			adc Player1_Proj_Speed_X0, x
@@ -114,14 +136,44 @@ PROJECTILES: {
 			adc #$00
 			sta Player1_Proj_X2, X
 
+			beq !SkipDestroyCheck+
+			lda Player1_Proj_X1, x
+			cmp #$3a
+			bcc !SkipDestroyCheck+
+			:DestroyPlayerProjectile()
+
+		!SkipDestroyCheck:
+			jmp !MovingComplete+
+
+		!MovingLeft:
+			sec
+			lda Player1_Proj_X0, x
+			sbc Player1_Proj_Speed_X0, x
+			sta Player1_Proj_X0, x
+			lda Player1_Proj_X1, x
+			sbc Player1_Proj_Speed_X1, x
+			sta Player1_Proj_X1, x
+			lda Player1_Proj_X2, x
+			sbc #$00
+			sta Player1_Proj_X2, X
+
+			bpl !+
+			:DestroyPlayerProjectile()
+
+		!:
+
+		!MovingComplete:
+
+
 			//TODO: Should we just use softsprite x,y directly?
 			lda Player1_Proj_X1, x
 			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x 
 			lda Player1_Proj_X2, x
 			sta SOFTSPRITES.SpriteData_TARGET_X_MSB, x 
 
+		!Skip:
 			dex
-			bpl !-
+			bpl !Loop-
 			rts
 	}
 
@@ -144,6 +196,7 @@ PROJECTILES: {
 			tax
 			//X register is now (0-3) based on player number and proj. number
 
+			
 			//Set the player projectile type and 
 			//reset fractional values
 			tya
@@ -165,6 +218,8 @@ PROJECTILES: {
 			dey //Convert to 0 or 1
 			sty TEMP
 
+			tya
+			sta Player1_Proj_Direction, x
 
 			//Subtract the LEFT border + Projectile Offset
 			ldy PLAYER_NUM
@@ -203,7 +258,7 @@ PROJECTILES: {
 			sta PROJECTILES.Player1_Proj_Y1, x
 
 
-
+			//Apply  speeds
 			lda PROJECTILES.Player_Proj_Speed_X + 0
 			sta PROJECTILES.Player1_Proj_Speed_X0, x
 			lda PROJECTILES.Player_Proj_Speed_X + 1
@@ -211,6 +266,7 @@ PROJECTILES: {
 			lda #$00
 			sta PROJECTILES.Player1_Proj_Speed_Y0, x
 			sta PROJECTILES.Player1_Proj_Speed_Y1, x
+
 
 			//Create the sprite
 			lda PROJECTILES.Player1_Proj_X2, x
