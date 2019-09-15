@@ -1,5 +1,4 @@
 #import "zeropage.asm"
-.segment Code [outPrg="start.prg"]
 
 BasicUpstart2(Entry)
 
@@ -111,9 +110,4 @@ Entry:
 	CosTableY:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 #import "maps/assets.asm"
-
-
-
-
-
 

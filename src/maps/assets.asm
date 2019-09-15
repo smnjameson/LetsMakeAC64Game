@@ -1,6 +1,6 @@
 /*  
 	$c000 - $c3ff Screen
-	$c400 - $c7ff 16 sprites
+	$c400 - $cfff 48 sprites
 	$d000 - $efff 128 Sprites
 	$f000 - $f7ff 1 charset
 	$f800 - $fffd 15 sprites
@@ -30,4 +30,3 @@
 	CHAR_SET:
 		.import binary "../../assets/maps/chars.bin"   //roll 12!
 
-		

@@ -8,7 +8,6 @@ SOFTSPRITES: {
 	.label BLIT_TABLE_START = $b000
 
 .align $100
-*=*"MASK TABLES"
 	Sprite_MaskTable:
 		.fill 256, 00
 	Sprite_MaskTable_Inverted:
