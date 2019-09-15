@@ -17,12 +17,20 @@ TABLES: {
 	__JumpAndFallTable:
 
 	PlayerWalkLeft: 
-		.byte 80,81,82,83,84,85,86,87
+		.byte 67,68,69,68
 	__PlayerWalkLeft: 
 
 	PlayerWalkRight: 
-		.byte 64,65,66,67,68,69,70,71
+		.byte 64,65,66,65
 	__PlayerWalkRight: 
+
+	PlayerThrowLeft: 
+		.byte 76,76,76,77,77,77,78,78,78,79,79,79
+	__PlayerThrowLeft: 
+
+	PlayerThrowRight: 
+		.byte 72,72,72,73,73,73,74,74,74,75,75,75
+	__PlayerThrowRight: 
 
 	PowerOfTwo:
 		.byte 1,2,4,8,16,32,64,128

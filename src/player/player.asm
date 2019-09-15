@@ -8,6 +8,7 @@ PLAYER: {
 	.label STATE_WALK_RIGHT = %00001000
 	.label STATE_FACE_LEFT  = %00010000
 	.label STATE_FACE_RIGHT = %00100000
+	.label STATE_THROWING 	= %01000000
 
 	.label PLAYER_1 = %00000001
 	.label PLAYER_2 = %00000010
@@ -65,6 +66,11 @@ PLAYER: {
 	Player2_WalkIndex:
 			.byte $00
 
+	Player1_ThrowIndex:
+			.byte $00
+	Player2_ThrowIndex:
+			.byte $00
+
 	Player1_State:
 			.byte $00
 	Player2_State:
@@ -83,7 +89,7 @@ PLAYER: {
 	Initialise: {
 			lda #$0a
 			sta VIC.SPRITE_MULTICOLOR_1
-			lda #$09
+			lda #$06
 			sta VIC.SPRITE_MULTICOLOR_2
 
 			lda #$05
@@ -364,6 +370,7 @@ PLAYER: {
 
 		.label CURRENT_PLAYER = TEMP1
 		.label CURRENT_FRAME = TEMP2
+		.label TEMP = TEMP3
 
 
 		lda #$02
@@ -426,10 +433,49 @@ PLAYER: {
 				lda DefaultFrame, x   //Default idle frame
 				sta CURRENT_FRAME
 
+				//Are we walking left or right?
 				ldy #$00
+
+			!AreWeThrowing:
+				//Are we throwing?
+				lda (PlayerState), y
+				and #[STATE_THROWING]
+				beq !NotThrowing+
+				//Yes we are throwing!!
+				//Grab next throw frame
+				stx TEMP
+				lda Player1_ThrowIndex, x
+				tax
+				lda (PlayerState), y
+				and #[STATE_FACE_LEFT]
+				beq !+
+				lda TABLES.PlayerThrowLeft, x
+				jmp !SkipFaceCheck+
+			!:
+				lda TABLES.PlayerThrowRight, x
+			!SkipFaceCheck:
+				sta CURRENT_FRAME	
+				ldx TEMP
+
+				//Increment Counter and turn of state if needed
+				lda Player1_ThrowIndex , x
+				clc
+				adc #$01
+				sta Player1_ThrowIndex , x
+				cmp #[TABLES.__PlayerThrowLeft - TABLES.PlayerThrowLeft]
+				bne !+
+				lda (PlayerState), y
+				and #[255 - STATE_THROWING]
+				sta (PlayerState), y
+			!:
+				jmp !SetFrame+
+
+			!NotThrowing:
 				lda (PlayerState), y
 				and #[STATE_WALK_RIGHT + STATE_WALK_LEFT]
-				beq !SetFrame+
+				beq !SetFrame+ //If not just do default frame
+
+
 				lda (PlayerState), y
 				and #[STATE_JUMP + STATE_FALL]
 				bne !SetFrame+
@@ -548,6 +594,9 @@ PLAYER: {
 			jmp !+
 
 		!FirePressed:
+			lda Player1_State
+			and #STATE_THROWING
+			bne !+
 			lda Player1_FirePressed	
 			bne !+
 			lda #$01
@@ -559,6 +608,13 @@ PLAYER: {
 			lda #$00 //Player 1 = 00
 			ldy #$01
 			jsr PROJECTILES.SpawnProjectile
+
+			lda Player1_State
+			ora #STATE_THROWING
+			sta Player1_State
+			lda #$00
+			sta Player1_ThrowIndex			
+
 			///
 
 		!:
@@ -604,7 +660,7 @@ PLAYER: {
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
 			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player1_State
-			lda #80
+			lda #67
 			sta DefaultFrame
 			jmp !Right+
 		!:
@@ -664,6 +720,9 @@ PLAYER: {
 			jmp !+
 
 		!FirePressed:
+			lda Player2_State
+			and #STATE_THROWING
+			bne !+		
 			lda Player2_FirePressed	
 			bne !+
 			lda #$01
@@ -675,8 +734,12 @@ PLAYER: {
 			lda #$01 //Player 1 = 00
 			ldy #$01
 			jsr PROJECTILES.SpawnProjectile
+			lda Player2_State
+			ora #STATE_THROWING
+			sta Player2_State	
+			lda #$00
+			sta Player2_ThrowIndex			
 			///
-
 		!:
 
 
@@ -720,7 +783,7 @@ PLAYER: {
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
 			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player2_State
-			lda #80
+			lda #67
 			sta DefaultFrame + 1
 			jmp !Right+
 		!:

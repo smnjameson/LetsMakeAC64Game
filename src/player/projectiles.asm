@@ -17,7 +17,7 @@ PROJECTILES: {
 
 
 	Player_Projectile_XOffset: //Horizontal spawn offset based on player direction
-			.byte $20, $08
+			.byte $10, $08
 
 
 	Player1_Proj_Type:	//Index into the cached software sprite types	

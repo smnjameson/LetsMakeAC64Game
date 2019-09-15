@@ -68,7 +68,7 @@ Entry:
 
 
 		jsr MAPLOADER.DrawMap
-
+ 
 
 		jsr PLAYER.Initialise
 		jsr HUD.Initialise
