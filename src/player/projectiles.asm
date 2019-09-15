@@ -9,9 +9,12 @@
 PROJECTILES: {
 
 	Player_Proj_Speed_X: //Fractional /LSB
-			.byte $80, $01
+			.byte $80, $02
+	Player_Proj_Speed_Y: //Fractional /LSB
+			.byte $80, $fe
 	Player_Proj_Gravity:
-			.byte $80, $00
+			.byte $18, $00
+
 
 	Player_Projectile_XOffset: //Horizontal spawn offset based on player direction
 			.byte $20, $08
@@ -119,7 +122,9 @@ PROJECTILES: {
 			ldx #$03
 		!Loop:
 			lda Player1_Proj_Type, x
-			beq !Skip+
+			bne !+
+			jmp !Skip+
+		!:
 
 			lda Player1_Proj_Direction, x
 			beq !MovingLeft+
@@ -165,17 +170,114 @@ PROJECTILES: {
 		!MovingComplete:
 
 
+		//YSpeed adjustments
+			clc
+			lda Player1_Proj_Y0, x
+			adc Player1_Proj_Speed_Y0, x
+			sta Player1_Proj_Y0, x
+			lda Player1_Proj_Y1, x
+			adc Player1_Proj_Speed_Y1, x
+			sta Player1_Proj_Y1, x
+			cmp #$a8
+			bcc !+
+			:DestroyPlayerProjectile()
+		!:
+
+		//Gravity
+			clc
+			lda Player1_Proj_Speed_Y0, x
+			adc Player_Proj_Gravity + 0
+			sta Player1_Proj_Speed_Y0, x
+			lda Player1_Proj_Speed_Y1, x
+			adc Player_Proj_Gravity + 1
+			sta Player1_Proj_Speed_Y1, x
+			
+
+
 			//TODO: Should we just use softsprite x,y directly?
 			lda Player1_Proj_X1, x
 			sta SOFTSPRITES.SpriteData_TARGET_X_LSB, x 
 			lda Player1_Proj_X2, x
 			sta SOFTSPRITES.SpriteData_TARGET_X_MSB, x 
+			lda Player1_Proj_Y1, x
+			sta SOFTSPRITES.SpriteData_TARGET_Y, x 
+
+
+			jsr CheckProjectileCollision
+
 
 		!Skip:
 			dex
-			bpl !Loop-
+			bmi !+
+			jmp !Loop-
+		!:
 			rts
 	}
+
+	//X register = softsprite/projectile
+	CheckProjectileCollision: {
+			.label SCREEN_LOOKUP = VECTOR1
+			.label COLLISION_DATA = TEMP1
+			.label TEMP = TEMP2
+			stx TEMP
+
+			lda Player1_Proj_Y1, x
+			lsr
+			lsr
+			lsr
+			tay	
+			lda TABLES.BufferLSB, y
+			sta SCREEN_LOOKUP
+			lda TABLES.BufferMSB, y
+			sta SCREEN_LOOKUP + 1
+
+			lda Player1_Proj_X2, x
+			lsr
+			lda Player1_Proj_X1, x
+			ror
+			lsr
+			lsr
+			tay
+
+
+			lda (SCREEN_LOOKUP), y
+			tax
+			lda CHAR_COLORS, x
+			sta COLLISION_DATA
+
+			iny
+			lda (SCREEN_LOOKUP), y
+			tax
+			lda CHAR_COLORS, x
+			ora COLLISION_DATA
+			sta COLLISION_DATA
+
+			tya
+			clc
+			adc #$27
+			tay
+			lda (SCREEN_LOOKUP), y
+			tax
+			lda CHAR_COLORS, x
+			ora COLLISION_DATA
+			sta COLLISION_DATA
+
+			iny
+			lda (SCREEN_LOOKUP), y
+			tax
+			lda CHAR_COLORS, x
+			ora COLLISION_DATA
+			
+			ldx TEMP
+
+			and #PLAYER.COLLISION_COLORABLE
+			beq !+
+
+			:DestroyPlayerProjectile()
+		!:
+			rts
+	}
+
 
 	// X register = Available sprite index (0-1)
 	// Y register = Player projectile type
@@ -263,8 +365,10 @@ PROJECTILES: {
 			sta PROJECTILES.Player1_Proj_Speed_X0, x
 			lda PROJECTILES.Player_Proj_Speed_X + 1
 			sta PROJECTILES.Player1_Proj_Speed_X1, x
-			lda #$00
+
+			lda Player_Proj_Speed_Y + 0
 			sta PROJECTILES.Player1_Proj_Speed_Y0, x
+			lda Player_Proj_Speed_Y + 1
 			sta PROJECTILES.Player1_Proj_Speed_Y1, x
 
 

@@ -1,5 +1,6 @@
 PLAYER: {
 	.label COLLISION_SOLID = %00010000
+	.label COLLISION_COLORABLE = %00100000
 
 	.label STATE_JUMP 		= %00000001
 	.label STATE_FALL 		= %00000010
@@ -181,14 +182,6 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_RightCollision
 		sta Player1_RightCollision
-
-
-
-
-
-
-
-
 
 
 		//Get floor collisions for each foot player 2

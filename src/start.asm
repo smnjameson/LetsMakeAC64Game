@@ -3,8 +3,8 @@
 
 BasicUpstart2(Entry)
 
-#import "../libs/vic.asm"
 #import "../libs/tables.asm"
+#import "../libs/vic.asm"
 #import "../libs/macros.asm"
 
 #import "utils/utils.asm"
@@ -83,7 +83,6 @@ Entry:
 		dec PerformFrameCodeFlag
 
 			inc ZP_COUNTER
-
 			
 
 			jsr SOFTSPRITES.UpdateSprites
