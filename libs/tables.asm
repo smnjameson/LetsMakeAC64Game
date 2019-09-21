@@ -25,11 +25,11 @@ TABLES: {
 	__PlayerWalkRight: 
 
 	PlayerThrowLeft: 
-		.byte 76,76,76,77,77,77,78,78,78,79,79,79
+		.byte 76,77,78,79,79,79,79,79,79,78,78,78,77,77
 	__PlayerThrowLeft: 
 
 	PlayerThrowRight: 
-		.byte 72,72,72,73,73,73,74,74,74,75,75,75
+		.byte 72,73,74,75,75,75,75,75,75,74,74,74,73,73
 	__PlayerThrowRight: 
 
 	PowerOfTwo:

@@ -221,7 +221,10 @@ PROJECTILES: {
 			.label TEMP = TEMP2
 			stx TEMP
 
+			//Center 4,3
 			lda Player1_Proj_Y1, x
+			clc
+			adc #$03
 			lsr
 			lsr
 			lsr
@@ -235,41 +238,22 @@ PROJECTILES: {
 			lsr
 			lda Player1_Proj_X1, x
 			ror
-			lsr
-			lsr
-			tay
-
-
-			lda (SCREEN_LOOKUP), y
-			tax
-			lda CHAR_COLORS, x
-			sta COLLISION_DATA
-
-			iny
-			lda (SCREEN_LOOKUP), y
-			tax
-			lda CHAR_COLORS, x
-			ora COLLISION_DATA
-			sta COLLISION_DATA
-
-			tya
 			clc
-			adc #$27
+			adc #$02
+			lsr
+			lsr
 			tay
+
 			lda (SCREEN_LOOKUP), y
 			tax
 			lda CHAR_COLORS, x
-			ora COLLISION_DATA
 			sta COLLISION_DATA
 
-			iny
-			lda (SCREEN_LOOKUP), y
-			tax
-			lda CHAR_COLORS, x
-			ora COLLISION_DATA
-			
-			ldx TEMP
 
+
+
+			ldx TEMP
+			lda COLLISION_DATA	
 			and #PLAYER.COLLISION_COLORABLE
 			beq !+
 
@@ -279,12 +263,14 @@ PROJECTILES: {
 	}
 
 
+
+
 	// X register = Available sprite index (0-1)
 	// Y register = Player projectile type
 	// A register = Player number (0-1)
 	SpawnProjectile: {
-			.label TEMP = TEMP1
-			.label PLAYER_NUM = TEMP2
+			.label TEMP = TEMP5
+			.label PLAYER_NUM = TEMP6
 
 			sta PLAYER_NUM
 

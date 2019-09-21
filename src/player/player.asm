@@ -368,9 +368,9 @@ PLAYER: {
 		.label PlayerX = VECTOR3
 		.label PlayerY = VECTOR4
 
-		.label CURRENT_PLAYER = TEMP1
-		.label CURRENT_FRAME = TEMP2
-		.label TEMP = TEMP3
+		.label CURRENT_PLAYER = TEMP2
+		.label CURRENT_FRAME = TEMP3
+		.label TEMP = TEMP4
 
 
 		lda #$02
@@ -467,8 +467,19 @@ PLAYER: {
 				lda (PlayerState), y
 				and #[255 - STATE_THROWING]
 				sta (PlayerState), y
+			
+			!:
+				lda Player1_ThrowIndex , x
+				cmp #$03
+				bne !+
+				//X is available index
+				jsr PROJECTILES.CheckPlayer1CanShoot
+				lda TEMP //Player 1 = 00
+				ldy #$01 //Projectile Type
+				jsr PROJECTILES.SpawnProjectile
 			!:
 				jmp !SetFrame+
+
 
 			!NotThrowing:
 				lda (PlayerState), y
@@ -552,7 +563,7 @@ PLAYER: {
 				lda (PlayerY), y
 				sta VIC.SPRITE_0_Y, x
 
-
+		!SkipFrameSet:
 			dec CURRENT_PLAYER
 			beq !+
 			jmp !Loop-
@@ -604,10 +615,6 @@ PLAYER: {
 			jsr PROJECTILES.CheckPlayer1CanShoot
 			bmi !+ //If negative player cannot shoot
 
-			//X is available index
-			lda #$00 //Player 1 = 00
-			ldy #$01
-			jsr PROJECTILES.SpawnProjectile
 
 			lda Player1_State
 			ora #STATE_THROWING
@@ -730,10 +737,7 @@ PLAYER: {
 			jsr PROJECTILES.CheckPlayer2CanShoot
 			bmi !+
 
-			//X is available index
-			lda #$01 //Player 1 = 00
-			ldy #$01
-			jsr PROJECTILES.SpawnProjectile
+
 			lda Player2_State
 			ora #STATE_THROWING
 			sta Player2_State	

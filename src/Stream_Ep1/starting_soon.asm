@@ -1,4 +1,4 @@
-// #define NIGHT
+#define NIGHT
 
 .label SCREEN_RAM = $0400
 .label COLOR_RAM = $d800

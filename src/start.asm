@@ -94,9 +94,6 @@ Entry:
 			jsr PROJECTILES.UpdateProjectiles
 
 
-
-
-
 		jmp !Loop- 
 
 

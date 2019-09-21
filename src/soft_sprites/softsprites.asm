@@ -261,6 +261,7 @@ SOFTSPRITES: {
 				lda (SCREEN_ROW), y
 				jsr GetFontLookup
 
+
 				ldy #$00
 			!SIMPLE_BLIT_01:
 				cpy OFFSET_Y
@@ -436,44 +437,85 @@ SOFTSPRITES: {
 	DrawSprites: {
 			.label SCREEN_ROW = VECTOR4
 			.label COLOR_ROW = VECTOR6
-				
+			.label TEMP = TEMP8
+
 				lda VECTOR4
 				sta SpriteData_CLEAR_LSB, x
 				lda VECTOR4 + 1
 				sta SpriteData_CLEAR_MSB, x
 
 				//0,0
+				stx TEMP
 				clc
-				lda SpriteData_CharStart, x
 				ldy #$00
+				lda (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				ldx TEMP
+				and #PLAYER.COLLISION_COLORABLE
+				bne !+
+				lda SpriteData_CharStart, x
 				sta (SCREEN_ROW), y
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
+			!:
+
 
 				//1,0
+				stx TEMP
+				clc
+				ldy #$01
+				lda (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				ldx TEMP
+				and #PLAYER.COLLISION_COLORABLE
+				bne !+
+
 				lda SpriteData_CharStart, x
 				adc #$02
-				ldy #$01
 				sta (SCREEN_ROW), y
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
+ 			!:
 
 				//0,1
+				stx TEMP
+				clc
+				ldy #$28
+				lda (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				ldx TEMP
+				and #PLAYER.COLLISION_COLORABLE
+				bne !+				
+
 				lda SpriteData_CharStart, x
 				adc #$01
 				ldy #$28
 				sta (SCREEN_ROW), y
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
+			!:
 
 				//1,1
+				stx TEMP
+				clc
+				ldy #$29
+				lda (SCREEN_ROW), y
+				tax
+				lda CHAR_COLORS, x
+				ldx TEMP
+				and #PLAYER.COLLISION_COLORABLE
+				bne !+	
+
 				lda SpriteData_CharStart, x
 				adc #$03
 				ldy #$29
 				sta (SCREEN_ROW), y
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
-
+			!:
 
 			rts		
 	}
@@ -580,6 +622,7 @@ SOFTSPRITES: {
 
 
 	GetFontLookup: {
+			//Acc = character to get
 			clc
 			adc #$03
 			ldy #$00
