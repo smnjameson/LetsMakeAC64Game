@@ -473,7 +473,14 @@ PLAYER: {
 				cmp #$03
 				bne !+
 				//X is available index
+				cpx #$00
+				bne !CheckPlayer2+
+			!CheckPlayer1:
 				jsr PROJECTILES.CheckPlayer1CanShoot
+				bpl !CheckComplete+
+			!CheckPlayer2:
+				jsr PROJECTILES.CheckPlayer2CanShoot
+			!CheckComplete:
 				lda TEMP //Player 1 = 00
 				ldy #$01 //Projectile Type
 				jsr PROJECTILES.SpawnProjectile
