@@ -64,6 +64,7 @@ Entry:
 		//Setup generated tables
 		jsr SOFTSPRITES.CreateMaskTable
 		lda #180
+		ldx #$04
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
 

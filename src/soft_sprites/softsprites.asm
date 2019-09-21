@@ -661,18 +661,19 @@ SOFTSPRITES: {
 			.label OFFSET_X = TEMP1
 			.label OFFSET_Y = TEMP2
 			.label SHIFT_TEMP = TEMP3
+			.label FRAME_COUNT = TEMP4
+			.label CURR_CHAR = TEMP5
+			.label CURR_FRAME = TEMP6
 
 			.label BLIT_DATA = VECTOR1
 			.label BLIT_DATA_RIGHT = VECTOR2
+
 			.label FONT_DATA_LOOKUP = VECTOR5
 
-			jsr GetFontLookup //Get the font data lookup into VECTOR5
-
-			//Set the font lookup
-			lda FONT_DATA_LOOKUP
-			sta SelfModLookup + 1
-			lda FONT_DATA_LOOKUP + 1
-			sta SelfModLookup + 2
+			stx FRAME_COUNT
+			sta CURR_CHAR
+			lda #$00
+			sta CURR_FRAME
 
 			//Set the startlookup for BlitLookup_LSB/MSB tables
 			ldx BlitLookupCount
@@ -691,6 +692,18 @@ SOFTSPRITES: {
 
 
 		!FullLoop:
+			lda CURR_CHAR
+			clc
+			adc CURR_FRAME
+			jsr GetFontLookup //Get the font data lookup into VECTOR5
+
+			//Set the font lookup
+			lda FONT_DATA_LOOKUP
+			sta SelfModLookup + 1
+			lda FONT_DATA_LOOKUP + 1
+			sta SelfModLookup + 2
+
+
 			//Set the blitdata position
 			lda BLIT_DATA_LSB
 			sta BLIT_DATA 
@@ -714,7 +727,7 @@ SOFTSPRITES: {
 			lda #$00
 			cpy OFFSET_Y
 			bcc !NoDataYet+
-			cpx #$08
+			cpx #$08 
 			bcs !NoDataYet+
 		SelfModLookup:
 			lda $BEEF, x
@@ -756,16 +769,27 @@ SOFTSPRITES: {
 			//Update the offsets top to bottom, Left to right , 32 total (1024 byte blit table)
 			ldy OFFSET_Y
 			iny
-			cpy #$08
+			cpy #$08 //ROWS
+			bne !Skip+
+			
+			//Update frame animation
+			ldy CURR_FRAME
+			iny
+			cpy FRAME_COUNT	
 			bne !+
+			ldy #$00
+		!:
+			sty CURR_FRAME
+
+
 			ldy #$00
 			ldx OFFSET_X
 			inx
 			inx
-			cpx #$08
+			cpx #$08 //COLUMNS
 			beq !Exit+
 			stx OFFSET_X
-		!:
+		!Skip:
 			sty OFFSET_Y
 			
 
@@ -778,7 +802,7 @@ SOFTSPRITES: {
 			adc #$00
 			sta BLIT_DATA_MSB
 
-			//Repeat
+
 			jmp !FullLoop-
 
 		!Exit:
