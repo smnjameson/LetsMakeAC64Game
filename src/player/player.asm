@@ -19,11 +19,13 @@ PLAYER: {
 	.label JOY_RT = %01000
 	.label JOY_FR = %10000
 
+	.label LEFT_SCREEN_EDGE = $16
+
 	PlayersActive:
 			.byte $00
 
 	Player1_X:
-			// Fractional / LSB / MSB
+			// Fractional / LSB / MSB   
 			.byte $00, $48, $00 // 1/256th pixel accuracy
 	Player2_X:
 			// Fractional / LSB / MSB
@@ -188,6 +190,7 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_RightCollision
 		sta Player1_RightCollision
+
 
 
 		//Get floor collisions for each foot player 2
@@ -355,6 +358,10 @@ PLAYER: {
 			lsr
 			tay
 
+			cpy #$16
+			bcc !+
+			ldy #$15
+		!:
 			rts
 	}
 
@@ -669,6 +676,19 @@ PLAYER: {
 			lda Player1_X + 2
 			sbc #$00
 			sta Player1_X + 2
+
+			//CHeck screen edge
+			lda Player1_X + 2
+			bne !SkipEdgeCheck+
+			lda Player1_X + 1
+			cmp #LEFT_SCREEN_EDGE
+			bcs !SkipEdgeCheck+
+			lda #$00
+			sta Player1_X + 0
+			lda #LEFT_SCREEN_EDGE
+			sta Player1_X + 1
+		!SkipEdgeCheck:
+
 
 			lda Player1_State
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
