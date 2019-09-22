@@ -19,7 +19,12 @@ PLAYER: {
 	.label JOY_RT = %01000
 	.label JOY_FR = %10000
 
-	.label LEFT_SCREEN_EDGE = $16
+	.label LEFT_SCREEN_EDGE = $14 //MSB = 0
+	.label RIGHT_SCREEN_EDGE = $44 //MSB = 1
+
+	.label PLAYER_RIGHT_COLLISON_BOX = 19
+	.label PLAYER_LEFT_COLLISON_BOX = 5
+	.label FOOT_COLLISION_OFFSET = 3
 
 	PlayersActive:
 			.byte $00
@@ -126,7 +131,7 @@ PLAYER: {
 
 		//Get floor collisions for each foot for Player 1
 		lda #$00
-		ldx #4
+		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -137,7 +142,7 @@ PLAYER: {
 
 		
 		lda #$00
-		ldx #10
+		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -152,7 +157,7 @@ PLAYER: {
 
 		//Get Left Collision
 		lda #$00
-		ldx #0
+		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -161,7 +166,7 @@ PLAYER: {
 		sta Player1_LeftCollision
 
 		lda #$00
-		ldx #0
+		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #18
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -173,7 +178,7 @@ PLAYER: {
 
 		//Get Right Collision
 		lda #$00
-		ldx #13
+		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -182,7 +187,7 @@ PLAYER: {
 		sta Player1_RightCollision
 
 		lda #$00
-		ldx #13
+		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #18
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -195,7 +200,7 @@ PLAYER: {
 
 		//Get floor collisions for each foot player 2
 		lda #$01
-		ldx #4
+		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -208,7 +213,7 @@ PLAYER: {
 
 		
 		lda #$01
-		ldx #10
+		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
@@ -221,7 +226,7 @@ PLAYER: {
 
 		//Get Left Collision
 		lda #$01
-		ldx #0
+		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -230,7 +235,7 @@ PLAYER: {
 		sta Player2_LeftCollision
 
 		lda #$01
-		ldx #0
+		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #18
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -243,7 +248,7 @@ PLAYER: {
 
 		//Get Right Collision
 		lda #$01
-		ldx #13
+		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -252,7 +257,7 @@ PLAYER: {
 		sta Player2_RightCollision
 
 		lda #$01
-		ldx #13
+		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #18
 		jsr PLAYER.GetCollisionPoint
 		jsr UTILS.GetCharacterAt
@@ -721,6 +726,18 @@ PLAYER: {
 			adc #$00
 			sta Player1_X + 2
 
+			//CHeck screen edge xx/$48/$01
+			lda Player1_X + 2
+			beq !SkipEdgeCheck+
+			lda Player1_X + 1
+			cmp #RIGHT_SCREEN_EDGE
+			bcc !SkipEdgeCheck+
+			lda #$00
+			sta Player1_X + 0
+			lda #RIGHT_SCREEN_EDGE
+			sta Player1_X + 1
+		!SkipEdgeCheck:
+
 			lda Player1_State
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
 			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
@@ -809,6 +826,18 @@ PLAYER: {
 			lda Player2_X + 2
 			sbc #$00
 			sta Player2_X + 2
+
+			//CHeck screen edge
+			lda Player2_X + 2
+			bne !SkipEdgeCheck+
+			lda Player2_X + 1
+			cmp #LEFT_SCREEN_EDGE
+			bcs !SkipEdgeCheck+
+			lda #$00
+			sta Player2_X + 0
+			lda #LEFT_SCREEN_EDGE
+			sta Player2_X + 1
+		!SkipEdgeCheck:
 
 			lda Player2_State
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]

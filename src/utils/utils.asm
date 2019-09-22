@@ -7,9 +7,9 @@ UTILS: {
 
 		.label COLLISION_LOOKUP = TEMP1
 
-		lda TABLES.ScreenRowLSB ,y
+		lda TABLES.BufferLSB ,y
 		sta COLLISION_LOOKUP
-		lda TABLES.ScreenRowMSB ,y
+		lda TABLES.BufferMSB ,y
 		sta COLLISION_LOOKUP + 1
 
 		txa
