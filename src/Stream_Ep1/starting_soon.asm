@@ -1,4 +1,4 @@
-#define NIGHT
+// #define NIGHT
 
 .label SCREEN_RAM = $0400
 .label COLOR_RAM = $d800
@@ -422,7 +422,7 @@ IRQ: {
 		sta $fffe   // 0314
 		stx $ffff	// 0315
 
-		lda #$00
+		lda #$08
 		sta $d012
 		lda $d011
 		and #%01111111
@@ -612,7 +612,7 @@ IRQ: {
 			sta $fffe   // 0314
 			stx $ffff	// 0315
 
-			lda #$00
+			lda #$08
 			sta $d012
 
 			asl $d019 //Acknowledging the interrupt
@@ -671,7 +671,7 @@ DoWaves: {
 		sta $d010
 		lda #$80
 		sta $d01d
-		lda #$ff
+		lda #$bf
 		sta $d01c
 
 		ldx #$00
@@ -715,7 +715,7 @@ DoWaves: {
 		iny
 		iny
 		inx
-		cpx #$07
+		cpx #$05
 		bne !Loop-
 
 
@@ -723,7 +723,7 @@ DoWaves: {
 		lda GlobalTimer
 		and #$07
 		beq !+
-		rts
+		jmp !End+
 	!:
 
 		ldx #$00
@@ -758,15 +758,29 @@ DoWaves: {
 			dec WaveY, x
 	!:	
 		inx
-		cpx #$07
+		cpx #$05
 		bne !Loop-
 
-
+	!End:
+		lda #207
+		sta SPRITE_POINTERS + 6
+		lda #$07
+		sta $d02d
+		lda #$e8
+		sta $d00c
+		lda #$e0
+		sta $d00d
+		lda $d010
+		and #$bf
+		sta $d010
+		lda #$40
+		sta $d01b
 
 		rts
 }
 
 DoWaves2: {
+	
 
 		ldx #$00
 		ldy #$00
@@ -811,14 +825,14 @@ DoWaves2: {
 		iny
 		iny
 		inx
-		cpx #$07
+		cpx #$05
 		bne !Loop-
 
 		//UPDATE?
 		lda GlobalTimer
 		and #$03
 		beq !+
-		rts
+		jmp !End+
 	!:
 
 
@@ -854,10 +868,62 @@ DoWaves2: {
 			dec Wave2Y, x
 	!:
 		inx
-		cpx #$07
+		cpx #$05
 		bne !Loop-
+
+	!End:
+
+
+
+		#if NIGHT
+			lda #206
+			sta SPRITE_POINTERS + 6
+		#endif
+	// inc $d020
+			:WaitForLine($de)
+			ldy reflectIndex
+			ldx #$00
+		!Loop:
+			lda reflectSin,y
+			sta $d00c
+		#if NIGHT
+			lda #1			
+		#else
+			lda colorBands, y
+		#endif
+			sta $d02d
+			iny
+			inx
+			cpx #21
+			beq !+
+			:WaitForNextLine()
+			jmp !Loop-
+		!:
+
+
+
+		lda GlobalTimer
+		and #$02
+		bne !+
+
+			inc reflectIndex
+			ldx reflectIndex
+			cpx #21
+			bne !+
+			ldx #$00
+			stx reflectIndex
+		!:
+
 		rts
 }
+reflectIndex:
+	.byte $00
+colorBands:
+	.byte 6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6
+	.byte 6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6
+reflectSin:
+	.fill 21,  (cos(i/7 * PI) *  sin(i/3 * PI) + cos(i/7 * PI) + sin(i/21 * PI)) * $04 + $e0 
+	.fill 21,  (cos(i/7 * PI) *  sin(i/3 * PI) + cos(i/7 * PI) + sin(i/21 * PI)) * $04 + $e0 
 
 WaveAnim:
 	.byte 195,194,193,192,193,194,195
@@ -939,7 +1005,7 @@ DoStars: {
 		lda GlobalTimer
 		and #$03
 		beq !+
-		rts
+		jmp !Exit+
 	!:
 
 		ldx #$00
@@ -972,6 +1038,25 @@ DoStars: {
 		inx
 		cpx #$03
 		bne !Loop-
+
+
+	!Exit:
+		lda #$e8
+		sta $d00c
+		lda #$50
+		sta $d00d
+		lda $d010
+		and #$bf
+		sta $d010
+		lda #$01
+		sta $d02d
+		lda #198
+		sta SPRITE_POINTERS + 6
+		lda $d017
+		and #$bf
+		sta $d017	
+		
+
 		rts
 }
 
@@ -995,16 +1080,18 @@ CloudColor:
 	.byte 1,1,1,15,15,12,12,12
 
 
+
 DoClouds: {
+
 		lda #$00
 		sta $d010
 		lda #$00
 		sta $d01c
-		lda #$ff
+		lda #$bf
 		sta $d01d
 
-		ldy #$0a
-		ldx #$05
+		ldy #$08
+		ldx #$04
 	!:
 		lda #200
 		sta SPRITE_POINTERS, x
@@ -1059,6 +1146,22 @@ DoClouds: {
 		dey
 		dex
 		bpl !-
+
+
+		lda #$e8
+		sta $d00c
+		lda #$50
+		sta $d00d
+		lda $d010
+		and #$bf
+		sta $d010
+		lda #$07
+		sta $d02d
+		lda #199
+		sta SPRITE_POINTERS + 6
+		lda $d017
+		and #$bf
+		sta $d017		
 		rts
 }	
 

@@ -70,3 +70,16 @@ Ice floor (Sliding)
 Bounce (springs?)
 
 
+
+
+LEVEL LAYOUT
+
+- Map template number
+- BG template
+- List of colors, bg, mc etc
+- Spawn points for players
+- Spawn points for enemies*
+- Spawn point for door and switch
+- List of enemies
+
+
