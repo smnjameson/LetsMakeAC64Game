@@ -16,6 +16,9 @@ BasicUpstart2(Entry)
 #import "animation/charanimations.asm"
 #import "soft_sprites/softsprites.asm"
 
+#import "enemies/enemies.asm"
+#import "enemies/behaviours.asm"
+
 Random: {
         lda seed
         beq doEor
@@ -43,6 +46,9 @@ Entry:
 		lda #$0e
 		sta VIC.EXTENDED_BG_COLOR_2
 
+		lda #$ff
+		sta VIC.SPRITE_ENABLE
+		sta VIC.SPRITE_MULTICOLOR	
 
 		jsr IRQ.Setup
 
@@ -75,6 +81,9 @@ Entry:
 		jsr HUD.Initialise
 		jsr SOFTSPRITES.Initialise
 
+		jsr ENEMIES.Initialise
+
+
 
 	//Inf loop
 	!Loop:
@@ -94,6 +103,7 @@ Entry:
 
 			jsr PROJECTILES.UpdateProjectiles
 
+			jsr ENEMIES.UpdateEnemies
 
 		jmp !Loop- 
 

@@ -109,13 +109,9 @@ PLAYER: {
 			sta SPRITE_POINTERS + 0
 			sta SPRITE_POINTERS + 1
 
-			lda VIC.SPRITE_ENABLE 
-			ora #%00000011
-			sta VIC.SPRITE_ENABLE
 
-			lda VIC.SPRITE_MULTICOLOR
-			ora #%00000011
-			sta VIC.SPRITE_MULTICOLOR
+
+
 
 			lda #[PLAYER_1 + PLAYER_2]
 			sta PlayersActive
