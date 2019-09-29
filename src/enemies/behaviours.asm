@@ -73,24 +73,17 @@ BEHAVIOURS: {
 		stx INDEX
 		txa
 		tay
-
 		asl
 		tax
-
 		lda ENEMIES.EnemyPosition_X1, y
 		sta VIC.SPRITE_0_X + [3 * 2], x
-
 		lda ENEMIES.EnemyPosition_Y1, y
 		sta VIC.SPRITE_0_Y + [3 * 2], x
-
 		ldx INDEX
-
 		ldy ENEMIES.EnemyPosition_X2, x
-
 		inx
 		inx
 		inx
-
 		lda $d010
 		and TABLES.InvPowerOfTwo, x
 		cpy #$00
@@ -98,10 +91,8 @@ BEHAVIOURS: {
 		ora TABLES.PowerOfTwo, x
 	!:
 		sta $d010
-
 		dex
 		dex
 		dex
-
 		ldy STOREY
 }
