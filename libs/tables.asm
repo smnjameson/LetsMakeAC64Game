@@ -37,6 +37,10 @@ TABLES: {
 	InvPowerOfTwo:
 		.byte 255-1, 255-2, 255-4, 255-8, 255-16, 255-32, 255-64, 255-128
 
+	Plus:
+		.fill 256, i
+
+		
 .align $100
 *=*"COLOR"
 	ColorSwapTable:

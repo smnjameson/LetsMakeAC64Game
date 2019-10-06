@@ -4,7 +4,12 @@ ENEMIES: {
 
 	.label STATE_JUMP 		= %00000001
 	.label STATE_FALL 		= %00000010
-	
+	.label STATE_WALK_LEFT  = %00000100
+	.label STATE_WALK_RIGHT = %00001000
+	.label STATE_FACE_LEFT  = %00010000
+	.label STATE_FACE_RIGHT = %00100000
+
+
 	EnemyType: 
 		.fill MAX_ENEMIES, 0
 
@@ -201,7 +206,7 @@ ENEMIES: {
 
 			//Divide by 8 to get ScreenX
 			lda ENEMY_X1
-			lsr ENEMY_X2 + 1
+			lsr ENEMY_X2 
 			ror 
 			lsr
 			lsr

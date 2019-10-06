@@ -109,7 +109,8 @@
 		lda #xoffset
 		ldy #yoffset
 		jsr ENEMIES.GetCollisionPoint
-		stx TEMP
+
+ 		stx TEMP
 		tax
 		jsr UTILS.GetCharacterAt
 		ldx TEMP
@@ -119,17 +120,18 @@
 		:getEnemyCollisions(xcheck, ycheck)
 		tay
 		lda CHAR_COLORS, y
-		and #PLAYER.COLLISION_SOLID
+		and #PLAYER.COLLISION_COLORABLE
 		beq !Fall+
 
 		lda ENEMIES.EnemyState, x
 		and #[255 - ENEMIES.STATE_FALL]
 		sta ENEMIES.EnemyState, x
+		clc
 		jmp !NoFall+
 
 	!Fall:
 		lda ENEMIES.EnemyState, x
-		and #ENEMIES.STATE_FALL
+		bit TABLES.Plus + ENEMIES.STATE_FALL
 		bne !+
 		ora #ENEMIES.STATE_FALL
 		sta ENEMIES.EnemyState, x
@@ -147,7 +149,9 @@
 		dec ENEMIES.EnemyJumpFallIndex, x
 		bpl !+
 		lda #$00
-		sta ENEMIES.EnemyJumpFallIndex, x 
+		sta ENEMIES.EnemyJumpFallIndex, x	
 	!:
+		sec 
+
 	!NoFall:
 }
