@@ -10,6 +10,11 @@
 .label SPRITE_POINTERS = SCREEN_RAM + $3f8
 
 
+
+
+* = $c400 "Enemy Sprites" //Start at frame #16
+	.import binary "../../assets/sprites/enemy_sprites.bin"
+
 * = $d000 "Player Sprites" //Start at frame #64
 	.import binary "../../assets/sprites/player_sprites.bin"
 

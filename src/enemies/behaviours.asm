@@ -15,8 +15,6 @@ BEHAVIOURS: {
 	.label BEHAVIOUR_UPDATE = 3;
 	.label BEHAVIOUR_DEATH = 6;
 
-
-
 	Enemy_001: {
 			jmp !OnSpawn+ 
 			jmp !OnUpdate+ 
@@ -24,14 +22,12 @@ BEHAVIOURS: {
 
 		!OnSpawn:
 			//Set pointer
-			lda #64
-			sta SPRITE_POINTERS + 3, x
+			:setEnemyFrame(64)
 			rts
 
 		!OnUpdate:
-
 			:PositionEnemy()
-			inc ENEMIES.EnemyPosition_Y1, x
+			// :UpdatePosition($100, $100)
 			rts
 
 		!OnDeath:
@@ -47,13 +43,14 @@ BEHAVIOURS: {
 
 		!OnSpawn:
 			//Set pointer
-			lda #64 + 19
-			sta SPRITE_POINTERS + 3, x
+			:setEnemyFrame(16)
 			rts
 
 		!OnUpdate:
+			//Should I fall??
+			:doFall(12, 21) //Check below enemy and fall if needed
+		!:
 			:PositionEnemy()
-			dec ENEMIES.EnemyPosition_Y1, x
 			rts
 
 		!OnDeath:
@@ -66,33 +63,3 @@ BEHAVIOURS: {
 
 
 
-.macro PositionEnemy() {
-		.label INDEX = TEMP8
-		.label STOREY = TEMP7
-
-		stx INDEX
-		txa
-		tay
-		asl
-		tax
-		lda ENEMIES.EnemyPosition_X1, y
-		sta VIC.SPRITE_0_X + [3 * 2], x
-		lda ENEMIES.EnemyPosition_Y1, y
-		sta VIC.SPRITE_0_Y + [3 * 2], x
-		ldx INDEX
-		ldy ENEMIES.EnemyPosition_X2, x
-		inx
-		inx
-		inx
-		lda $d010
-		and TABLES.InvPowerOfTwo, x
-		cpy #$00
-		beq !+
-		ora TABLES.PowerOfTwo, x
-	!:
-		sta $d010
-		dex
-		dex
-		dex
-		ldy STOREY
-}

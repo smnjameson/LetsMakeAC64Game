@@ -19,6 +19,8 @@ BasicUpstart2(Entry)
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
 
+#import "enemies/enemymacros.asm"
+
 Random: {
         lda seed
         beq doEor
