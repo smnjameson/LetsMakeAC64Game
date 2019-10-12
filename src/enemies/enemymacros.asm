@@ -7,6 +7,8 @@
 
 		lda ENEMIES.EnemyFrame, x
 		sta SPRITE_POINTERS + 3, x
+		lda ENEMIES.EnemyColor, x
+		sta VIC.SPRITE_COLOR_3, x
 
 		txa
 		tay
@@ -84,10 +86,29 @@
 }
 
 .macro setEnemyFrame(frame) {
-	.if(frame != 0) {
+	.if(frame != 0 && frame != null) {
 		lda #frame
 	}
 	sta ENEMIES.EnemyFrame, x
+}
+
+
+.macro setEnemyColor(color, color2) {
+	.if(color2 !=  null) {
+		lda ZP_COUNTER
+		and #$01
+		beq !+
+		lda #color
+		jmp !Skip+
+	!:
+		lda #color2
+	!Skip:
+	} else {
+		.if(color != 0 && color != null) {
+			lda #color
+		}
+	}
+	sta ENEMIES.EnemyColor, x
 }
 
 .macro setStaticMemory(index, value) {

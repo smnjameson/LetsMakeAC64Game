@@ -30,6 +30,8 @@ ENEMIES: {
 
 	EnemyFrame:
 		.fill MAX_ENEMIES, 0		
+	EnemyColor:
+		.fill MAX_ENEMIES, 0		
 
 	EnemyJumpFallIndex:
 		.fill MAX_ENEMIES, 0
