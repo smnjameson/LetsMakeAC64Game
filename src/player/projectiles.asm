@@ -36,7 +36,6 @@ PROJECTILES: {
 	Player2_Proj_X1:
 			.byte $00, $00
 
-	*=*"CHECK"
 	Player1_Proj_X2:
 			.byte $00, $00
 	Player2_Proj_X2:

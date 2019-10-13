@@ -78,7 +78,7 @@ Entry:
 		sta $01
 
 		//Set VIC BANK 3
-		lda $dd00
+		// lda $dd00
 		and #%11111100
 		sta $dd00
 

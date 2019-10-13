@@ -214,3 +214,67 @@
 		ora #$06
 		sta ENEMIES.EnemyPosition_Y1, x
 }
+
+.macro hasHitProjectile() {
+		jsr CheckVsProjectiles
+}
+
+CheckVsProjectiles: {
+		ldy #$00
+	!Loop:
+		lda PROJECTILES.Player1_Proj_Type, y
+		beq !Skip+
+		//// Y
+		lda ENEMIES.EnemyPosition_Y1, x
+		sec
+		sbc #$32 //Subtract border
+		sta TEMP10
+
+		lda PROJECTILES.Player1_Proj_Y1, y
+		sec
+		sbc TEMP10
+		clc
+		adc #$08
+		cmp #21 + 8
+		bcs !Skip+
+		//////////////
+
+		/// X
+		lda PROJECTILES.Player1_Proj_X2, y
+		lsr
+		lda PROJECTILES.Player1_Proj_X1, y
+		ror
+		pha
+
+		lda ENEMIES.EnemyPosition_X2, x
+		lsr
+		lda ENEMIES.EnemyPosition_X1, x
+		ror
+		sec
+		sbc #$0c //Subtract border
+		sta TEMP10 
+
+		pla
+		sec
+		sbc TEMP10
+
+		clc
+		adc #$04
+		cmp #$10
+		bcs !Skip+
+		jmp !Collide+
+		////////////////
+	!Skip:
+		iny
+		cpy #$04
+		bne !Loop-
+		jmp !+
+
+	!Collide:
+		lda #$01
+		sta ENEMIES.EnemyColor, x
+		lda #$00
+		sta PROJECTILES.Player1_Proj_Type, y
+	!:
+		rts
+}

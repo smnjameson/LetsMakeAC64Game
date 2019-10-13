@@ -54,6 +54,7 @@ BEHAVIOURS: {
 
 		!OnUpdate:	
 				:setEnemyColor(7, 13)
+				:hasHitProjectile()
 				:getStaticMemory(DY)
 				tay
 				:getStaticMemory(DX)
@@ -157,7 +158,7 @@ BEHAVIOURS: {
 
 		!OnUpdate:
 				:setEnemyColor(5, 14)
-
+				:hasHitProjectile()
 				//Should I fall??
 				:doFall(12, 21) //Check below enemy and fall if needed
 				bcc !+
@@ -247,6 +248,15 @@ BEHAVIOURS: {
 
 		!OnDeath:
 				rts
+	}
+
+
+	StunnedBehaviuor: {
+		update: {
+			lda ENEMIES.EnemyState, x
+			:setEnemyColor($02, $0a)
+
+		}
 	}
 
 }
