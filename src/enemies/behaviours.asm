@@ -66,7 +66,7 @@ BEHAVIOURS: {
 				cmp #$cd
 				bcs !DoYBounce+
 			!:
-
+				* = * 
 				:getStaticMemory(DY)
 				clc
 				adc #$01
@@ -86,6 +86,7 @@ BEHAVIOURS: {
 				clc
 				adc #$01
 				:setStaticMemory(DY, null)
+
 			!NoYBounce:	
 
 			!XBounce:
@@ -106,12 +107,11 @@ BEHAVIOURS: {
 				lsr
 				tay
 				lda CollisionPointsX, y
-				tya
 				ldy #$0c
 				:getEnemyCollisions(null, null)
 				tay
 				lda CHAR_COLORS, y
-				and #PLAYER.COLLISION_COLORABLE	
+				and #PLAYER.COLLISION_SOLID	
 				beq !NoXBounce+
 			!DoXBounce:
 				:getStaticMemory(DX)
@@ -120,6 +120,7 @@ BEHAVIOURS: {
 				adc #$01
 				:setStaticMemory(DX, null)
 			!NoXBounce:	
+			!ExitBounce:
 
 				:PositionEnemy()
 				rts
