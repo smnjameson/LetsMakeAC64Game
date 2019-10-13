@@ -37,52 +37,77 @@
 		ldx INDEX
 }
 
+
 .macro UpdatePosition(xpos, ypos) {
-	.if(xpos > 0) {
+	.if(xpos == null && ypos == null) {
+		sty TEMP10
+
+		cmp #$80
+		bcc !Pos+
+		dec ENEMIES.EnemyPosition_X2, x 
+	!Pos:
 		clc
-		lda ENEMIES.EnemyPosition_X0, x
-		adc #<xpos
-		sta ENEMIES.EnemyPosition_X0, x 
-		lda ENEMIES.EnemyPosition_X1, x
-		adc #>xpos
+		adc ENEMIES.EnemyPosition_X1, x
 		sta ENEMIES.EnemyPosition_X1, x 
 		lda ENEMIES.EnemyPosition_X2, x
 		adc #$00
 		sta ENEMIES.EnemyPosition_X2, x 
-	}
-	.if(xpos < 0) {
-		.eval xpos = xpos * -1
-		sec
-		lda ENEMIES.EnemyPosition_X0, x
-		sbc #<xpos
-		sta ENEMIES.EnemyPosition_X0, x 
-		lda ENEMIES.EnemyPosition_X1, x
-		sbc #>xpos
-		sta ENEMIES.EnemyPosition_X1, x 
-		lda ENEMIES.EnemyPosition_X2, x
-		sbc #$00
-		sta ENEMIES.EnemyPosition_X2, x 
-	}	
+		jmp !Skip+
+	!Skip:
 
-	.if(ypos > 0) {
+		lda TEMP10
 		clc
-		lda ENEMIES.EnemyPosition_Y0, x
-		adc #<ypos
-		sta ENEMIES.EnemyPosition_Y0, x 
-		lda ENEMIES.EnemyPosition_Y1, x
-		adc #>ypos
+		adc ENEMIES.EnemyPosition_Y1, x
 		sta ENEMIES.EnemyPosition_Y1, x 
-	} 
-	.if(ypos < 0) {
-		.eval ypos = ypos * -1
-		sec
-		lda ENEMIES.EnemyPosition_Y0, x
-		sbc #<ypos
-		sta ENEMIES.EnemyPosition_Y0, x 
-		lda ENEMIES.EnemyPosition_Y1, x
-		sbc #>ypos
-		sta ENEMIES.EnemyPosition_Y1, x 
-	}	
+
+	} else { 
+
+		.if(xpos > 0) {
+			clc
+			lda ENEMIES.EnemyPosition_X0, x
+			adc #<xpos
+			sta ENEMIES.EnemyPosition_X0, x 
+			lda ENEMIES.EnemyPosition_X1, x
+			adc #>xpos
+			sta ENEMIES.EnemyPosition_X1, x 
+			lda ENEMIES.EnemyPosition_X2, x
+			adc #$00
+			sta ENEMIES.EnemyPosition_X2, x 
+		}
+		.if(xpos < 0) {
+			.eval xpos = xpos * -1
+			sec
+			lda ENEMIES.EnemyPosition_X0, x
+			sbc #<xpos
+			sta ENEMIES.EnemyPosition_X0, x 
+			lda ENEMIES.EnemyPosition_X1, x
+			sbc #>xpos
+			sta ENEMIES.EnemyPosition_X1, x 
+			lda ENEMIES.EnemyPosition_X2, x
+			sbc #$00
+			sta ENEMIES.EnemyPosition_X2, x 
+		}	
+
+		.if(ypos > 0) {
+			clc
+			lda ENEMIES.EnemyPosition_Y0, x
+			adc #<ypos
+			sta ENEMIES.EnemyPosition_Y0, x 
+			lda ENEMIES.EnemyPosition_Y1, x
+			adc #>ypos
+			sta ENEMIES.EnemyPosition_Y1, x 
+		} 
+		.if(ypos < 0) {
+			.eval ypos = ypos * -1
+			sec
+			lda ENEMIES.EnemyPosition_Y0, x
+			sbc #<ypos
+			sta ENEMIES.EnemyPosition_Y0, x 
+			lda ENEMIES.EnemyPosition_Y1, x
+			sbc #>ypos
+			sta ENEMIES.EnemyPosition_Y1, x 
+		}	
+	}
 }
 
 .macro setEnemyFrame(frame) {
@@ -127,13 +152,17 @@
 
 .macro getEnemyCollisions(xoffset, yoffset) {
 		.label TEMP = TEMP8
-		lda #xoffset
-		ldy #yoffset
+		.if(xoffset != null) {
+			lda #xoffset
+			ldy #yoffset
+		}
 		jsr ENEMIES.GetCollisionPoint
 
  		stx TEMP
 		tax
 		jsr UTILS.GetCharacterAt
+
+	!End:
 		ldx TEMP
 }
 
@@ -175,4 +204,13 @@
 		sec 
 
 	!NoFall:
+}
+
+.macro snapEnemyToFloor() {
+		lda ENEMIES.EnemyPosition_Y1, x
+		sec
+		sbc #$06
+		and #$f8
+		ora #$06
+		sta ENEMIES.EnemyPosition_Y1, x
 }

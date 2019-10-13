@@ -46,7 +46,7 @@ ENEMIES: {
 	Initialise: {
 			//TEST
 			lda #$01
-			ldx #100 //Half value
+			ldx #42 //Half value
 			ldy #80
 			jsr SpawnEnemy
 
@@ -183,7 +183,7 @@ ENEMIES: {
 			adc #$00
 			sta ENEMY_X2
 			bcc !done+
-		!neg:
+		!neg:		//TODO potential refactor to reduce duplication
 			dec EnemyPosition_X2, x
 
 			clc

@@ -9,6 +9,7 @@ TEMP6:		.byte $00
 TEMP7:		.byte $00
 TEMP8:		.byte $00
 TEMP9:		.byte $00
+TEMP10:		.byte $00
 
 VECTOR1: 	.word $00
 VECTOR2: 	.word $00

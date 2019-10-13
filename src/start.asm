@@ -29,11 +29,28 @@ Random: {
         bcc noEor
     doEor:    
         eor #$1d
+        eor $dc04
+        eor $dd04
     noEor:  
         sta seed
         rts
     seed:
-        .byte $76
+        .byte $62
+
+
+    init:
+        lda #$ff
+        sta $dc05
+        sta $dd05
+        lda #$7f
+        sta $dc04
+        lda #$37
+        sta $dd04
+
+        lda #$91
+        sta $dc0e
+        sta $dd0e
+        rts
 }
 
 
@@ -68,6 +85,8 @@ Entry:
 		//Set screen and character memory
 		lda #%00001100
 		sta VIC.MEMORY_SETUP
+
+		jsr Random.init
 
 		//Setup generated tables
 		jsr SOFTSPRITES.CreateMaskTable
@@ -121,3 +140,4 @@ Entry:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 #import "maps/assets.asm"
 
+ 
