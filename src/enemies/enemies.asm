@@ -8,6 +8,8 @@ ENEMIES: {
 	.label STATE_WALK_RIGHT = %00001000
 	.label STATE_FACE_LEFT  = %00010000
 	.label STATE_FACE_RIGHT = %00100000
+	.label STATE_STUNNED    = %01000000
+	.label STATE_DYING   	= %10000000
 
 
 	EnemyType: 
@@ -36,6 +38,9 @@ ENEMIES: {
 	EnemyJumpFallIndex:
 		.fill MAX_ENEMIES, 0
 
+	EnemyStunTimer:
+		.fill MAX_ENEMIES, 0
+
 	EnemyState:
 		.fill MAX_ENEMIES, 0
 
@@ -54,6 +59,24 @@ ENEMIES: {
 			ldx #129 //half value
 			ldy #120
 			jsr SpawnEnemy
+
+			//TEST
+			lda #$01
+			ldx #22 //Half value
+			ldy #60
+			jsr SpawnEnemy
+
+			lda #$02
+			ldx #29 //half value
+			ldy #80
+			jsr SpawnEnemy
+
+			//TEST
+			lda #$01
+			ldx #122 //Half value
+			ldy #180
+			jsr SpawnEnemy
+
 
 			rts
 	}

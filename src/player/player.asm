@@ -635,7 +635,7 @@ PLAYER: {
 			ora #STATE_THROWING
 			sta Player1_State
 			lda #$00
-			sta Player1_ThrowIndex			
+			sta Player1_ThrowIndex	
 
 			///
 
@@ -782,7 +782,9 @@ PLAYER: {
 			ora #STATE_THROWING
 			sta Player2_State	
 			lda #$00
-			sta Player2_ThrowIndex			
+			sta Player2_ThrowIndex		
+
+
 			///
 		!:
 

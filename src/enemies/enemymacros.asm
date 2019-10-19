@@ -219,6 +219,15 @@
 		jsr CheckVsProjectiles
 }
 
+.macro exitIfStunned() {
+		lda ENEMIES.EnemyState, x 
+		and #ENEMIES.STATE_STUNNED
+		beq !Exit+
+		jmp BEHAVIOURS.StunnedBehaviour.update
+	!Exit:
+}
+
+
 CheckVsProjectiles: {
 		ldy #$00
 	!Loop:
@@ -259,8 +268,8 @@ CheckVsProjectiles: {
 		sbc TEMP10
 
 		clc
-		adc #$04
-		cmp #$10
+		adc #$00	//Start of left edge (inv)
+		cmp #$08	//width of collision box
 		bcs !Skip+
 		jmp !Collide+
 		////////////////
@@ -271,10 +280,41 @@ CheckVsProjectiles: {
 		jmp !+
 
 	!Collide:
+		lda ENEMIES.EnemyState, x
+		and #%01111100
+		ora #%01000000
+		sta ENEMIES.EnemyState, x
+
+		lda #$ff
+		sta ENEMIES.EnemyStunTimer, x
+
+
+		txa
+		pha 
+		tya 
+		pha
+
+		lsr 
+		tay
 		lda #$01
-		sta ENEMIES.EnemyColor, x
+		ldx #$02
+		jsr HUD.AddScore	
+
+		pla 
+		tay 
+		pla 
+		tax
+
 		lda #$00
 		sta PROJECTILES.Player1_Proj_Type, y
+		sta SOFTSPRITES.SpriteData_ID, y
+
+		stx SelfModRestore + 1
+		tya 
+		tax 
+		jsr SOFTSPRITES.ClearSprite
+	SelfModRestore:
+		ldx #$BB
 	!:
 		rts
 }

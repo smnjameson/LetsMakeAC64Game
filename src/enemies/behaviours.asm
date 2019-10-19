@@ -53,12 +53,13 @@ BEHAVIOURS: {
 				.byte 0, 23
 
 		!OnUpdate:	
+				:exitIfStunned()
 				:setEnemyColor(7, 13)
 				:hasHitProjectile()
 				:getStaticMemory(DY)
 				tay
 				:getStaticMemory(DX)
-				:UpdatePosition(null, null)
+				:UpdatePosition(null, null)				
 
 			!YBounce:
 				lda ENEMIES.EnemyPosition_Y1, x
@@ -67,7 +68,6 @@ BEHAVIOURS: {
 				cmp #$cd
 				bcs !DoYBounce+
 			!:
-				* = * 
 				:getStaticMemory(DY)
 				clc
 				adc #$01
@@ -157,6 +157,7 @@ BEHAVIOURS: {
 				rts
 
 		!OnUpdate:
+				:exitIfStunned()
 				:setEnemyColor(5, 14)
 				:hasHitProjectile()
 				//Should I fall??
@@ -251,11 +252,40 @@ BEHAVIOURS: {
 	}
 
 
-	StunnedBehaviuor: {
-		update: {
-			lda ENEMIES.EnemyState, x
-			:setEnemyColor($02, $0a)
 
+	StunnedBehaviour: {
+		update: {
+			lda ZP_COUNTER
+			and #$03
+			bne !+
+			dec ENEMIES.EnemyStunTimer, x
+			bne !+
+			lda ENEMIES.EnemyState, x
+			and #[255 - ENEMIES.STATE_STUNNED]
+			sta ENEMIES.EnemyState, x
+			rts
+		!:	
+			lda ENEMIES.EnemyStunTimer, x
+			cmp #$30
+			bcs !SetColorNormal+
+			and #$01
+			beq !SetColor2+
+		!SetColor1:
+			:setEnemyColor($0c, null)
+			jmp !Skip+
+		!SetColor2:
+			:setEnemyColor($02, null)
+			jmp !Skip+
+		!SetColorNormal:
+			:setEnemyColor($0c, null)
+		!Skip:
+
+			:doFall(12, 21)
+		// 	bcs !+
+		// 	:snapEnemyToFloor()
+		// !:
+			:PositionEnemy()
+			rts
 		}
 	}
 
