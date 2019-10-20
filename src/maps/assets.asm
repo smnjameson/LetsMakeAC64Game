@@ -5,7 +5,7 @@
 	$f000 - $f7ff 1 charset
 	$f800 - $fffd 15 sprites
 */
-
+					
 .label SCREEN_RAM = $c000
 .label SPRITE_POINTERS = SCREEN_RAM + $3f8
 

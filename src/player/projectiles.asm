@@ -216,6 +216,7 @@ PROJECTILES: {
 	//X register = softsprite/projectile
 	CheckProjectileCollision: {
 			.label SCREEN_LOOKUP = VECTOR1
+			.label COLOR_LOOKUP = VECTOR1
 			.label COLLISION_DATA = TEMP1
 			.label TEMP = TEMP2
 			stx TEMP
@@ -255,6 +256,17 @@ PROJECTILES: {
 			lda COLLISION_DATA	
 			and #PLAYER.COLLISION_COLORABLE
 			beq !+
+
+			inc $d020
+			lda SCREEN_LOOKUP + 1
+			clc
+			adc #>[$d800 - MAPLOADER.BUFFER]
+			sta SCREEN_LOOKUP + 1
+			lda #$0a
+			sta (COLOR_LOOKUP), y
+		// !b1:
+		// 	jmp !b1-
+
 
 			:DestroyPlayerProjectile()
 		!:

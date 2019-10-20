@@ -1,6 +1,6 @@
 SOFTSPRITES: {
 	.label MAX_UNIQUE_CHARS = 4			//Maximum number of unique char IDs 
-	.label MAX_SPRITES_PER_FRAME = 4	//Maximum number of sprites to update per frame
+	.label MAX_SPRITES_PER_FRAME = 3	//Maximum number of sprites to update per frame
 	//.label MAX_SPRITES //DEFINED in ZERO PAGE file
 
 	.label SPRITE_FONT_START = 187
@@ -529,6 +529,12 @@ SOFTSPRITES: {
 			.label BUFFER = VECTOR2
 			.label COLOR_ROW= VECTOR3
 
+				/*
+					 OPtimisation is to not restore color
+					 however this recudes the variance in BG graphics
+					 BUT it does allow the floor effects to work with 
+					 less cycle usage 
+				*/
 				stx TEMP
 
 				lda SpriteData_CLEAR_MSB, x
@@ -552,29 +558,29 @@ SOFTSPRITES: {
 				ldy #$00
 				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				lda CHAR_COLORS, x
-				sta (COLOR_ROW), y
+				// lda CHAR_COLORS, x
+				// sta (COLOR_ROW), y
 
 				//1,0
 				ldy #$01
 				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				lda CHAR_COLORS, x
-				sta (COLOR_ROW), y
+				// lda CHAR_COLORS, x
+				// sta (COLOR_ROW), y
 
 				//0,1
 				ldy #$28
 				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				lda CHAR_COLORS, x
-				sta (COLOR_ROW), y
+				// lda CHAR_COLORS, x
+				// sta (COLOR_ROW), y
 
 				//1,1
 				ldy #$29
 				lax (BUFFER), y
 				sta (SCREEN_ROW), y
-				lda CHAR_COLORS, x
-				sta (COLOR_ROW), y
+				// lda CHAR_COLORS, x
+				// sta (COLOR_ROW), y
 
 				ldx TEMP
 			rts	

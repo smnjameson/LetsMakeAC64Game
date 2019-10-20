@@ -153,6 +153,12 @@ PLAYER: {
 
 		//Get Left Collision
 		lda #$00
+		sta Player1_LeftCollision
+		lda Player1_State
+		and #STATE_FACE_LEFT
+		beq !Skip+
+
+		lda #$00
 		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #11
 		jsr PLAYER.GetCollisionPoint
@@ -170,9 +176,15 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_LeftCollision
 		sta Player1_LeftCollision
-
+	!Skip:
 
 		//Get Right Collision
+		lda #$00
+		sta Player1_RightCollision
+		lda Player1_State
+		and #STATE_FACE_RIGHT
+		beq !Skip+
+
 		lda #$00
 		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #11
@@ -191,6 +203,9 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_RightCollision
 		sta Player1_RightCollision
+	!Skip:
+
+
 
 
 
@@ -221,6 +236,12 @@ PLAYER: {
 
 
 		//Get Left Collision
+		lda #$00
+		sta Player2_LeftCollision
+		lda Player2_State
+		and #STATE_FACE_LEFT
+		beq !Skip+
+
 		lda #$01
 		ldx #PLAYER_LEFT_COLLISON_BOX
 		ldy #11
@@ -239,10 +260,16 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player2_LeftCollision
 		sta Player2_LeftCollision
-
+	!Skip:
 
 
 		//Get Right Collision
+		lda #$00
+		sta Player2_RightCollision
+		lda Player2_State
+		and #STATE_FACE_RIGHT
+		beq !Skip+
+
 		lda #$01
 		ldx #PLAYER_RIGHT_COLLISON_BOX
 		ldy #11
@@ -261,6 +288,7 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player2_RightCollision
 		sta Player2_RightCollision
+	!Skip:
 
 		rts
 	}
@@ -866,6 +894,20 @@ PLAYER: {
 			lda Player2_X + 2
 			adc #$00
 			sta Player2_X + 2
+
+
+			//CHeck screen edge xx/$48/$01
+			lda Player2_X + 2
+			beq !SkipEdgeCheck+
+			lda Player2_X + 1
+			cmp #RIGHT_SCREEN_EDGE
+			bcc !SkipEdgeCheck+
+			lda #$00
+			sta Player2_X + 0
+			lda #RIGHT_SCREEN_EDGE
+			sta Player2_X + 1
+		!SkipEdgeCheck:
+
 
 			lda Player2_State
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
