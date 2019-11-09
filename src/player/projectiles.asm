@@ -257,7 +257,7 @@ PROJECTILES: {
 			and #PLAYER.COLLISION_COLORABLE
 			beq !+
 
-			inc $d020
+			// inc $d020
 			lda SCREEN_LOOKUP + 1
 			clc
 			adc #>[$d800 - MAPLOADER.BUFFER]

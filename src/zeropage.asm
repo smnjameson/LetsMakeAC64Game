@@ -32,7 +32,7 @@ JOY_ZP1: 	.byte $00
 JOY_ZP2: 	.byte $00
 
 
-.label MAX_SPRITES = 8
+.label MAX_SPRITES = 8  //Power of two!!
 SPRITE_SCREEN_ROW:	.fill MAX_SPRITES * 2, $00
 SPRITE_SCREEN_X:	.fill MAX_SPRITES, $00
 

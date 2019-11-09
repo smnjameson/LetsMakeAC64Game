@@ -1,6 +1,6 @@
 SOFTSPRITES: {
 	.label MAX_UNIQUE_CHARS = 4			//Maximum number of unique char IDs 
-	.label MAX_SPRITES_PER_FRAME = 3	//Maximum number of sprites to update per frame
+	.label MAX_SPRITES_PER_FRAME = 4	//Maximum number of sprites to update per frame
 	//.label MAX_SPRITES //DEFINED in ZERO PAGE file
 
 	.label SPRITE_FONT_START = 187
@@ -131,13 +131,19 @@ SOFTSPRITES: {
 
 
 			//PRE CLEAR SCREEN BUFFER
-			ldx #$00
+			ldx #[MAX_SPRITES - 1]
 		!Loop:
+			lda SpriteData_CLEAR_MSB, x
+			beq !+
 			jsr ClearSprite
+			lda SpriteData_ID, x
+			bne !+
+			lda #$00
+			sta SpriteData_CLEAR_MSB, x
 		!:
-			inx
-			cpx #MAX_SPRITES
-			bne !Loop-
+			dex
+			bpl !Loop-
+
 
 
 
@@ -286,7 +292,6 @@ SOFTSPRITES: {
 
 
 
-
 				//BOTTOM LEFT ////////////////////////
 				ldy #$28
 				lda (SCREEN_ROW), y
@@ -399,18 +404,15 @@ SOFTSPRITES: {
 				jsr DrawSprites
 
 		!Skip:
-			lda UPDATE_INDEX
-			clc
-			adc #$01
-			cmp #MAX_SPRITES
-			bcc !NoWrap+
-			sec
-			sbc #MAX_SPRITES
-		!NoWrap:
-			sta UPDATE_INDEX
-			tax
+			lda UPDATE_INDEX //4
+			clc //2
+			adc #$01 //2
+			and #[MAX_SPRITES - 1] //2
+			sta UPDATE_INDEX //4
+
 			cmp SpriteUpdateIndex //When we are back to the index we started at we've done all sprites
 			beq !+
+			tax //2
 			jmp !Loop-
 
 
@@ -535,12 +537,8 @@ SOFTSPRITES: {
 					 BUT it does allow the floor effects to work with 
 					 less cycle usage 
 				*/
-				stx TEMP
+				// stx TEMP
 
-				lda SpriteData_CLEAR_MSB, x
-				bne !+
-				rts
-			!:
 				sta SCREEN_ROW + 1
 				clc
 				adc #>[VIC.COLOR_RAM - SCREEN_RAM]
@@ -556,33 +554,27 @@ SOFTSPRITES: {
 
 				//0,0
 				ldy #$00
-				lax (BUFFER), y
+				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-				// lda CHAR_COLORS, x
-				// sta (COLOR_ROW), y
+	
 
 				//1,0
 				ldy #$01
-				lax (BUFFER), y
+				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-				// lda CHAR_COLORS, x
-				// sta (COLOR_ROW), y
-
+	
 				//0,1
 				ldy #$28
-				lax (BUFFER), y
+				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-				// lda CHAR_COLORS, x
-				// sta (COLOR_ROW), y
+	
 
 				//1,1
 				ldy #$29
-				lax (BUFFER), y
+				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-				// lda CHAR_COLORS, x
-				// sta (COLOR_ROW), y
 
-				ldx TEMP
+				// ldx TEMP
 			rts	
 	}
 
