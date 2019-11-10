@@ -1,3 +1,4 @@
+* = * "PLAYER CODE"
 PLAYER: {
 	.label COLLISION_SOLID = %00010000
 	.label COLLISION_COLORABLE = %00100000
@@ -9,6 +10,7 @@ PLAYER: {
 	.label STATE_FACE_LEFT  = %00010000
 	.label STATE_FACE_RIGHT = %00100000
 	.label STATE_THROWING 	= %01000000
+	.label STATE_EATING 	= %10000000
 
 	.label PLAYER_1 = %00000001
 	.label PLAYER_2 = %00000010
@@ -25,6 +27,8 @@ PLAYER: {
 	.label PLAYER_RIGHT_COLLISON_BOX = 19
 	.label PLAYER_LEFT_COLLISON_BOX = 5
 	.label FOOT_COLLISION_OFFSET = 3
+
+	.label FIRE_HELD_THRESHOLD = 50
 
 	PlayersActive:
 			.byte $00
@@ -46,7 +50,10 @@ PLAYER: {
 			.byte $00
 	Player2_FirePressed:
 			.byte $00
-
+	Player1_FireHeld:
+			.byte $00
+	Player2_FireHeld:
+			.byte $00
 
 	Player1_FloorCollision:
 			.byte $00
@@ -416,6 +423,7 @@ PLAYER: {
 			lda CURRENT_PLAYER
 			cmp #$01
 			bne !Player2+
+
 		!Player1:
 			lda #<Player1_State
 			sta PlayerState
@@ -526,6 +534,15 @@ PLAYER: {
 
 			!NotThrowing:
 				lda (PlayerState), y
+				bit TABLES.Plus + STATE_EATING
+
+				beq !NotEating+
+
+				lda #$52
+				sta CURRENT_FRAME
+				jmp !SetFrame+
+
+			!NotEating:
 				and #[STATE_WALK_RIGHT + STATE_WALK_LEFT]
 				beq !SetFrame+ //If not just do default frame
 
@@ -642,18 +659,38 @@ PLAYER: {
 		!Fire:
 			lda JOY_ZP1
 			and #JOY_FR
-			beq !FirePressed+
-			lda #$00
+			bne !FirePressed+
+			lda #$01
 			sta Player1_FirePressed	
+			ldx Player1_FireHeld
+			inx
+			stx Player1_FireHeld
+			cpx #FIRE_HELD_THRESHOLD
+			bcs !StartEat+
+			jmp !+
+
+		!StartEat:
+			lda Player1_State
+			ora #STATE_EATING
+			sta Player1_State
 			jmp !+
 
 		!FirePressed:
+			lda #$00
+			sta Player1_FireHeld
 			lda Player1_State
+			bit TABLES.Plus + STATE_EATING
+			beq !Skip+
+			and #[255 - STATE_EATING]
+			sta Player1_State
+			jmp !+
+
+		!Skip:
 			and #STATE_THROWING
 			bne !+
 			lda Player1_FirePressed	
-			bne !+
-			lda #$01
+			beq !+
+			lda #$00
 			sta Player1_FirePressed	
 			jsr PROJECTILES.CheckPlayer1CanShoot
 			bmi !+ //If negative player cannot shoot
@@ -664,13 +701,18 @@ PLAYER: {
 			sta Player1_State
 			lda #$00
 			sta Player1_ThrowIndex	
-
 			///
 
 		!:
 
 
 		!Up:
+			lda Player1_State
+			bit TABLES.Plus + STATE_EATING
+			beq !+
+			jmp !SkipMovement+
+		!:
+
 			lda Player1_State
 			and #[STATE_FALL + STATE_JUMP]
 			bne !+
@@ -771,6 +813,8 @@ PLAYER: {
 			sta DefaultFrame
 	
 		!:
+		!SkipMovement:
+
 			rts
 	}
 
@@ -789,18 +833,37 @@ PLAYER: {
 		!Fire:
 			lda JOY_ZP2
 			and #JOY_FR
-			beq !FirePressed+
-			lda #$00
+			bne !FirePressed+
+			lda #$01
 			sta Player2_FirePressed	
+			ldx Player2_FireHeld
+			inx
+			stx Player2_FireHeld
+			cpx #FIRE_HELD_THRESHOLD
+			bcs !StartEat+			
+			jmp !+
+
+		!StartEat:
+			lda Player2_State
+			ora #STATE_EATING
+			sta Player2_State
 			jmp !+
 
 		!FirePressed:
+			lda #$00
+			sta Player2_FireHeld	
 			lda Player2_State
+			bit TABLES.Plus + STATE_EATING
+			beq !Skip+
+			and #[255 - STATE_EATING]
+			sta Player2_State
+			jmp !+
+		!Skip:		
 			and #STATE_THROWING
 			bne !+		
 			lda Player2_FirePressed	
-			bne !+
-			lda #$01
+			beq !+
+			lda #$00
 			sta Player2_FirePressed	
 			jsr PROJECTILES.CheckPlayer2CanShoot
 			bmi !+
@@ -818,6 +881,11 @@ PLAYER: {
 
 
 		!Up:
+			lda Player2_State
+			bit TABLES.Plus + STATE_EATING
+			beq !+
+			jmp !SkipMovement+
+		!:		
 			lda Player2_State
 			and #[STATE_FALL + STATE_JUMP]
 			bne !+
@@ -917,6 +985,8 @@ PLAYER: {
 			sta DefaultFrame + 1
 	
 		!:
+		!SkipMovement:
+
 			rts
 	}
 

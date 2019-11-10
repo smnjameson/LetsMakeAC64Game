@@ -400,9 +400,9 @@ SOFTSPRITES: {
 
 				//Restore x iterator
 				ldx TEMP
-		!OnlyDraw:				
-				jsr DrawSprites
+		!OnlyDraw:	
 
+				jsr DrawSprites
 		!Skip:
 			lda UPDATE_INDEX //4
 			clc //2
@@ -414,7 +414,6 @@ SOFTSPRITES: {
 			beq !+
 			tax //2
 			jmp !Loop-
-
 
 
 		!:

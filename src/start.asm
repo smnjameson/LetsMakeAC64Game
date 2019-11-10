@@ -150,4 +150,3 @@ Entry:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 #import "maps/assets.asm"
 
- 
