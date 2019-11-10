@@ -28,7 +28,7 @@ PLAYER: {
 	.label PLAYER_LEFT_COLLISON_BOX = 5
 	.label FOOT_COLLISION_OFFSET = 3
 
-	.label FIRE_HELD_THRESHOLD = 50
+	.label FIRE_HELD_THRESHOLD = 15
 
 	PlayersActive:
 			.byte $00
@@ -79,6 +79,11 @@ PLAYER: {
 	Player1_WalkIndex:
 			.byte $00
 	Player2_WalkIndex:
+			.byte $00
+
+	Player1_EatIndex:
+			.byte $00
+	Player2_EatIndex:
 			.byte $00
 
 	Player1_ThrowIndex:
@@ -534,14 +539,37 @@ PLAYER: {
 
 
 			!NotThrowing:
+				ldx CURRENT_PLAYER	
 				lda (PlayerState), y
 				bit TABLES.Plus + STATE_EATING
 
 				beq !NotEating+
 
-				lda #$52
-				sta CURRENT_FRAME
+				lda Player1_EatIndex, x
+				tay
+				lda ZP_COUNTER
+				and #$03
+				bne !Skip+
+				iny
+				cpy #$02
+				bcc !+
+				ldy #$02
+			!:
+				tya
+				sta Player1_EatIndex, x
+			!Skip:				
+				lda (PlayerState), x
+				and #[STATE_FACE_LEFT]
+				beq !FaceRight+
+			!FaceLeft:
+				lda TABLES.PlayerEatLeft, y
+				jmp !EatFrame+
+			!FaceRight:
+				lda TABLES.PlayerEatRight, y
+			!EatFrame:
+				sta CURRENT_FRAME 
 				jmp !SetFrame+
+
 
 			!NotEating:
 				and #[STATE_WALK_RIGHT + STATE_WALK_LEFT]
@@ -685,6 +713,8 @@ PLAYER: {
 			sta Player1_State, y
 			lda #$00
 			sta Player1_FireHeld, y
+			sta Player1_FirePressed, y				
+			sta Player1_EatIndex, y
 			jmp !+
 
 		!Skip:
@@ -714,8 +744,8 @@ PLAYER: {
 			lda #$00
 			sta Player1_ThrowIndex, y	
 			///
-
 		!:
+
 
 
 		!Up:

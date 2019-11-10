@@ -24,6 +24,15 @@ TABLES: {
 		.byte 64,65,66,65
 	__PlayerWalkRight: 
 
+	PlayerEatLeft: 
+		.byte 84,85,86
+	__PlayerEatLeft: 
+
+	PlayerEatRight: 
+		.byte 80,81,82
+	__PlayerEatRight: 
+
+
 	PlayerThrowLeft: 
 		.byte 76,77,78,79,79,79,79,79,79,78,78,78,77,77
 	__PlayerThrowLeft: 
