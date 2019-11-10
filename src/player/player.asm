@@ -57,16 +57,17 @@ PLAYER: {
 
 	Player1_FloorCollision:
 			.byte $00
-	Player1_LeftCollision:
-			.byte $00
-	Player1_RightCollision:
-			.byte $00
-
 	Player2_FloorCollision:
 			.byte $00
-	Player2_LeftCollision:
+
+	Player1_RightCollision:
 			.byte $00
 	Player2_RightCollision:
+			.byte $00
+
+	Player1_LeftCollision:
+			.byte $00
+	Player2_LeftCollision:
 			.byte $00
 
 
@@ -639,104 +640,120 @@ PLAYER: {
 
 
 	PlayerControl: {
-		jsr Player1Control
-		jsr Player2Control
+		ldy #$00
+		jsr PlayerControlFunc
+		ldy #$01
+		jsr PlayerControlFunc
 		rts
 	}
 
-
-	Player1Control: {
+	PlayerControlFunc: {
 			.label JOY_PORT_2 = $dc00
+			lda JOY_PORT_2, y
+			sta JOY_ZP1, y
 
-			lda JOY_PORT_2
-			sta JOY_ZP1
-
-			lda Player1_State	
+			lda Player1_State, y	
 			and #[255 - STATE_WALK_RIGHT - STATE_WALK_LEFT]
-			sta Player1_State
+			sta Player1_State, y
 
 
 		!Fire:
-			lda JOY_ZP1
+			lda JOY_ZP1, y
 			and #JOY_FR
 			bne !FirePressed+
 			lda #$01
-			sta Player1_FirePressed	
-			ldx Player1_FireHeld
+			sta Player1_FirePressed, y
+			ldx Player1_FireHeld, y
 			inx
-			stx Player1_FireHeld
+			txa
+			sta Player1_FireHeld, y
 			cpx #FIRE_HELD_THRESHOLD
 			bcs !StartEat+
 			jmp !+
 
 		!StartEat:
-			lda Player1_State
+			lda Player1_State, y
 			ora #STATE_EATING
-			sta Player1_State
+			sta Player1_State, y
 			jmp !+
 
 		!FirePressed:
-			lda #$00
-			sta Player1_FireHeld
-			lda Player1_State
+			lda Player1_State, y
 			bit TABLES.Plus + STATE_EATING
 			beq !Skip+
 			and #[255 - STATE_EATING]
-			sta Player1_State
+			sta Player1_State, y
+			lda #$00
+			sta Player1_FireHeld, y
 			jmp !+
 
 		!Skip:
+			lda #$00
+			sta Player1_FireHeld, y
 			and #STATE_THROWING
 			bne !+
-			lda Player1_FirePressed	
+			lda Player1_FirePressed, y
 			beq !+
 			lda #$00
-			sta Player1_FirePressed	
+			sta Player1_FirePressed, y	
+
+			cpy #$00
+			bne !Plyr2+
+		!Plyr1:
 			jsr PROJECTILES.CheckPlayer1CanShoot
+			jmp !PlyrDone+
+		!Plyr2:
+			jsr PROJECTILES.CheckPlayer2CanShoot
+		!PlyrDone:
 			bmi !+ //If negative player cannot shoot
 
 
-			lda Player1_State
+			lda Player1_State, y
 			ora #STATE_THROWING
-			sta Player1_State
+			sta Player1_State, y
 			lda #$00
-			sta Player1_ThrowIndex	
+			sta Player1_ThrowIndex, y	
 			///
 
 		!:
 
 
 		!Up:
-			lda Player1_State
+			lda Player1_State, y
 			bit TABLES.Plus + STATE_EATING
 			beq !+
 			jmp !SkipMovement+
 		!:
 
-			lda Player1_State
+			lda Player1_State, y
 			and #[STATE_FALL + STATE_JUMP]
 			bne !+
-			lda JOY_ZP1 
+			lda JOY_ZP1, y
 			and #JOY_UP
 			bne !+
-			lda Player1_State
+			lda Player1_State, y
 			ora #STATE_JUMP
-			sta Player1_State
+			sta Player1_State, y
 			lda #$00
-			sta Player1_JumpIndex
+			sta Player1_JumpIndex, y
 			jmp !Left+
 		!:
 
 
 		!Left:
-			lda JOY_ZP1
+			lda JOY_ZP1, y
 			and #JOY_LT
-			bne !+
+			beq !Skip+
+			jmp !+
+		!Skip:
 
-			lda Player1_LeftCollision
+			lda Player1_LeftCollision, y
 			and #COLLISION_SOLID
 			bne !+
 
+			cpy #$00
+			bne !Plyr2+
+		!Plyr1:
 			sec
 			lda Player1_X
 			sbc Player1_WalkSpeed
@@ -759,157 +776,9 @@ PLAYER: {
 			lda #LEFT_SCREEN_EDGE
 			sta Player1_X + 1
 		!SkipEdgeCheck:
+			jmp !PlyrDone+
 
-
-			lda Player1_State
-			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
-			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
-			sta Player1_State
-			lda #67
-			sta DefaultFrame
-			jmp !Right+
-		!:
-
-
-
-		!Right:
-			lda JOY_ZP1
-			and #JOY_RT
-			bne !+
-
-			lda Player1_RightCollision
-			and #COLLISION_SOLID
-			bne !+
-
-			clc
-			lda Player1_X
-			adc Player1_WalkSpeed
-			sta Player1_X
-			lda Player1_X + 1
-			adc Player1_WalkSpeed + 1
-			sta Player1_X + 1
-			lda Player1_X + 2
-			adc #$00
-			sta Player1_X + 2
-
-			//CHeck screen edge xx/$48/$01
-			lda Player1_X + 2
-			beq !SkipEdgeCheck+
-			lda Player1_X + 1
-			cmp #RIGHT_SCREEN_EDGE
-			bcc !SkipEdgeCheck+
-			lda #$00
-			sta Player1_X + 0
-			lda #RIGHT_SCREEN_EDGE
-			sta Player1_X + 1
-		!SkipEdgeCheck:
-
-			lda Player1_State
-			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
-			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
-			sta Player1_State
-
-			lda #64
-			sta DefaultFrame
-	
-		!:
-		!SkipMovement:
-
-			rts
-	}
-
-
-
-	Player2Control: {
-			.label JOY_PORT_1 = $dc01
-
-			lda JOY_PORT_1
-			sta JOY_ZP2
-
-			lda Player2_State	
-			and #[255 - STATE_WALK_RIGHT - STATE_WALK_LEFT]
-			sta Player2_State
-
-		!Fire:
-			lda JOY_ZP2
-			and #JOY_FR
-			bne !FirePressed+
-			lda #$01
-			sta Player2_FirePressed	
-			ldx Player2_FireHeld
-			inx
-			stx Player2_FireHeld
-			cpx #FIRE_HELD_THRESHOLD
-			bcs !StartEat+			
-			jmp !+
-
-		!StartEat:
-			lda Player2_State
-			ora #STATE_EATING
-			sta Player2_State
-			jmp !+
-
-		!FirePressed:
-			lda #$00
-			sta Player2_FireHeld	
-			lda Player2_State
-			bit TABLES.Plus + STATE_EATING
-			beq !Skip+
-			and #[255 - STATE_EATING]
-			sta Player2_State
-			jmp !+
-		!Skip:		
-			and #STATE_THROWING
-			bne !+		
-			lda Player2_FirePressed	
-			beq !+
-			lda #$00
-			sta Player2_FirePressed	
-			jsr PROJECTILES.CheckPlayer2CanShoot
-			bmi !+
-
-
-			lda Player2_State
-			ora #STATE_THROWING
-			sta Player2_State	
-			lda #$00
-			sta Player2_ThrowIndex		
-
-
-			///
-		!:
-
-
-		!Up:
-			lda Player2_State
-			bit TABLES.Plus + STATE_EATING
-			beq !+
-			jmp !SkipMovement+
-		!:		
-			lda Player2_State
-			and #[STATE_FALL + STATE_JUMP]
-			bne !+
-			lda JOY_ZP2	
-			and #JOY_UP
-			bne !+
-			lda Player2_State
-			ora #STATE_JUMP
-			sta Player2_State
-			lda #$00
-			sta Player2_JumpIndex
-			jmp !Left+
-		!:
-
-
-		!Left:
-			lda JOY_ZP2
-			and #JOY_LT
-			bne !+
-
-			lda Player2_LeftCollision
-			and #COLLISION_SOLID
-			bne !+		
-
+		!Plyr2:
 			sec
 			lda Player2_X
 			sbc Player2_WalkSpeed
@@ -932,26 +801,59 @@ PLAYER: {
 			lda #LEFT_SCREEN_EDGE
 			sta Player2_X + 1
 		!SkipEdgeCheck:
+		!PlyrDone:
 
-			lda Player2_State
+			lda Player1_State, y
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
 			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
-			sta Player2_State
+			sta Player1_State, y
 			lda #67
-			sta DefaultFrame + 1
+			sta DefaultFrame, y
 			jmp !Right+
 		!:
 
 
+
 		!Right:
-			lda JOY_ZP2
+			lda JOY_ZP1, y
 			and #JOY_RT
+			beq !Skip+
+			jmp !+
+		!Skip:
+
+			lda Player1_RightCollision, y
+			and #COLLISION_SOLID
 			bne !+
 
-			lda Player2_RightCollision
-			and #COLLISION_SOLID
-			bne !+		
+			cpy #$00
+			bne !Plyr2+
 
+		!Plyr1:
+			clc
+			lda Player1_X
+			adc Player1_WalkSpeed
+			sta Player1_X
+			lda Player1_X + 1
+			adc Player1_WalkSpeed + 1
+			sta Player1_X + 1
+			lda Player1_X + 2
+			adc #$00
+			sta Player1_X + 2
+
+			//CHeck screen edge xx/$48/$01
+			lda Player1_X + 2
+			beq !SkipEdgeCheck+
+			lda Player1_X + 1
+			cmp #RIGHT_SCREEN_EDGE
+			bcc !SkipEdgeCheck+
+			lda #$00
+			sta Player1_X + 0
+			lda #RIGHT_SCREEN_EDGE
+			sta Player1_X + 1
+		!SkipEdgeCheck:
+			jmp !PlyrDone+
+
+		!Plyr2:
 			clc
 			lda Player2_X
 			adc Player2_WalkSpeed
@@ -962,7 +864,6 @@ PLAYER: {
 			lda Player2_X + 2
 			adc #$00
 			sta Player2_X + 2
-
 
 			//CHeck screen edge xx/$48/$01
 			lda Player2_X + 2
@@ -976,21 +877,20 @@ PLAYER: {
 			sta Player2_X + 1
 		!SkipEdgeCheck:
 
+		!PlyrDone:
 
-			lda Player2_State
+			lda Player1_State, y
 			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
 			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
-			sta Player2_State
+			sta Player1_State, y
+
 			lda #64
-			sta DefaultFrame + 1
-	
+			sta DefaultFrame, y
 		!:
 		!SkipMovement:
 
 			rts
 	}
-
-
 
 
 	JumpAndFall: {
