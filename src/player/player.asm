@@ -91,6 +91,7 @@ PLAYER: {
 	Player2_ThrowIndex:
 			.byte $00
 
+	*=*
 	Player1_State:
 			.byte $00
 	Player2_State:
@@ -412,6 +413,7 @@ PLAYER: {
 
 
 	DrawPlayer: {
+
 		.label PlayerState = VECTOR1
 		.label PlayerWalkIndex = VECTOR2
 		.label PlayerX = VECTOR3
@@ -476,16 +478,13 @@ PLAYER: {
 
 		!PlayerSetupComplete:
 
-
 			//Set player frame
 				ldx CURRENT_PLAYER
 				dex
 				lda DefaultFrame, x   //Default idle frame
 				sta CURRENT_FRAME
 
-				//Are we walking left or right?
-				ldy #$00
-
+				ldy #$00 //Set IZPY index
 			!AreWeThrowing:
 				//Are we throwing?
 				lda (PlayerState), y
@@ -540,9 +539,10 @@ PLAYER: {
 
 			!NotThrowing:
 				ldx CURRENT_PLAYER	
+				dex
+				ldy #$00
 				lda (PlayerState), y
 				bit TABLES.Plus + STATE_EATING
-
 				beq !NotEating+
 
 				lda Player1_EatIndex, x
@@ -557,14 +557,19 @@ PLAYER: {
 			!:
 				tya
 				sta Player1_EatIndex, x
-			!Skip:				
-				lda (PlayerState), x
+				:DebugHex(null, 19, 24, 220)
+			!Skip:	
+				ldy #$00
+				lda (PlayerState), y 
+
 				and #[STATE_FACE_LEFT]
 				beq !FaceRight+
 			!FaceLeft:
+				ldy Player1_EatIndex, x
 				lda TABLES.PlayerEatLeft, y
 				jmp !EatFrame+
 			!FaceRight:
+				ldy Player1_EatIndex, x
 				lda TABLES.PlayerEatRight, y
 			!EatFrame:
 				sta CURRENT_FRAME 
@@ -593,7 +598,6 @@ PLAYER: {
 				txa 
 				sta (PlayerWalkIndex), y
 			!Skip:
-
 
 
 				lda (PlayerState), y
@@ -657,8 +661,6 @@ PLAYER: {
 			beq !+
 			jmp !Loop-
 		!:
-
-
 
 			rts
 	}
@@ -834,7 +836,7 @@ PLAYER: {
 		!PlyrDone:
 
 			lda Player1_State, y
-			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			and #[255 - STATE_FACE_RIGHT - STATE_WALK_RIGHT]
 			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player1_State, y
 			lda #67
@@ -910,7 +912,7 @@ PLAYER: {
 		!PlyrDone:
 
 			lda Player1_State, y
-			and #[255 - STATE_FACE_LEFT - STATE_FACE_RIGHT]
+			and #[255 - STATE_FACE_LEFT - STATE_WALK_LEFT]
 			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
 			sta Player1_State, y
 
