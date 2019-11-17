@@ -15,6 +15,7 @@ BasicUpstart2(Entry)
 #import "player/hud.asm"
 #import "animation/charanimations.asm"
 #import "soft_sprites/softsprites.asm"
+#import "animation/spritewarp.asm"
 
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
@@ -101,7 +102,24 @@ Entry:
 		jsr PLAYER.Initialise
 		jsr HUD.Initialise
 		jsr SOFTSPRITES.Initialise
+		jsr SPRITEWARP.init
 
+		// ldx #$00
+		// ldy #$03
+		// lda #$c0
+		// jsr SPRITEWARP.dissolve		
+		// ldx #$00
+		// ldy #$04
+		// lda #$c0
+		// jsr SPRITEWARP.dissolve		
+		// ldx #$00
+		// ldy #$05
+		// lda #$c0
+		// jsr SPRITEWARP.dissolve		
+		ldx #$00
+		ldy #$01
+		lda #$c0
+		jsr SPRITEWARP.dissolve		
 		jsr ENEMIES.Initialise
 
 
@@ -133,6 +151,8 @@ Entry:
 
 			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
+
+
 
 			lda #$00
 			// sta $d020

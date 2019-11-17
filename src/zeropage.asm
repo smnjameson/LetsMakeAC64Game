@@ -31,6 +31,7 @@ ZP_COUNTER: 	.byte $00
 JOY_ZP1: 	.byte $00
 JOY_ZP2: 	.byte $00
 
+SPRITE_WARP_DATA: .word $0000
 
 .label MAX_SPRITES = 8  //Power of two!!
 SPRITE_SCREEN_ROW:	.fill MAX_SPRITES * 2, $00
