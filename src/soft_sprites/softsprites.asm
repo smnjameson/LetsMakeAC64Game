@@ -8,11 +8,6 @@ SOFTSPRITES: {
 	.label BLIT_TABLE_START = $b000
 
 .align $100
-	Sprite_MaskTable:
-		.fill 256, 00
-	Sprite_MaskTable_Inverted:
-		.fill 256, 00
-
 	CurrentSpriteIndex:
 		.byte $00
 	SpriteData_ID: //180 = Player Projectile
@@ -42,8 +37,6 @@ SOFTSPRITES: {
 		.fill MAX_SPRITES, $00
 
 
-
-
 	//Constants	
 	SpriteData_CharStart:
 		.fill MAX_SPRITES, SPRITE_FONT_START + i * 4
@@ -61,6 +54,8 @@ SOFTSPRITES: {
 	BlitLookup_MSB:
 		.fill MAX_UNIQUE_CHARS, 0
 
+	Times16:
+		.fill 8, i*16
 
 	Initialise: {
 			ldx #$00
@@ -114,36 +109,12 @@ SOFTSPRITES: {
 		.byte $00
 		
 	UpdateSprites: {
-			.label OFFSET_X = TEMP1
-			.label OFFSET_Y = TEMP2
-			.label TEMP = TEMP3
-			.label TEMP_OFFSET = TEMP4
 			.label SCREEN_X = TEMP5
 			.label UPDATE_COUNTER = TEMP6
 			.label UPDATE_INDEX = TEMP7
 
-			.label CHAR_DATA_LEFT = VECTOR1
-			.label BLIT_LOOKUP = VECTOR2
-			.label CHAR_DATA_RIGHT = VECTOR3
 			.label SCREEN_ROW = VECTOR4
-			.label ORIGINAL_DATA = VECTOR5
 			.label COLOR_ROW = VECTOR6
-
-
-			//PRE CLEAR SCREEN BUFFER
-			ldx #[MAX_SPRITES - 1]
-		!Loop:
-			lda SpriteData_CLEAR_MSB, x
-			beq !+
-			jsr ClearSprite
-			lda SpriteData_ID, x
-			bne !+
-			lda #$00
-			sta SpriteData_CLEAR_MSB, x
-		!:
-			dex
-			bpl !Loop-
-
 
 
 
@@ -153,12 +124,22 @@ SOFTSPRITES: {
 			stx UPDATE_INDEX
 
 
-			// ldx #$00
 		!Loop:
-			lda SpriteData_ID, x
-			bne !+
-			jmp !Skip+
-		!:
+
+				//PRE CLEAR SCREEN BUFFER
+				lda SpriteData_CLEAR_MSB, x
+				beq !+
+				jsr ClearSprite
+				lda SpriteData_ID, x
+				bne !+
+				lda #$00
+				sta SpriteData_CLEAR_MSB, x
+				jmp !Skip+
+			!:
+				lda SpriteData_ID, x
+				bne !+
+				jmp !Skip+
+			!:
 
 
 				//Only update on alternate frames
@@ -167,7 +148,6 @@ SOFTSPRITES: {
 				jmp !NoApplyUpdate+
 			!:
 			
-
 				//Apply new target locations
 				lda SpriteData_TARGET_X_LSB, x
 				sta SpriteData_X_LSB, x
@@ -180,11 +160,11 @@ SOFTSPRITES: {
 
 				lda SpriteData_X_LSB, x
 				and #$07
-				sta OFFSET_X
+				sta BLIT_LOOKUP + 2	//OFFSET X
 
 				lda SpriteData_Y, x
 				and #$07
-				sta OFFSET_Y
+				sta BLIT_LOOKUP + 1 //OFFSET Y
 
 				lda SpriteData_X_MSB, x
 				lsr
@@ -222,188 +202,53 @@ SOFTSPRITES: {
 
 				//Get target location for font data in current charset
 				lda SpriteData_CharStart_LSB, x
-				sta CHAR_DATA_LEFT
-				lda SpriteData_CharStart_MSB, x
 				sta CHAR_DATA_LEFT + 1
+				lda SpriteData_CharStart_MSB, x
+				sta CHAR_DATA_LEFT + 2
 
 
-
-
-				stx TEMP //Store x iterator to retrieve at end
-
-
-				//Get blit data lookup based on OFFSET X & Y
-				//
-				lda OFFSET_X
-				lsr
-				sta BLIT_LOOKUP + 1
-				lda OFFSET_Y
-				asl
-				asl
-				asl
-				asl
-				asl
-				sta BLIT_LOOKUP
-
-
+				//Set blity lookup from generated offsets earlier
 				lda SpriteData_ID, x
-				tax
-				dex
+				tay
+				dey
 
-				lda BlitLookup_LSB,x
+				lda BLIT_LOOKUP + 1	
+				asl
+				asl
+				asl
+				asl
+				asl
 				clc
-				adc BLIT_LOOKUP
-				sta BLIT_LOOKUP
+				adc BlitLookup_LSB,y
+				sta BLIT_LOOKUP + 1	
 
-				lda BlitLookup_MSB,x
-				adc BLIT_LOOKUP + 1
-				sta BLIT_LOOKUP + 1
-
-
-
-
-				// TOP LEFT ////////////////////////
-				ldy #$00
-				lda (SCREEN_ROW), y
-				jsr GetFontLookup
-
-
-				ldy #$00
-			!SIMPLE_BLIT_01:
-				cpy OFFSET_Y
-				bcs !FULL_BLIT_01+
-				lda (ORIGINAL_DATA), y	
-				sta (CHAR_DATA_LEFT), y
-				iny
-				bcc !SIMPLE_BLIT_01-
-
-			!FULL_BLIT_01:
-				lax (BLIT_LOOKUP), y //4
-
-				lda (ORIGINAL_DATA), y			   
-				and Sprite_MaskTable, x            
-				ora Sprite_MaskTable_Inverted, x
-
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #$08
-				bne !FULL_BLIT_01-
-				////////////////////////////////////
-
-
-
-				//BOTTOM LEFT ////////////////////////
-				ldy #$28
-				lda (SCREEN_ROW), y
-				sec
-				sbc #$01
-				jsr GetFontLookup
-				
+				lda BLIT_LOOKUP + 2
+				lsr
 				clc
-				lda OFFSET_Y
-				adc #$08
-				sta TEMP_OFFSET
-
-				ldy #$08
-				cpy TEMP_OFFSET
-				bcs !SIMPLE_BLIT_02+				
-			!FULL_BLIT_02:
-				lax (BLIT_LOOKUP), y
-				lda (ORIGINAL_DATA), y			   
-				and Sprite_MaskTable, x            
-				ora Sprite_MaskTable_Inverted, x
-
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy TEMP_OFFSET
-				bcc !FULL_BLIT_02-
-
-			!SIMPLE_BLIT_02:	
-				lda (ORIGINAL_DATA), y	
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #$10
-				bne !SIMPLE_BLIT_02-
-				////////////////////////////////////
+				adc BlitLookup_MSB,y
+				sta BLIT_LOOKUP + 2
 
 
-				//TOP RIGHT ////////////////////////////////////
-				ldy #$01
-				lda (SCREEN_ROW), y
-				sec
-				sbc #$02
-				jsr GetFontLookup
-				
-				clc
-				lda OFFSET_Y
-				adc #$10
-				sta TEMP_OFFSET
+				//Draw to char, Using self mod lookups and targets
+				ldy #$1f
+			!:
+			BLIT_LOOKUP:
+				lda $BEEF, y
+			CHAR_DATA_LEFT:
+				sta $BEEF, y
+				dey
+				bpl !-
 
-				ldy #$10
-			!SIMPLE_BLIT_03:
-				cpy TEMP_OFFSET
-				bcs !FULL_BLIT_03+
-				lda (ORIGINAL_DATA), y	
-				sta (CHAR_DATA_LEFT), y
-				iny
-				bcc !SIMPLE_BLIT_03-
-			!FULL_BLIT_03:
-				lax (BLIT_LOOKUP), y        
-				lda (ORIGINAL_DATA), y	
-				and Sprite_MaskTable, x           
-				ora Sprite_MaskTable_Inverted, x
-
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #$18
-				bne !FULL_BLIT_03-
-				////////////////////////////////////
-
-
-
-				//BOTTOM RIGHT ////////////////////////////////////
-				ldy #$29
-				lda (SCREEN_ROW), y
-				sec
-				sbc #$03
-				jsr GetFontLookup
-				
-				clc
-				lda OFFSET_Y
-				adc #$18
-				sta TEMP_OFFSET				
-
-				ldy #$18
-				cpy TEMP_OFFSET
-				bcs !SIMPLE_BLIT_04+					
-			!FULL_BLIT_04:
-				lax (BLIT_LOOKUP), y
-				lda (ORIGINAL_DATA), y			   
-				and Sprite_MaskTable, x            
-				ora Sprite_MaskTable_Inverted, x
-									   
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy TEMP_OFFSET
-				bcc !FULL_BLIT_04-
-
-			!SIMPLE_BLIT_04:	
-				lda (ORIGINAL_DATA), y	
-				sta (CHAR_DATA_LEFT), y
-				iny
-				cpy #$20
-				bne !SIMPLE_BLIT_04-
-				////////////////////////////////////
-
-			
 				dec UPDATE_COUNTER
 
-				//Restore x iterator
-				ldx TEMP
+
 		!OnlyDraw:	
+			lda #$05
+			sta $d020
 
 				jsr DrawSprites
 		!Skip:
+
 			lda UPDATE_INDEX //4
 			clc //2
 			adc #$01 //2
@@ -455,6 +300,7 @@ SOFTSPRITES: {
 				ldx TEMP
 				and #PLAYER.COLLISION_COLORABLE
 				bne !+
+
 				lda SpriteData_CharStart, x
 				sta (SCREEN_ROW), y
 				lda SpriteColor, x
@@ -525,10 +371,8 @@ SOFTSPRITES: {
 
 
 	ClearSprite: {
-			.label TEMP = TEMP2
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
-			.label COLOR_ROW= VECTOR3
 
 				/*
 					 OPtimisation is to not restore color
@@ -536,19 +380,14 @@ SOFTSPRITES: {
 					 BUT it does allow the floor effects to work with 
 					 less cycle usage 
 				*/
-				// stx TEMP
 
 				sta SCREEN_ROW + 1
-				clc
-				adc #>[VIC.COLOR_RAM - SCREEN_RAM]
-				sta COLOR_ROW + 1	
 				sec
-				sbc #>[VIC.COLOR_RAM - MAPLOADER.BUFFER]
+				sbc #>[SCREEN_RAM- MAPLOADER.BUFFER]
 				sta BUFFER + 1
 
 				lda SpriteData_CLEAR_LSB, x
 				sta SCREEN_ROW
-				sta COLOR_ROW
 				sta BUFFER
 
 				//0,0
@@ -572,50 +411,8 @@ SOFTSPRITES: {
 				ldy #$29
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-
-				// ldx TEMP
 			rts	
 	}
-
-
-
-
-
-
-	CreateMaskTable: {
-		    ldx #$00
-		Loop:
-		    lda TABLES.ColorSwapTable, x
-		    and #%10101010
-		    sta TEMP1
-
-		    lsr
-		    ora TEMP1    
-		    sta TEMP1
-
-		    lda TABLES.ColorSwapTable, x
-		    and #%01010101
-		    sta TEMP2
-		    asl
-		    ora TEMP2
-		    ora TEMP1
-
-
-		    eor #$ff
-		    sta Sprite_MaskTable, x
-
-		    eor #$ff
-		    sta TEMP2
-		    txa
-		    and TEMP2
-			sta Sprite_MaskTable_Inverted, x
-		    
-		    inx    
-		    bne Loop
-
-		    rts
-	}
-
 
 
 	GetFontLookup: {
@@ -640,11 +437,6 @@ SOFTSPRITES: {
 			sta VECTOR5 + 1
 			rts
 	}
-
-
-
-
-
 	BLIT_DATA_LSB:
 		.byte <BLIT_TABLE_START
 	BLIT_DATA_MSB:
@@ -740,7 +532,7 @@ SOFTSPRITES: {
 			//Shift horizontally now
 			ldy #$00
 		!:	
-			lda #$aa
+			lda #$00
 			sta SHIFT_TEMP
 			lda (BLIT_DATA), y
 			ldx OFFSET_X
@@ -748,8 +540,7 @@ SOFTSPRITES: {
 		!InnerLoop:
 			lsr
 			ror SHIFT_TEMP
-			sec
-			ror
+			lsr
 			ror SHIFT_TEMP
 			dex
 			dex

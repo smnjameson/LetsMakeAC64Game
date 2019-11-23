@@ -74,7 +74,7 @@ IRQ: {
 
 
 			//Reset Values set by IRQ	
-			lda #BLACK
+			lda #LIGHT_BLUE
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000 

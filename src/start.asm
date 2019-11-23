@@ -56,14 +56,14 @@ Random: {
 
 
 Entry:
-		lda #$00
+		lda #$0e
 		sta VIC.BACKGROUND_COLOR
 		lda #$00
 		sta VIC.BORDER_COLOR
 
 		lda #$05
 		sta VIC.EXTENDED_BG_COLOR_1
-		lda #$0e
+		lda #$00
 		sta VIC.EXTENDED_BG_COLOR_2
 
 		lda #$ff
@@ -90,7 +90,6 @@ Entry:
 		jsr Random.init
 
 		//Setup generated tables
-		jsr SOFTSPRITES.CreateMaskTable
 		lda #180
 		ldx #$04
 		jsr SOFTSPRITES.CreateSpriteBlitTable
@@ -134,28 +133,28 @@ Entry:
 			inc ZP_COUNTER
 			
 
-			// inc $d020 //1
+			inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
-			// inc $d020 //2
+			inc $d020 //2
 			jsr PLAYER.DrawPlayer
-			// inc $d020 //3
+			inc $d020 //3
 			jsr PLAYER.PlayerControl
-			// inc $d020 //4
+			inc $d020 //4
 			jsr PLAYER.JumpAndFall
-			// inc $d020 //5
+			inc $d020 //5
  			jsr PLAYER.GetCollisions
 
-			// inc $d020 //6
+			inc $d020 //6
 			jsr PROJECTILES.UpdateProjectiles
 
-			// inc $d020 //7
+			inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
 
 
 
 			lda #$00
-			// sta $d020
+			sta $d020
 		jmp !Loop- 
 
 
