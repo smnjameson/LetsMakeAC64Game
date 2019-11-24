@@ -10,6 +10,8 @@
 .label SPRITE_POINTERS = SCREEN_RAM + $3f8
 
 
+* = $6000 "Generated warped sprites"
+	.fill 128 * 64, 0
 
 
 * = $c400 "Enemy Sprites" //Start at frame #16

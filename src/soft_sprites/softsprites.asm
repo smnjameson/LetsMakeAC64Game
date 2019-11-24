@@ -243,10 +243,8 @@ SOFTSPRITES: {
 
 
 		!OnlyDraw:	
-			lda #$05
-			sta $d020
-
-				jsr DrawSprites
+			jsr DrawSprites
+			
 		!Skip:
 
 			lda UPDATE_INDEX //4

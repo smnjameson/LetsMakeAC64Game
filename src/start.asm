@@ -54,7 +54,6 @@ Random: {
         rts
 }
 
-
 Entry:
 		lda #$0e
 		sta VIC.BACKGROUND_COLOR
@@ -94,7 +93,6 @@ Entry:
 		ldx #$04
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
-
 		jsr MAPLOADER.DrawMap
  
 
@@ -103,22 +101,8 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
 
-		// ldx #$00
-		// ldy #$03
-		// lda #$c0
-		// jsr SPRITEWARP.dissolve		
-		// ldx #$00
-		// ldy #$04
-		// lda #$c0
-		// jsr SPRITEWARP.dissolve		
-		// ldx #$00
-		// ldy #$05
-		// lda #$c0
-		// jsr SPRITEWARP.dissolve		
-		ldx #$00
-		ldy #$01
-		lda #$c0
-		jsr SPRITEWARP.dissolve		
+		jsr SPRITEWARP.generate
+
 		jsr ENEMIES.Initialise
 
 
@@ -133,22 +117,22 @@ Entry:
 			inc ZP_COUNTER
 			
 
-			inc $d020 //1
+			// inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
-			inc $d020 //2
+			// inc $d020 //2
 			jsr PLAYER.DrawPlayer
-			inc $d020 //3
+			// inc $d020 //3
 			jsr PLAYER.PlayerControl
-			inc $d020 //4
+			// inc $d020 //4
 			jsr PLAYER.JumpAndFall
-			inc $d020 //5
+			// inc $d020 //5
  			jsr PLAYER.GetCollisions
 
-			inc $d020 //6
+			// inc $d020 //6
 			jsr PROJECTILES.UpdateProjectiles
 
-			inc $d020 //7
+			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
 
 
