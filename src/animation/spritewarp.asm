@@ -1,22 +1,32 @@
 SPRITEWARP: {
 
 	init: {
-		lda #$90
-		sta $d004
-		sta $d005
-		lda #$3f
-		sta SPRITE_POINTERS + 2
+		// lda #$90
+		// sta $d004
+		// sta $d005
+		// lda #$3f
+		// sta SPRITE_POINTERS + 2
 
 		rts
 	}
 
+	//Acc = sprite pointer to generate from
 	generate: {
 			.label TEMP = TEMP1
+			.label LSB = TEMP6
 
-			lda #<$c400
-			sta SPRITE_SOURCE + 0
-			lda #>$c400
+			ldx #$00
+			stx LSB
+			lsr
+			ror LSB
+			lsr
+			ror LSB
+			ora #$c0
 			sta SPRITE_SOURCE + 1
+			lda LSB
+			sta SPRITE_SOURCE + 0
+
+
 			lda #<$cfc0
 			sta SPRITE_TARGET + 0
 			lda #>$cfc0
@@ -78,13 +88,44 @@ SPRITEWARP: {
 			jmp !Loop-
 		!:
 
-			//Copy last 8 sprites flipped
-			// lda GenTargetLSB
-			// sta SPRITE_TARGET + 0
-			// sta SPRITE_SOURCE + 0
-			// lda GenTargetMSB
-			// sta SPRITE_TARGET + 1
 
+
+			//Copy last 8 sprites flipped
+			lda GenTargetLSB + 1
+			sta SPRITE_TARGET + 0
+			sta SPRITE_SOURCE + 0
+			lda GenTargetMSB + 1
+			sta SPRITE_TARGET + 1
+			sec
+			sbc #$02
+			sta SPRITE_SOURCE + 1
+
+			
+
+			ldy #$00
+		!Loop:
+			sty TEMP
+
+			jsr copySpriteFlipped
+
+			clc
+			lda SPRITE_TARGET + 0
+			adc #$40
+			sta SPRITE_TARGET + 0
+			sta SPRITE_SOURCE + 0
+			bcc !+
+			inc SPRITE_TARGET + 1
+			inc SPRITE_SOURCE + 1
+		!:
+			ldy TEMP
+			iny
+			cpy #$08
+			bne !Loop-
+
+			lda GenTargetMSB + 1
+			clc
+			adc #$02
+			sta GenTargetMSB + 1
 			rts
 	}
 
@@ -92,12 +133,12 @@ SPRITEWARP: {
 	// 1-7 Col0-6 squeeze amount
 	WarpTable: 
 		.byte 1, 4,3,3,2,2,1,1
-		.byte 2, 4,3,3,2,2,1,1
+		.byte 1, 4,3,3,2,2,1,1
+		.byte 1, 4,3,3,2,2,1,1
 		.byte 1, 4,3,3,2,2,1,1
 		.byte 2, 4,3,3,2,2,1,1
-		.byte 1, 4,3,3,2,2,1,1
 		.byte 2, 4,3,3,2,2,1,1
-		.byte 1, 4,3,3,2,2,1,1
+		.byte 2, 4,3,3,2,2,1,1
 		.byte 2, 4,3,3,2,2,1,1
 	
 

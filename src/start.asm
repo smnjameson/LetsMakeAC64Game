@@ -100,10 +100,14 @@ Entry:
 		jsr HUD.Initialise
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
+		jsr ENEMIES.Initialise
 
+		//Generate all sprites
+		lda #$10
+		jsr SPRITEWARP.generate
+		lda #$10
 		jsr SPRITEWARP.generate
 
-		jsr ENEMIES.Initialise
 
 
 
@@ -117,7 +121,7 @@ Entry:
 			inc ZP_COUNTER
 			
 
-			// inc $d020 //1
+			inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
 			// inc $d020 //2
