@@ -91,7 +91,6 @@ PLAYER: {
 	Player2_ThrowIndex:
 			.byte $00
 
-	*=*
 	Player1_State:
 			.byte $00
 	Player2_State:

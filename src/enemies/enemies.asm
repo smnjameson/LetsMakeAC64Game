@@ -44,6 +44,22 @@ ENEMIES: {
 	EnemyState:
 		.fill MAX_ENEMIES, 0
 
+	EnemyEatenBy:
+		.fill MAX_ENEMIES, 0
+	EnemyEatenIndex:
+		.fill MAX_ENEMIES, 0
+	EnemyEatenCounter:
+		.fill MAX_ENEMIES, 0
+	EnemyEatOffsetX:
+		.fill MAX_ENEMIES, 0
+	EnemyEatOffsetY:
+		.fill MAX_ENEMIES, 0
+	EnemyEatPointerLSB:
+		.fill MAX_ENEMIES, 0
+	EnemyEatPointerMSB:
+		.fill MAX_ENEMIES, 0
+
+
 	EnemyStaticMemory:
 		.fill STATIC_MEMORY_SIZE * MAX_ENEMIES, 0
 
@@ -83,11 +99,12 @@ ENEMIES: {
 
 	UpdateEnemies: {
 			.label ENEMY_BEHAVIOUR = VECTOR1
-			.label TEMP = TEMP9
+			.label TEMP = TEMP11
 
 			ldy #MAX_ENEMIES - 1
 		!Loop:
 			lda EnemyType, y
+			sty $eebe
 			beq !Skip+
 
 			sty TEMP
@@ -150,8 +167,6 @@ ENEMIES: {
 	}
 
 
-
-
 	CallBehaviour: {
 			//X = Free index
 			//Y = Behaviour offset
@@ -170,9 +185,13 @@ ENEMIES: {
 			adc #00
 			sta SelfMod + 2
 
-			
+			stx $eebf //TEMPORARY FOR DEBUGGING
+				
 			ldx INDEX
-		SelfMod:
+		SelfMod: //TODO : Investigate re: CPU JAM
+					//seems to be incorrect x index
+					//CPU JAM #1 addr was set to $771e
+					//CPU JAM #2 addr was set to $BD7F
 			jsr $BEEF
 			rts
 	}

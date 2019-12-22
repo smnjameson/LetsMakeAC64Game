@@ -14,11 +14,11 @@
 	.fill 128 * 64, 0
 
 
-* = $c400 "Enemy Sprites" //Start at frame #16
+* = $c400 "Enemy Sprites" //Start at frame #16/$10
 	.import binary "../../assets/sprites/enemy_sprites.bin"
 
 
-* = $d000 "Player Sprites" //Start at frame #64
+* = $d000 "Player Sprites" //Start at frame #64/$40
 	.import binary "../../assets/sprites/player_sprites.bin"
 
 * = $8000 "Map data"
@@ -33,7 +33,14 @@
 
 	HUD_DATA:
 		.import binary "../../assets/maps/hud.bin"
-		
+
+* = $eec0 "Dynamic sprite absorb frames" // #187-191 / $bb-$bf
+		.fill 64, $ff	
+		.fill 64, $cc	
+		.fill 64, $aa	
+		.fill 64, $55	
+		.fill 64, $c5	
+
 * = $f000 "Charset"
 	CHAR_SET:
 		.import binary "../../assets/maps/chars.bin"   //roll 12!

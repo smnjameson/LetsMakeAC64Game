@@ -10,6 +10,7 @@ TEMP7:		.byte $00
 TEMP8:		.byte $00
 TEMP9:		.byte $00
 TEMP10:		.byte $00
+TEMP11:		.byte $00
 
 VECTOR1: 	.word $00
 VECTOR2: 	.word $00
@@ -17,6 +18,8 @@ VECTOR3: 	.word $00
 VECTOR4: 	.word $00
 VECTOR5: 	.word $00
 VECTOR6: 	.word $00
+VECTOR7: 	.word $00
+VECTOR8: 	.word $00
 
 IRQ_TEMP1: 	.byte $00
 

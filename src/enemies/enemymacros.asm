@@ -223,8 +223,154 @@
 		lda ENEMIES.EnemyState, x 
 		and #ENEMIES.STATE_STUNNED
 		beq !Exit+
-		jmp BEHAVIOURS.StunnedBehaviour.update
+		lda ENEMIES.EnemyEatenBy, x
+		beq !+
+		jmp BEHAVIOURS.AbsorbBehaviour.update
+	!:
+		jmp CheckVsPlayerEat
 	!Exit:
+}
+
+CheckVsPlayerEat: {
+		.label X_THRESHOLD = $30
+		.label Y_THRESHOLD = $18
+
+		.label PLAYER_X = VECTOR6
+		.label XY_DIFF = VECTOR5
+		
+		ldy #$01	
+	!Loop:
+		lda PLAYER.Player1_State, y
+		sty TEMP10 //Temproary store Y
+		and #PLAYER.STATE_EATING
+		bne !+
+		jmp !End+
+	!:
+		//Record indirect lookup for player X
+		cpy #$00
+
+		beq !+
+		lda #<PLAYER.Player2_X
+		sta PLAYER_X 
+		lda #>PLAYER.Player2_X
+		sta PLAYER_X + 1 
+		jmp !Skip+
+	!:
+		lda #<PLAYER.Player1_X
+		sta PLAYER_X 
+		lda #>PLAYER.Player1_X
+		sta PLAYER_X + 1 		
+	!Skip:
+
+		
+
+		//Check direction player is facing, and that the enemy is on the correct side
+		lda PLAYER.Player1_State, y
+		and #PLAYER.STATE_FACE_LEFT
+		beq !PlayerFacingRight+
+
+	!PlayerFacingLeft:
+		//Check if enemy in front of player
+		sec
+		ldy #$01
+		lda (PLAYER_X), y
+		sbc ENEMIES.EnemyPosition_X1, x 
+		sta XY_DIFF
+		iny
+		lda (PLAYER_X), y
+		sbc ENEMIES.EnemyPosition_X2, x 
+		sta XY_DIFF + 1
+		bpl !+
+		jmp !End+
+	!:
+		beq !+
+		jmp !End+
+	!:
+
+		//Is enemy in range on X
+		lda XY_DIFF
+		cmp #X_THRESHOLD
+		bcs !End+
+
+		//Check if player is in Y range
+		ldy TEMP10
+		sec
+		lda PLAYER.Player1_Y, y
+		sbc ENEMIES.EnemyPosition_Y1, x
+		sta TEMP9 
+		clc
+		adc #Y_THRESHOLD
+		lsr
+		cmp #Y_THRESHOLD
+		bcs !End+
+
+		tya
+		clc
+		adc #$01
+		sta ENEMIES.EnemyEatenBy, x //Store which player is eating me
+		lda XY_DIFF
+		sta ENEMIES.EnemyEatOffsetX, x //Store offset for moving enemy to player
+		lda TEMP9
+		sta ENEMIES.EnemyEatOffsetY, x //Store offset for moving enemy to player
+		jsr BEHAVIOURS.AbsorbBehaviour.setup
+		jmp BEHAVIOURS.AbsorbBehaviour.update
+
+
+	!PlayerFacingRight:
+		//Check if enemy in front of player
+		sec
+		ldy #$01
+		lda ENEMIES.EnemyPosition_X1, x 
+		sbc (PLAYER_X), y
+		sta XY_DIFF
+		iny
+		lda ENEMIES.EnemyPosition_X2, x 
+		sbc (PLAYER_X), y
+		sta XY_DIFF + 1
+		bmi !End+
+		bne !End+
+
+		//Is enemy in range on X
+		lda XY_DIFF
+		cmp #X_THRESHOLD
+		bcs !End+
+
+		//Check if player is in Y range
+		ldy TEMP10
+		sec
+		lda ENEMIES.EnemyPosition_Y1, x 
+		sbc PLAYER.Player1_Y, y
+		sta TEMP9
+		clc
+		adc #Y_THRESHOLD
+		lsr
+		cmp #Y_THRESHOLD
+		bcs !End+
+
+		tya
+		clc
+		adc #$01		
+		sta ENEMIES.EnemyEatenBy, x	 //Store which player is eating me
+		lda XY_DIFF
+		eor #$ff
+		adc #$01		
+		sta ENEMIES.EnemyEatOffsetX, x //Store offset for moving enemy to player
+		lda TEMP9
+		eor #$ff
+		adc #$01		
+		sta ENEMIES.EnemyEatOffsetY, x //Store offset for moving enemy to player
+		jsr BEHAVIOURS.AbsorbBehaviour.setup
+		jmp BEHAVIOURS.AbsorbBehaviour.update
+
+
+	!End:
+		ldy TEMP10
+		dey
+		bmi !+
+		jmp !Loop-
+	!:
+
+		jmp BEHAVIOURS.StunnedBehaviour.update
 }
 
 

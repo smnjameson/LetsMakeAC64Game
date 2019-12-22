@@ -15,6 +15,8 @@ BEHAVIOURS: {
 	.label BEHAVIOUR_UPDATE = 3;
 	.label BEHAVIOUR_DEATH = 6;
 
+
+
 	//Flying candy monster bounces of scenery
 	Enemy_001: {
 			jmp !OnSpawn+ 
@@ -131,7 +133,7 @@ BEHAVIOURS: {
 	}
 
 
-
+	//Enemy walks back and forth on platforms
 	Enemy_002: {
 			jmp !OnSpawn+ 
 			jmp !OnUpdate+ 
@@ -159,6 +161,7 @@ BEHAVIOURS: {
 		!OnUpdate:
 				:exitIfStunned()
 				:setEnemyColor(5, 14)
+
 				:hasHitProjectile()
 				//Should I fall??
 				:doFall(12, 21) //Check below enemy and fall if needed
@@ -239,13 +242,11 @@ BEHAVIOURS: {
 				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
 				sta ENEMIES.EnemyState, x
 				// jmp !Done+
-
 			!:
 
 			!Done:
 				:PositionEnemy()
 				rts
-
 
 		!OnDeath:
 				rts
@@ -289,6 +290,129 @@ BEHAVIOURS: {
 		}
 	}
 
+	AbsorbBehaviour: {
+		.label TimeBetweenEatFrames = $04
+
+		setup: {
+			txa
+			clc
+			adc #$bb //Calculate the sprite pointer
+			:setEnemyFrame(null)
+
+			//Determine the start of the eat absorb animation
+			// Type * $0400 + (EnemyIsFacingRight * $0200) + $5c00
+			lda #$00
+			sta ENEMIES.EnemyEatPointerLSB, x
+			lda ENEMIES.EnemyType, x
+			asl
+			asl
+			sta ENEMIES.EnemyEatPointerMSB, x
+			lda ENEMIES.EnemyState, x
+			and #ENEMIES.STATE_FACE_RIGHT
+			beq !+
+			lda #$5e //MSB of $5c00 + $0200
+			
+			jmp !DoAdd+
+		!:
+			lda #$5c
+
+		!DoAdd:
+			adc ENEMIES.EnemyEatPointerMSB, x
+			sta ENEMIES.EnemyEatPointerMSB, x
+
+			lda #$08 //Number of frames in eat animation
+			sta ENEMIES.EnemyEatenIndex, x
+			lda #$01 //Frame timer
+			sta ENEMIES.EnemyEatenCounter, x
+
+			rts
+		}
+
+
+		update: {	
+			.label SpriteFrom = VECTOR7
+			.label SpriteTo = VECTOR8
+
+			//Move enemy along X
+			lda ENEMIES.EnemyEatOffsetX, x
+			beq !DoneMoveHoriz+
+			bmi !MoveRight+
+		!MoveLeft:
+			dec ENEMIES.EnemyEatOffsetX, x
+			:UpdatePosition($100, $000)
+			jmp !DoneMoveHoriz+
+		!MoveRight:
+			inc ENEMIES.EnemyEatOffsetX, x
+			:UpdatePosition(-$100, $000)
+		!DoneMoveHoriz:	
+
+			//Move enemy along Y
+			lda ENEMIES.EnemyEatOffsetY, x
+			beq !DoneMoveVert+
+			bmi !MoveUp+
+		!MoveDown:
+			dec ENEMIES.EnemyEatOffsetY, x
+			:UpdatePosition($000, $100)
+			jmp !DoneMoveVert+
+		!MoveUp:
+			inc ENEMIES.EnemyEatOffsetY, x
+			:UpdatePosition($000, -$100)
+		!DoneMoveVert:	
+
+			//Initialise sprite copy vectors
+			lda ENEMIES.EnemyEatPointerLSB,x
+			sta SpriteFrom
+			lda ENEMIES.EnemyEatPointerMSB,x
+			sta SpriteFrom + 1
+			txa
+			asl
+			tay
+			lda EatData, y
+			sta SpriteTo
+			lda EatData + 1, y
+			sta SpriteTo + 1
+
+			//Do we draw the frame?
+			dec ENEMIES.EnemyEatenCounter, x
+			bne !NoFrameCopy+
+			lda #TimeBetweenEatFrames
+			sta ENEMIES.EnemyEatenCounter, x
+
+			lda ENEMIES.EnemyEatenIndex, x
+			beq !NoFrameCopy+
+			dec ENEMIES.EnemyEatenIndex, x
+
+			//Copy sprite data for absorb
+			ldy #$3f
+		!:
+			lda (SpriteFrom), y
+			sta (SpriteTo), y
+			dey
+			bpl !-
+
+			//Update frame
+			clc
+			lda ENEMIES.EnemyEatPointerLSB,x
+			adc #$40
+			sta ENEMIES.EnemyEatPointerLSB,x
+			lda ENEMIES.EnemyEatPointerMSB,x
+			adc #$00
+			sta ENEMIES.EnemyEatPointerMSB,x
+
+		//Update position color/frame etc
+		//No frame Copy
+		!NoFrameCopy:
+			:PositionEnemy()
+			rts
+		}
+	}
+
+	EatData:
+		.word $eec0
+		.word $ef00
+		.word $ef40
+		.word $ef80
+		.word $efc0
 }
 
 

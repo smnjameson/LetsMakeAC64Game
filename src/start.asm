@@ -109,8 +109,6 @@ Entry:
 		jsr SPRITEWARP.generate
 
 
-
-
 	//Inf loop
 	!Loop:
 		lda PerformFrameCodeFlag
@@ -138,7 +136,6 @@ Entry:
 
 			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
-
 
 
 			lda #$00
