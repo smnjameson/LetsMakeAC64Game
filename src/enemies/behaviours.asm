@@ -290,6 +290,8 @@ BEHAVIOURS: {
 		}
 	}
 
+
+
 	AbsorbBehaviour: {
 		.label TimeBetweenEatFrames = $04
 
@@ -307,9 +309,9 @@ BEHAVIOURS: {
 			asl
 			asl
 			sta ENEMIES.EnemyEatPointerMSB, x
-			lda ENEMIES.EnemyState, x
-			and #ENEMIES.STATE_FACE_RIGHT
-			beq !+
+
+			lda ENEMIES.EnemyEatOffsetX, x
+			bmi !+
 			lda #$5e //MSB of $5c00 + $0200
 			
 			jmp !DoAdd+
