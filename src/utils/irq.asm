@@ -42,12 +42,13 @@ IRQ: {
 
 			ldx #WHITE
 			lda VIC.SCREEN_CONTROL_2
-			and #%11101111
+			ora #%00010000 
 			tay
 			
 			stx VIC.BACKGROUND_COLOR
 			sty VIC.SCREEN_CONTROL_2
-
+			lda #$0a
+			sta VIC.EXTENDED_BG_COLOR_1
 
 			lda #$01
 			sta PerformFrameCodeFlag
@@ -79,6 +80,8 @@ IRQ: {
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000 
 			sta VIC.SCREEN_CONTROL_2
+			lda #$05
+			sta VIC.EXTENDED_BG_COLOR_1
 
 			lda #<MainIRQ    
 			ldx #>MainIRQ

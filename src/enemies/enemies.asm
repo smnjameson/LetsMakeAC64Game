@@ -11,7 +11,7 @@ ENEMIES: {
 	.label STATE_STUNNED    = %01000000
 	.label STATE_DYING   	= %10000000
 
-
+* = * "EnemyType"
 	EnemyType: 
 		.fill MAX_ENEMIES, 0
 
@@ -104,9 +104,19 @@ ENEMIES: {
 			ldy #MAX_ENEMIES - 1
 		!Loop:
 			lda EnemyType, y
-			sty $eebe
-			beq !Skip+
+			bne !Active+
+		//EnemyIsNotActive
+			lda VIC.SPRITE_ENABLE
+			and TABLES.InvPowerOfTwo, y
+			sta VIC.SPRITE_ENABLE	
+			jmp !Skip+
 
+		!Active:
+		//EnemyIsActive
+			lda VIC.SPRITE_ENABLE
+			ora TABLES.PowerOfTwo, y
+			sta VIC.SPRITE_ENABLE
+			lda EnemyType, y
 			sty TEMP
 			ldx TEMP
 			ldy #BEHAVIOURS.BEHAVIOUR_UPDATE

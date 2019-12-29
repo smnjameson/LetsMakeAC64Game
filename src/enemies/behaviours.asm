@@ -293,7 +293,7 @@ BEHAVIOURS: {
 
 
 	AbsorbBehaviour: {
-		.label TimeBetweenEatFrames = $04
+		.label TimeBetweenEatFrames = $02
 
 		setup: {
 			txa
@@ -321,6 +321,42 @@ BEHAVIOURS: {
 		!DoAdd:
 			adc ENEMIES.EnemyEatPointerMSB, x
 			sta ENEMIES.EnemyEatPointerMSB, x
+
+			//Add 350 score for absorbing
+			txa
+
+			pha //Stack = EnemyNum
+
+			lda ENEMIES.EnemyEatenBy, x
+			.break
+			pha	//Stack = EnemyNum, PlayerNum
+			tay
+			dey
+			lda #$35
+			ldx #$01
+			jsr HUD.AddScore
+
+			//Increment eat meter for player
+			pla //Gets PlayerNum, Stack = EnmemyNum
+			tax
+			dex
+		//DEBUG////////////////
+			cpx #$ff
+			bne !+
+			.break
+			nop
+		!:
+		
+		///////////////////////
+
+		// :DebugHex(null, 9, 23, 220)
+			inc PLAYER.Player1_EatCount, x
+			jsr HUD.UpdateEatMeter
+
+			pla //Gets enemyNum
+			tax 
+
+			
 
 			lda #$08 //Number of frames in eat animation
 			sta ENEMIES.EnemyEatenIndex, x
@@ -381,16 +417,22 @@ BEHAVIOURS: {
 			sta ENEMIES.EnemyEatenCounter, x
 
 			lda ENEMIES.EnemyEatenIndex, x
-			beq !NoFrameCopy+
+			bne !NotFinished+ //Have we finished eating?
+		!Finished:
+			lda #$00
+			sta ENEMIES.EnemyType, x
+			rts	//No need to continue	
+
+		!NotFinished:
 			dec ENEMIES.EnemyEatenIndex, x
 
 			//Copy sprite data for absorb
 			ldy #$3f
-		!:
+		!Loop:
 			lda (SpriteFrom), y
 			sta (SpriteTo), y
 			dey
-			bpl !-
+			bpl !Loop-
 
 			//Update frame
 			clc

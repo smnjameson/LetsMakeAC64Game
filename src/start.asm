@@ -119,7 +119,7 @@ Entry:
 			inc ZP_COUNTER
 			
 
-			inc $d020 //1
+			// inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
 			// inc $d020 //2

@@ -101,6 +101,11 @@ PLAYER: {
 	Player2_WalkSpeed:
 			.byte $80, $01
 
+* = * "EAT COUNTERS"
+	Player1_EatCount:
+			.byte $00
+	Player2_EatCount:
+			.byte $00
 	DefaultFrame:
 			.byte $40, $40
 
@@ -113,14 +118,14 @@ PLAYER: {
 			sta VIC.SPRITE_MULTICOLOR_2
 
 			lda #$05
-			sta VIC.SPRITE_COLOR_0
+			sta VIC.SPRITE_COLOR_5
 
 			lda #$02
-			sta VIC.SPRITE_COLOR_1
+			sta VIC.SPRITE_COLOR_6
 
 			lda #$40
-			sta SPRITE_POINTERS + 0
-			sta SPRITE_POINTERS + 1
+			sta SPRITE_POINTERS + 5
+			sta SPRITE_POINTERS + 6
 
 
 
@@ -556,7 +561,6 @@ PLAYER: {
 			!:
 				tya
 				sta Player1_EatIndex, x
-				:DebugHex(null, 19, 24, 220)
 			!Skip:	
 				ldy #$00
 				lda (PlayerState), y 
@@ -615,7 +619,7 @@ PLAYER: {
 			!SetFrame:
 				lda CURRENT_FRAME
 				ldx CURRENT_PLAYER
-				sta [SPRITE_POINTERS - 1], x
+				sta [SPRITE_POINTERS + 4], x
 
 				//Set player position X & Y
 				ldy #$01
@@ -626,14 +630,17 @@ PLAYER: {
 				tax
 
 				lda (PlayerX), y
-				sta VIC.SPRITE_0_X, x 
+				sta VIC.SPRITE_5_X, x 
 				iny
 
 				txa
 				pha
 
 				ldx CURRENT_PLAYER
-				dex
+				inx
+				inx
+				inx
+				inx
 
 				lda (PlayerX), y
 				beq !+
@@ -653,7 +660,7 @@ PLAYER: {
 				tax
 				ldy #$00
 				lda (PlayerY), y
-				sta VIC.SPRITE_0_Y, x
+				sta VIC.SPRITE_5_Y, x
 
 		!SkipFrameSet:
 			dec CURRENT_PLAYER

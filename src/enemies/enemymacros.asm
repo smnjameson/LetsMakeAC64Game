@@ -6,33 +6,28 @@
 		stx INDEX
 
 		lda ENEMIES.EnemyFrame, x
-		sta SPRITE_POINTERS + 3, x
+		sta SPRITE_POINTERS + 0, x
 		lda ENEMIES.EnemyColor, x
-		sta VIC.SPRITE_COLOR_3, x
+		sta VIC.SPRITE_COLOR_0, x
 
 		txa
 		tay
 		asl
 		tax
 		lda ENEMIES.EnemyPosition_X1, y
-		sta VIC.SPRITE_0_X + [3 * 2], x
+		sta VIC.SPRITE_0_X + [0 * 2], x
 		lda ENEMIES.EnemyPosition_Y1, y
-		sta VIC.SPRITE_0_Y + [3 * 2], x
+		sta VIC.SPRITE_0_Y + [0 * 2], x
 		ldx INDEX
 		ldy ENEMIES.EnemyPosition_X2, x
-		inx
-		inx
-		inx
+
 		lda $d010
 		and TABLES.InvPowerOfTwo, x
 		cpy #$00
-		beq !+
+		beq !Skip+
 		ora TABLES.PowerOfTwo, x
-	!:
+	!Skip:
 		sta $d010
-		dex
-		dex
-		dex
 		ldy STOREY
 		ldx INDEX
 }

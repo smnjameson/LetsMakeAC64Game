@@ -12,6 +12,10 @@ TEMP9:		.byte $00
 TEMP10:		.byte $00
 TEMP11:		.byte $00
 
+SCORETEMP1:	.byte $00
+SCORETEMP2:	.byte $00
+SCOREVECTOR1: .word $00
+
 VECTOR1: 	.word $00
 VECTOR2: 	.word $00
 VECTOR3: 	.word $00
