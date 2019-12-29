@@ -32,6 +32,9 @@ PLAYER: {
 
 	PlayersActive:
 			.byte $00
+* =* "Crown"
+	PlayerHasCrown:
+			.byte $01
 
 	Player1_X:
 			// Fractional / LSB / MSB   
@@ -117,15 +120,18 @@ PLAYER: {
 			lda #$06
 			sta VIC.SPRITE_MULTICOLOR_2
 
-			lda #$05
+			lda #$08
 			sta VIC.SPRITE_COLOR_5
 
-			lda #$02
+			lda #$05
 			sta VIC.SPRITE_COLOR_6
 
+			lda #$02
+			sta VIC.SPRITE_COLOR_7
+
 			lda #$40
-			sta SPRITE_POINTERS + 5
 			sta SPRITE_POINTERS + 6
+			sta SPRITE_POINTERS + 7
 
 
 
@@ -427,6 +433,33 @@ PLAYER: {
 		.label CURRENT_FRAME = TEMP3
 		.label TEMP = TEMP4
 
+		//Crown sprite
+		lda PlayerHasCrown	
+		beq !NoCrown+
+	!Crown:
+		lda $d015
+		ora #%00100000
+		sta $d015
+		lda PlayerHasCrown
+		tay
+		dey
+		lda Player1_State, y
+		and #[STATE_FACE_LEFT]
+		bne !FaceLeft+
+	!FaceRight:
+		lda #$47
+		jmp !ApplyCrown+
+	!FaceLeft:
+		lda #$46
+	!ApplyCrown:
+		sta SPRITE_POINTERS + 5
+		bne !DoneCrown+ //Always taken
+	!NoCrown:
+		lda $d015
+		and #%11011111
+		sta $d015
+	!DoneCrown:
+
 
 		lda #$02
 		sta CURRENT_PLAYER
@@ -619,7 +652,7 @@ PLAYER: {
 			!SetFrame:
 				lda CURRENT_FRAME
 				ldx CURRENT_PLAYER
-				sta [SPRITE_POINTERS + 4], x
+				sta [SPRITE_POINTERS + 5], x
 
 				//Set player position X & Y
 				ldy #$01
@@ -630,13 +663,20 @@ PLAYER: {
 				tax
 
 				lda (PlayerX), y
+				sta VIC.SPRITE_6_X, x 
+				lda PlayerHasCrown
+				cmp CURRENT_PLAYER
+				bne !Skip+
+				lda (PlayerX), y
 				sta VIC.SPRITE_5_X, x 
+			!Skip:
 				iny
 
 				txa
 				pha
 
 				ldx CURRENT_PLAYER
+				inx
 				inx
 				inx
 				inx
@@ -660,7 +700,13 @@ PLAYER: {
 				tax
 				ldy #$00
 				lda (PlayerY), y
-				sta VIC.SPRITE_5_Y, x
+				sta VIC.SPRITE_6_Y, x
+				lda PlayerHasCrown
+				cmp CURRENT_PLAYER
+				bne !Skip+
+				lda (PlayerY), y
+				sta VIC.SPRITE_5_Y, x 
+			!Skip:
 
 		!SkipFrameSet:
 			dec CURRENT_PLAYER

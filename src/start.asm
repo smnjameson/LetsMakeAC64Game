@@ -22,7 +22,7 @@ BasicUpstart2(Entry)
 
 #import "enemies/enemymacros.asm"
 
-Random: {
+Random: { 
         lda seed
         beq doEor
         asl
@@ -80,7 +80,7 @@ Entry:
 		//Set VIC BANK 3
 		// lda $dd00
 		and #%11111100
-		sta $dd00
+		sta $dd00 
 
 		//Set screen and character memory
 		lda #%00001100

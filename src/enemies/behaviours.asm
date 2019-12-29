@@ -328,7 +328,6 @@ BEHAVIOURS: {
 			pha //Stack = EnemyNum
 
 			lda ENEMIES.EnemyEatenBy, x
-			.break
 			pha	//Stack = EnemyNum, PlayerNum
 			tay
 			dey
@@ -340,14 +339,18 @@ BEHAVIOURS: {
 			pla //Gets PlayerNum, Stack = EnmemyNum
 			tax
 			dex
-		//DEBUG////////////////
-			cpx #$ff
-			bne !+
-			.break
-			nop
-		!:
-		
-		///////////////////////
+
+///////////////////////
+//DEBUG////////////////
+	cpx #$ff	//CPU jam seems to be caused when this value hits $ff
+	bne !+		//because the playerNum returns as 0 instaead of 1/2
+				//Probably causes other JAMs				
+	.break
+	nop
+!:
+///////////////////////
+///////////////////////
+
 
 		// :DebugHex(null, 9, 23, 220)
 			inc PLAYER.Player1_EatCount, x
