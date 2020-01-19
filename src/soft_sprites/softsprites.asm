@@ -296,7 +296,7 @@ SOFTSPRITES: {
 				tax
 				lda CHAR_COLORS, x
 				ldx TEMP
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				bne !+
 
 				lda SpriteData_CharStart, x
@@ -314,7 +314,7 @@ SOFTSPRITES: {
 				tax
 				lda CHAR_COLORS, x
 				ldx TEMP
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				bne !+
 
 				lda SpriteData_CharStart, x
@@ -332,7 +332,7 @@ SOFTSPRITES: {
 				tax
 				lda CHAR_COLORS, x
 				ldx TEMP
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				bne !+				
 
 				lda SpriteData_CharStart, x
@@ -351,7 +351,7 @@ SOFTSPRITES: {
 				tax
 				lda CHAR_COLORS, x
 				ldx TEMP
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				bne !+	
 
 				lda SpriteData_CharStart, x

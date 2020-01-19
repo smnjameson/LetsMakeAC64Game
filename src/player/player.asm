@@ -1,7 +1,6 @@
 * = * "PLAYER CODE"
 PLAYER: {
-	.label COLLISION_SOLID = %00010000
-	.label COLLISION_COLORABLE = %00100000
+
 
 	.label STATE_JUMP 		= %00000001
 	.label STATE_FALL 		= %00000010
@@ -32,9 +31,7 @@ PLAYER: {
 
 	PlayersActive:
 			.byte $00
-* =* "Crown"
-	PlayerHasCrown:
-			.byte $01
+
 
 	Player1_X:
 			// Fractional / LSB / MSB   
@@ -43,10 +40,12 @@ PLAYER: {
 			// Fractional / LSB / MSB
 			.byte $00, $48, $00 // 1/256th pixel accuracy
 
+
 	Player1_Y:
 			.byte $70 // 1 pixel accuracy
 	Player2_Y:
 			.byte $70 // 1 pixel accuracy
+
 
 
 	Player1_FirePressed:
@@ -104,7 +103,7 @@ PLAYER: {
 	Player2_WalkSpeed:
 			.byte $80, $01
 
-* = * "EAT COUNTERS"
+
 	Player1_EatCount:
 			.byte $00
 	Player2_EatCount:
@@ -323,16 +322,12 @@ PLAYER: {
 			//x register contains x offset (half value)
 			//y register contains y offset
 
-			.label PLAYER_POSITION = TEMP1
-			.label X_PIXEL_OFFSET = TEMP3
-			.label Y_PIXEL_OFFSET = TEMP4
+			.label PLAYER_POSITION = COLLISION_POINT_POSITION
+			.label X_PIXEL_OFFSET = COLLISION_POINT_X_OFFSET
+			.label Y_PIXEL_OFFSET = COLLISION_POINT_Y_OFFSET
 
-			.label X_BORDER_OFFSET = $18
-			.label Y_BORDER_OFFSET = $32
-
-			.label PLAYER_X = VECTOR1
-			.label PLAYER_Y = VECTOR2
-
+			.label PLAYER_X = COLLISION_POINT_X
+			.label PLAYER_Y = COLLISION_POINT_Y
 
 			stx X_PIXEL_OFFSET
 			sty Y_PIXEL_OFFSET
@@ -360,61 +355,10 @@ PLAYER: {
 			sta PLAYER_Y
 			lda #>Player2_Y
 			sta PLAYER_Y + 1
-
 		!PlayerSetupComplete:
 
-			//Store Player position X
-			ldy #$01
-			lda (PLAYER_X), y
-			sta PLAYER_POSITION
-			iny
-			lda (PLAYER_X), y
-			sta PLAYER_POSITION + 1
-		
-			//Add sprite offset X
-			lda PLAYER_POSITION
-			clc
-			adc X_PIXEL_OFFSET
-			sta PLAYER_POSITION
-			lda PLAYER_POSITION + 1
-			adc #$00
-			sta PLAYER_POSITION + 1
+			jsr UTILS.GetCollisionPoint
 
-			//Subtract border width
-			lda PLAYER_POSITION
-			sec
-			sbc #X_BORDER_OFFSET
-			sta PLAYER_POSITION
-			lda PLAYER_POSITION + 1
-			sbc #$00
-			sta PLAYER_POSITION + 1
-
-			
-			//Divide by 8 to get ScreenX
-			lda PLAYER_POSITION
-			lsr PLAYER_POSITION + 1
-			ror 
-			lsr
-			lsr
-			tax
-
-
-			//Divide player Y by 8 to get ScreenY
-			ldy #$00
-			lda (PLAYER_Y), y
-			clc
-			adc Y_PIXEL_OFFSET
-			sec
-			sbc #Y_BORDER_OFFSET
-			lsr
-			lsr
-			lsr
-			tay
-
-			cpy #$16
-			bcc !+
-			ldy #$15
-		!:
 			rts
 	}
 
@@ -433,32 +377,6 @@ PLAYER: {
 		.label CURRENT_FRAME = TEMP3
 		.label TEMP = TEMP4
 
-		//Crown sprite
-		lda PlayerHasCrown	
-		beq !NoCrown+
-	!Crown:
-		lda $d015
-		ora #%00100000
-		sta $d015
-		lda PlayerHasCrown
-		tay
-		dey
-		lda Player1_State, y
-		and #[STATE_FACE_LEFT]
-		bne !FaceLeft+
-	!FaceRight:
-		lda #$47
-		jmp !ApplyCrown+
-	!FaceLeft:
-		lda #$46
-	!ApplyCrown:
-		sta SPRITE_POINTERS + 5
-		bne !DoneCrown+ //Always taken
-	!NoCrown:
-		lda $d015
-		and #%11011111
-		sta $d015
-	!DoneCrown:
 
 
 		lda #$02
@@ -664,11 +582,7 @@ PLAYER: {
 
 				lda (PlayerX), y
 				sta VIC.SPRITE_6_X, x 
-				lda PlayerHasCrown
-				cmp CURRENT_PLAYER
-				bne !Skip+
-				lda (PlayerX), y
-				sta VIC.SPRITE_5_X, x 
+
 			!Skip:
 				iny
 
@@ -701,11 +615,6 @@ PLAYER: {
 				ldy #$00
 				lda (PlayerY), y
 				sta VIC.SPRITE_6_Y, x
-				lda PlayerHasCrown
-				cmp CURRENT_PLAYER
-				bne !Skip+
-				lda (PlayerY), y
-				sta VIC.SPRITE_5_Y, x 
 			!Skip:
 
 		!SkipFrameSet:
@@ -713,6 +622,9 @@ PLAYER: {
 			beq !+
 			jmp !Loop-
 		!:
+
+			//Set MSB for crown
+
 
 			rts
 	}
@@ -757,6 +669,21 @@ PLAYER: {
 			lda Player1_State, y
 			ora #STATE_EATING
 			sta Player1_State, y
+			iny	
+			cpy CROWN.PlayerHasCrown
+			bne !+
+			lda Player1_X + 0
+			sta CROWN.Crown_X + 0
+			lda Player1_X + 1
+			sta CROWN.Crown_X + 1
+			lda Player1_X + 2
+			sta CROWN.Crown_X + 2
+			lda Player1_Y
+			sta CROWN.Crown_Y
+			lda #$00
+			sta CROWN.PlayerHasCrown
+		!:
+			dey
 			jmp !+
 
 		!FirePressed:
@@ -832,7 +759,7 @@ PLAYER: {
 		!Skip:
 
 			lda Player1_LeftCollision, y
-			and #COLLISION_SOLID
+			and #UTILS.COLLISION_SOLID
 			bne !+
 
 			cpy #$00
@@ -906,7 +833,7 @@ PLAYER: {
 		!Skip:
 
 			lda Player1_RightCollision, y
-			and #COLLISION_SOLID
+			and #UTILS.COLLISION_SOLID
 			bne !+
 
 			cpy #$00
@@ -1044,7 +971,7 @@ PLAYER: {
 
 		!FallCheck:
 			lda (PlayerFloorCollision),y
-			and #COLLISION_SOLID
+			and #UTILS.COLLISION_SOLID
 			bne !NotFalling+
 
 		!Falling:

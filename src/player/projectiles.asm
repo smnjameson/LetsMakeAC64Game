@@ -254,7 +254,7 @@ PROJECTILES: {
 
 			ldx TEMP
 			lda COLLISION_DATA	
-			and #PLAYER.COLLISION_COLORABLE
+			and #UTILS.COLLISION_COLORABLE
 			beq !+
 
 			// inc $d020

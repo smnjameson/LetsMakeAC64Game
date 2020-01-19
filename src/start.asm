@@ -13,6 +13,7 @@ BasicUpstart2(Entry)
 #import "player/player.asm"
 #import "player/projectiles.asm"
 #import "player/hud.asm"
+#import "player/crown.asm"
 #import "animation/charanimations.asm"
 #import "soft_sprites/softsprites.asm"
 #import "animation/spritewarp.asm"
@@ -77,8 +78,9 @@ Entry:
 		ora #%00000101
 		sta $01
 
+
 		//Set VIC BANK 3
-		// lda $dd00
+		lda $dd00
 		and #%11111100
 		sta $dd00 
 
@@ -101,7 +103,7 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
-
+		jsr CROWN.Initialise
 		//Generate all sprites
 		lda #$10
 		jsr SPRITEWARP.generate
@@ -124,6 +126,7 @@ Entry:
 			
 			// inc $d020 //2
 			jsr PLAYER.DrawPlayer
+			jsr CROWN.DrawCrown
 			// inc $d020 //3
 			jsr PLAYER.PlayerControl
 			// inc $d020 //4

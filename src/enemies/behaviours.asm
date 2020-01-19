@@ -81,7 +81,7 @@ BEHAVIOURS: {
 				:getEnemyCollisions(null, null)
 				tay
 				lda CHAR_COLORS, y
-				and #PLAYER.COLLISION_SOLID	
+				and #UTILS.COLLISION_SOLID	
 				beq !NoYBounce+
 			!DoYBounce:
 				:getStaticMemory(DY)
@@ -114,7 +114,7 @@ BEHAVIOURS: {
 				:getEnemyCollisions(null, null)
 				tay
 				lda CHAR_COLORS, y
-				and #PLAYER.COLLISION_SOLID	
+				and #UTILS.COLLISION_SOLID	
 				beq !NoXBounce+
 			!DoXBounce:
 				:getStaticMemory(DX)
@@ -195,7 +195,7 @@ BEHAVIOURS: {
 				:getEnemyCollisions(0, 21)
 				tay
 				lda CHAR_COLORS, y
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				beq !ChangeDir+
 			!WalkLeft:
 				:UpdatePosition(-$080, $000)
@@ -223,7 +223,7 @@ BEHAVIOURS: {
 				:getEnemyCollisions(24, 21)
 				tay
 				lda CHAR_COLORS, y
-				and #PLAYER.COLLISION_COLORABLE
+				and #UTILS.COLLISION_COLORABLE
 				beq !ChangeDir+
 			!WalkRight:
 				:UpdatePosition($080, $000)

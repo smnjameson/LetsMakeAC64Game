@@ -165,7 +165,7 @@
 		:getEnemyCollisions(xcheck, ycheck)
 		tay
 		lda CHAR_COLORS, y
-		and #PLAYER.COLLISION_COLORABLE
+		and #UTILS.COLLISION_COLORABLE
 		beq !Fall+
 
 		lda ENEMIES.EnemyState, x
