@@ -47,7 +47,11 @@ PLAYER: {
 			.byte $70 // 1 pixel accuracy
 
 
-
+	//Flags
+	Player1_IsDying:
+			.byte $00
+	Player2_IsDying:
+			.byte $00
 	Player1_FirePressed:
 			.byte $00
 	Player2_FirePressed:

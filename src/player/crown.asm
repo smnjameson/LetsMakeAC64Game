@@ -81,7 +81,9 @@ CROWN: {
 			beq !noMsb+
 			txa
 			ora #%00100000
+			tax
 		!noMsb:
+			txa
 			sta $d010
 
 			//Only fall if player doesnt have crown
@@ -246,7 +248,9 @@ CROWN: {
 			lda #$04
 			sta Sprite1_XOFF
 			lda #$10
-			sta Sprite1_W	
+			sta Sprite1_W
+			lda #$06
+			sta Sprite1_YOFF				
 			lda #$15
 			sta Sprite1_H
 			jsr UTILS.GetSpriteCollision

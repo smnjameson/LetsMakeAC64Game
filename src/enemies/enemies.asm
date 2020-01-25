@@ -122,6 +122,8 @@ ENEMIES: {
 			ldy #BEHAVIOURS.BEHAVIOUR_UPDATE
 			jsr CallBehaviour
 			ldy TEMP
+			jsr CheckPlayerCollision
+			ldy TEMP
 				
 		!Skip:		
 			dey
@@ -129,6 +131,116 @@ ENEMIES: {
 			rts
 	}
 
+	CheckPlayerCollision: {
+		//Y is the current enemy
+			.label Sprite1_X = COLLISION_POINT_X
+			.label Sprite1_Y = COLLISION_POINT_Y
+			.label Sprite2_X = COLLISION_POINT_X1
+			.label Sprite2_Y = COLLISION_POINT_Y1
+
+			.label Sprite1_W = COLLISION_WIDTH
+			.label Sprite2_W = COLLISION_WIDTH1
+			.label Sprite1_H = COLLISION_HEIGHT
+			.label Sprite2_H = COLLISION_HEIGHT1
+
+			.label Sprite1_XOFF = COLLISION_POINT_X_OFFSET
+			.label Sprite2_XOFF = COLLISION_POINT_X1_OFFSET
+			.label Sprite1_YOFF = COLLISION_POINT_Y_OFFSET
+			.label Sprite2_YOFF = COLLISION_POINT_Y1_OFFSET
+		ldx #$01
+	!Loop:
+			
+		//Define player dimenisons
+			//Player 1
+			// lda PLAYER.Player1_State
+			// and #[PLAYER.STATE_EATING]
+			// bne !+
+
+			cpx #$01
+			beq !Player2+
+		!Player1:
+			lda #<PLAYER.Player1_X
+			sta Sprite2_X + 0
+			lda #>PLAYER.Player1_X
+			sta Sprite2_X + 1 
+
+			lda #<PLAYER.Player1_Y
+			sta Sprite2_Y + 0
+			lda #>PLAYER.Player1_Y
+			sta Sprite2_Y + 1 
+			jmp !DeterminedPlayer+
+
+		!Player2:
+			lda #<PLAYER.Player2_X
+			sta Sprite2_X + 0
+			lda #>PLAYER.Player2_X
+			sta Sprite2_X + 1 
+
+			lda #<PLAYER.Player2_Y
+			sta Sprite2_Y + 0
+			lda #>PLAYER.Player2_Y
+			sta Sprite2_Y + 1 
+		!DeterminedPlayer:
+
+			lda #$04
+			sta Sprite2_XOFF
+			lda #$10
+			sta Sprite2_W
+
+			lda #$06
+			sta Sprite2_YOFF
+			lda #$0f 
+			sta Sprite2_H
+
+
+
+			//Inefficient copy due to enemy data format
+			lda EnemyPosition_X1, y
+			sta EnemyXCopy + 1
+			lda EnemyPosition_X2, y
+			sta EnemyXCopy + 2
+			lda EnemyPosition_Y1, y
+			sta EnemyYCopy
+
+			lda #<EnemyXCopy
+			sta Sprite1_X + 0
+			lda #>EnemyXCopy
+			sta Sprite1_X + 1
+
+			lda #<EnemyYCopy
+			sta Sprite1_Y + 0
+			lda #>EnemyYCopy
+			sta Sprite1_Y + 1
+
+			lda #$04
+			sta Sprite1_XOFF
+			lda #$10
+			sta Sprite1_W
+			lda #$06
+			sta Sprite1_YOFF				
+			lda #$15
+			sta Sprite1_H
+
+			sty ENEMY_COLLISION_TEMP1
+			jsr UTILS.GetSpriteCollision
+			ldy ENEMY_COLLISION_TEMP1
+
+			bcc !+
+			inc $d02d, x
+			lda #$01
+			sta Player_IsDying, x
+		!:
+	
+			dex
+			bpl !Loop-
+			rts
+	}
+
+	EnemyXCopy:
+		.byte $00,$00,$00	
+	EnemyYCopy:
+		.byte $00
+		
 
 	SpawnEnemy: {
 			.label SPRITE_X = TEMP1
