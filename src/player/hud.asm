@@ -117,15 +117,24 @@ HUD: {
 			rts
 	}
 
+.align $10
 	LivesLocations:
 		.byte 49,9,50,10
-		.byte 70,30,59,29
+		.byte 70,30,69,29
 
 
 	DrawLives: {
 			ldx #$01
 		!Loop:	
 			stx HUD_LIVES_TEMP1
+
+					//Little self mod to set the correct player
+					txa 
+					asl 
+					asl
+					clc
+					adc #<LivesLocations
+					sta PlayerMod + 1
 
 					ldy #$03
 				!InnerLoop:
@@ -140,6 +149,7 @@ HUD: {
 						lda #$a9
 					!Done:
 						pha
+					PlayerMod:
 						lda LivesLocations, y
 						tax
 						pla

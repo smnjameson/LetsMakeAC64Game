@@ -146,9 +146,9 @@ PLAYER: {
 
 
 
-			lda #$02
+			lda #$03
 			sta Player1_Lives
-			lda #$01
+			lda #$02
 			sta Player2_Lives
 
 
