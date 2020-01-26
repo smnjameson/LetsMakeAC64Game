@@ -155,7 +155,10 @@ ENEMIES: {
 			// lda PLAYER.Player1_State
 			// and #[PLAYER.STATE_EATING]
 			// bne !+
-
+			lda PLAYER.Player_IsDying, x
+			beq !+
+			jmp !Next+
+		!:
 			cpx #$01
 			beq !Player2+
 		!Player1:
@@ -225,14 +228,25 @@ ENEMIES: {
 			jsr UTILS.GetSpriteCollision
 			ldy ENEMY_COLLISION_TEMP1
 
-			bcc !+
-			inc $d02d, x
+			bcc !+	
+
+				//Initiate a jump for death anim
+				lda PLAYER.Player1_State, x
+				and #[255 - (STATE_FALL + STATE_JUMP)]
+				ora #STATE_JUMP
+				sta PLAYER.Player1_State, x
+				lda #$00
+				sta PLAYER.Player1_JumpIndex, x	
+
 			lda #$01
-			sta Player_IsDying, x
+			sta PLAYER.Player_IsDying, x
+
 		!:
-	
+		!Next:
 			dex
-			bpl !Loop-
+			bmi !+
+			jmp !Loop-
+		!:
 			rts
 	}
 

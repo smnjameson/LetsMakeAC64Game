@@ -39,6 +39,10 @@ IRQ: {
 		!:
 			dex
 			bne !-
+			
+			lda #$00	//Hide sprites
+			sta $d00c
+			sta $d00e
 
 			ldx #WHITE
 			lda VIC.SCREEN_CONTROL_2
@@ -49,6 +53,8 @@ IRQ: {
 			sty VIC.SCREEN_CONTROL_2
 			lda #$0a
 			sta VIC.EXTENDED_BG_COLOR_1
+
+
 
 			lda #$01
 			sta PerformFrameCodeFlag
@@ -82,7 +88,7 @@ IRQ: {
 			sta VIC.SCREEN_CONTROL_2
 			lda #$05
 			sta VIC.EXTENDED_BG_COLOR_1
-
+			
 			lda #<MainIRQ    
 			ldx #>MainIRQ
 			sta $fffe   // 0314

@@ -9,6 +9,12 @@ BasicUpstart2(Entry)
 #import "utils/utils.asm"
 #import "utils/irq.asm"
 
+
+.var music = LoadSid("../assets/sound/cuteplatform.sid")
+* = $1000 "Music"
+	.fill music.size, music.getData(i)
+
+
 #import "maps/maploader.asm"
 #import "player/player.asm"
 #import "player/projectiles.asm"
@@ -90,6 +96,10 @@ Entry:
 
 		jsr Random.init
 
+		lda #$01	//Initialize current song
+		jsr $1000
+
+
 		//Setup generated tables
 		lda #180
 		ldx #$04
@@ -125,7 +135,6 @@ Entry:
 			jsr SOFTSPRITES.UpdateSprites
 			
 			// inc $d020 //2
-			jsr PLAYER.DrawPlayer
 			jsr CROWN.DrawCrown
 			// inc $d020 //3
 			jsr PLAYER.PlayerControl
@@ -133,13 +142,16 @@ Entry:
 			jsr PLAYER.JumpAndFall
 			// inc $d020 //5
  			jsr PLAYER.GetCollisions
+			jsr PLAYER.DrawPlayer
 
 			// inc $d020 //6
 			jsr PROJECTILES.UpdateProjectiles
 
 			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
+			jsr HUD.DrawLives
 
+			jsr $1003
 
 			lda #$00
 			sta $d020
@@ -156,4 +168,5 @@ Entry:
 	CosTableY:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 #import "maps/assets.asm"
+
 

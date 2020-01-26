@@ -26,7 +26,10 @@ CROWN: {
 		 	//Enable crown if it is active
 			//Crown sprite
 			lda PlayerHasCrown	
-			bmi !NoCrown+
+			bpl !+
+			jmp !NoCrown+
+		!:
+
 		!Crown:
 			lda $d015
 			ora #%00100000
@@ -38,6 +41,7 @@ CROWN: {
 		!:
 			tay
 			dey
+			sty CROWN_OFFSET_TEMP1
 			lda PLAYER.Player1_State, y
 			and #[PLAYER.STATE_FACE_LEFT]
 			bne !FaceLeft+
@@ -64,13 +68,40 @@ CROWN: {
 			lda CrownPosTableY + 1, x
 			sta CROWN_POS_Y + 1
 
+
 			// .break
 			ldy #$00
-			lda (CROWN_POS_Y), y //lsb
+			lda (CROWN_POS_Y), y //Y lsb
 			sta VIC.SPRITE_5_Y
+			tya 
+			pha 
 
+				//Check for crown offset
+				ldy CROWN_OFFSET_TEMP1
+				lda PLAYER.Player_State, y
+				and #[PLAYER.STATE_THROWING]
+				beq !SkipThrowOffset+
+				lda PLAYER.Player_ThrowIndex, y
+				tay
+				lda VIC.SPRITE_5_Y
+				sec
+				sbc ThrowYOffset, y
+				sta VIC.SPRITE_5_Y
+
+				// ldy CROWN_OFFSET_TEMP1
+				// lda PLAYER.Player_ThrowIndex, y
+				// tay
+				// lda VIC.SPRITE_5_X
+				// clc
+				// adc ThrowXOffset, y
+				// sta VIC.SPRITE_5_X
+
+
+		!SkipThrowOffset:
+			pla
+			tay
 			iny
-			lda (CROWN_POS_X), y //lsb
+			lda (CROWN_POS_X), y //X lsb
 			sta VIC.SPRITE_5_X
 
 			lda $d010
@@ -113,6 +144,9 @@ CROWN: {
 			.word PLAYER.Player2_Y
 	}
 
+	ThrowYOffset:
+		//.byte 76,77,78,79, 79,79,79,79, 79,78,78,78, 77,77
+		.byte 3,3,4,4,4,4,4,4,4,4,4,4,3,3
 
 	Fall: {
 			lda #<Crown_X

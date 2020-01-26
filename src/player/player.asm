@@ -32,22 +32,28 @@ PLAYER: {
 	PlayersActive:
 			.byte $00
 
+	Player_Lives:
+	Player1_Lives:
+		.byte $04
+	Player2_Lives:
+		.byte $04
 
 	Player1_X:
 			// Fractional / LSB / MSB   
-			.byte $00, $48, $00 // 1/256th pixel accuracy
+			.byte $00, $88, $00 // 1/256th pixel accuracy
 	Player2_X:
 			// Fractional / LSB / MSB
-			.byte $00, $48, $00 // 1/256th pixel accuracy
+			.byte $00, $98, $00 // 1/256th pixel accuracy
 
 
 	Player1_Y:
-			.byte $70 // 1 pixel accuracy
+			.byte $c0 // 1 pixel accuracy
 	Player2_Y:
-			.byte $70 // 1 pixel accuracy
+			.byte $c0 // 1 pixel accuracy
 
 
 	//Flags
+	Player_IsDying:
 	Player1_IsDying:
 			.byte $00
 	Player2_IsDying:
@@ -92,11 +98,13 @@ PLAYER: {
 	Player2_EatIndex:
 			.byte $00
 
+	Player_ThrowIndex:
 	Player1_ThrowIndex:
 			.byte $00
 	Player2_ThrowIndex:
 			.byte $00
 
+	Player_State:
 	Player1_State:
 			.byte $00
 	Player2_State:
@@ -138,6 +146,10 @@ PLAYER: {
 
 
 
+			lda #$02
+			sta Player1_Lives
+			lda #$01
+			sta Player2_Lives
 
 
 			lda #[PLAYER_1 + PLAYER_2]
@@ -654,6 +666,10 @@ PLAYER: {
 			and #[255 - STATE_WALK_RIGHT - STATE_WALK_LEFT]
 			sta Player1_State, y
 
+			lda Player_IsDying,y
+			beq !+
+			rts
+		!:
 
 		!Fire:
 			lda JOY_ZP1, y
@@ -944,6 +960,9 @@ PLAYER: {
 			lda #>Player1_Y
 			sta PlayerY + 1
 
+			lda Player_IsDying + 0
+			sta PLAYER_DYING
+
 			jmp !PlayerSetupComplete+
 		!Player2:
 			lda #<Player2_State
@@ -965,7 +984,9 @@ PLAYER: {
 			sta PlayerY
 			lda #>Player2_Y
 			sta PlayerY + 1
-
+			lda Player_IsDying + 1
+			sta PLAYER_DYING
+	
 		!PlayerSetupComplete:
 		
 			ldy #$00
@@ -974,6 +995,8 @@ PLAYER: {
 			bne !ExitFallingCheck+
 
 		!FallCheck:
+			lda PLAYER_DYING
+			bne !Falling+
 			lda (PlayerFloorCollision),y
 			and #UTILS.COLLISION_SOLID
 			bne !NotFalling+

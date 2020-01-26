@@ -116,6 +116,46 @@ HUD: {
 
 			rts
 	}
+
+	LivesLocations:
+		.byte 49,9,50,10
+		.byte 70,30,59,29
+
+
+	DrawLives: {
+			ldx #$01
+		!Loop:	
+			stx HUD_LIVES_TEMP1
+
+					ldy #$03
+				!InnerLoop:
+						ldx HUD_LIVES_TEMP1
+
+						tya
+						cmp PLAYER.Player_Lives, x
+						bcs !+
+						lda #$aa
+						jmp !Done+
+					!:
+						lda #$a9
+					!Done:
+						pha
+						lda LivesLocations, y
+						tax
+						pla
+						sta SCREEN_RAM + 23 * $28, x
+
+					
+					dey
+					bpl !InnerLoop-
+
+
+			ldx HUD_LIVES_TEMP1
+			dex
+			bpl !Loop-
+
+			rts
+	}
 }
 
 
