@@ -24,6 +24,17 @@ TABLES: {
 		.byte 64,65,66,65
 	__PlayerWalkRight: 
 
+	PlayerCrownBob:
+		.byte 3,4,3,4
+	__PlayerCrownBob:
+	PlayerThrowCrownX:
+		.byte 1, 1,0,2,2, 2,2,2,2,2, 2,2,2, 0,0
+	_PlayerThrowCrownX:
+	PlayerThrowCrownY:
+		.byte 3, 4,5,4,4, 4,4,4,4,4 ,4,4,4, 5,5
+	_PlayerThrowCrownY:
+
+	
 	PlayerEatLeft: 
 		.byte 84,85,86
 	__PlayerEatLeft: 
@@ -34,12 +45,14 @@ TABLES: {
 
 
 	PlayerThrowLeft: 
-		.byte 76,77,78,79,79,79,79,79,79,78,78,78,77,77
+		.byte 76,77,78,79, 79,79,79,79,79, 78,78,78, 77,77
 	__PlayerThrowLeft: 
 
 	PlayerThrowRight: 
 		.byte 72,73,74,75,75,75,75,75,75,74,74,74,73,73
 	__PlayerThrowRight: 
+
+
 
 	PowerOfTwo:
 		.byte 1,2,4,8,16,32,64,128

@@ -24,7 +24,7 @@ VIC: {
 	.label SPRITE_7_Y = $d00f
 
 	.label SPRITE_MSB = $d010
-
+	.label SCREEN_CONTROL_1 = $d011
 	.label RASTER_Y = $d012 
 
 	.label SPRITE_ENABLE = $d015

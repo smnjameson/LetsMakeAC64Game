@@ -83,10 +83,18 @@ HUD: {
 	}
 
 	UpdateEatMeter: {
-			ldx #$00
+			
 			clc
 			lda PLAYER.Player1_EatCount
 			adc PLAYER.Player2_EatCount
+			tax
+			//Accumulator has total eaten
+			//Bar has 56 units total
+			//Therefore we need to show (TotalEaten * 56) / TotalEnemies
+
+			lda MAPDATA.MAP_1.BarUnits, x
+
+			ldx #$00
 		!Loop:	
 			cmp #$04
 			bcc !LessThanFour+

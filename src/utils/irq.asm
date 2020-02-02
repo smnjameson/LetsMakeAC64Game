@@ -1,4 +1,14 @@
 IRQ: {
+	/*
+	furroy: need screen shake when fat guy jumps and lands !!!!!!
+	*/
+
+	ScreenShakeTimer:
+		.byte $00
+
+	ScreenShakeValues:
+		.byte 0,0,1,0,2,0,3,0,4
+
 	Setup: {
 		sei
 
@@ -46,15 +56,14 @@ IRQ: {
 
 			ldx #WHITE
 			lda VIC.SCREEN_CONTROL_2
-			ora #%00010000 
+			and #%11111000
+			ora #%00011000 
 			tay
 			
 			stx VIC.BACKGROUND_COLOR
 			sty VIC.SCREEN_CONTROL_2
 			lda #$0a
 			sta VIC.EXTENDED_BG_COLOR_1
-
-
 
 			lda #$01
 			sta PerformFrameCodeFlag
@@ -84,11 +93,28 @@ IRQ: {
 			lda #LIGHT_BLUE
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_2
+			and #%11110000
 			ora #%00010000 
 			sta VIC.SCREEN_CONTROL_2
 			lda #$05
 			sta VIC.EXTENDED_BG_COLOR_1
+
 			
+
+				//Now shake the screen
+				lda ScreenShakeTimer
+				beq !NoShake+
+				dec ScreenShakeTimer
+				ldx ScreenShakeTimer
+				lda ScreenShakeValues, x
+				sta RANDOM_VAL
+				lda VIC.SCREEN_CONTROL_2
+				and #%11111000
+				ora RANDOM_VAL
+				sta VIC.SCREEN_CONTROL_2	
+			!NoShake:
+
+
 			lda #<MainIRQ    
 			ldx #>MainIRQ
 			sta $fffe   // 0314

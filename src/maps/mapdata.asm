@@ -27,8 +27,12 @@ MAPDATA: {
 
 		EnemyList:
 			.byte 1,1,1,1, 2,2,2,2, 1,1,2,2
-			.byte 1,1,1,1, 2,2,2,2, 1,1,2,2
+		__EnemyList:
 			.byte 0
+
+		BarUnits:
+			.fill [__EnemyList - EnemyList], [[i*56]/[__EnemyList - EnemyList]]
+			.byte 56
 	}
 
 }

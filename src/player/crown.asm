@@ -36,7 +36,7 @@ CROWN: {
 			sta $d015
 			lda PlayerHasCrown
 			bne !+
-			lda #$5e
+			lda #$8e
 			jmp !ApplyCrown+
 		!:
 			tay
@@ -74,35 +74,113 @@ CROWN: {
 			sta VIC.SPRITE_5_Y
 			tya 
 			pha 
+				lda #$01
+				sta CROWN_THROW_OFFSET_X
 
 				lda PlayerHasCrown 
 				beq !SkipThrowOffset+
+
 				//Check for crown offset
 				ldy CROWN_OFFSET_TEMP1
 				lda PLAYER.Player_State, y
 				and #[PLAYER.STATE_THROWING]
-				beq !SkipThrowOffset+
+				beq !NotThrowingOffset+
+
+
 				lda PLAYER.Player_ThrowIndex, y
 				tay
+
 				lda VIC.SPRITE_5_Y
 				sec
-				sbc ThrowYOffset, y
+				sbc TABLES.PlayerThrowCrownY, y
+				sta VIC.SPRITE_5_Y
+
+				lda TABLES.PlayerThrowCrownX, y
+				sta CROWN_THROW_OFFSET_X
+
+
+				jmp !SkipThrowOffset+
+
+
+				//Adjust the player crown when walking
+			!NotThrowingOffset:
+				ldy CROWN_OFFSET_TEMP1
+				lda PLAYER.Player_State, y
+				and #[PLAYER.STATE_WALK_LEFT + PLAYER.STATE_WALK_RIGHT]
+				beq !+
+				lda PLAYER.Player_WalkIndex, y
+				tay
+				jmp !FetchedOffset+
+			!:
+				ldy #$00
+			!FetchedOffset:
+				lda VIC.SPRITE_5_Y
+				sec
+				sbc TABLES.PlayerCrownBob, y
 				sta VIC.SPRITE_5_Y
 
 
-
 		!SkipThrowOffset:
+
+			ldy CROWN_OFFSET_TEMP1
+			lda PLAYER.Player_State, y
+			and #[PLAYER.STATE_FACE_LEFT]
+			bne !FacingLeft+
+
+		!FacingRight:
 			pla
 			tay
 			iny
-			lda (CROWN_POS_X), y //X lsb
-			sta VIC.SPRITE_5_X
 
+			lda (CROWN_POS_X), y
+			clc
+		 	adc CROWN_THROW_OFFSET_X
+			sta CROWN_X
+			iny
+			lda (CROWN_POS_X), y
+			adc #$00
+			sta CROWN_X + 1
+
+			lda CROWN_X
+			sec
+			sbc #$01
+			sta CROWN_X
+			lda CROWN_X + 1
+			sbc #$00
+			sta CROWN_X + 1
+			jmp !Apply+
+
+		!FacingLeft:
+			pla
+			tay
+			iny
+
+			lda (CROWN_POS_X), y
+			sec
+		 	sbc CROWN_THROW_OFFSET_X
+			sta CROWN_X
+			iny
+			lda (CROWN_POS_X), y
+			sbc #$00
+			sta CROWN_X + 1
+
+			lda CROWN_X
+			clc
+			adc #$01
+			sta CROWN_X
+			lda CROWN_X + 1
+			adc #$00
+			sta CROWN_X + 1
+
+
+		!Apply:
+			//Apply new offset values
+			lda CROWN_X
+			sta VIC.SPRITE_5_X
 			lda $d010
 			and #%11011111
 			tax
-			iny
-			lda (CROWN_POS_X), y //msb
+			lda CROWN_X + 1
 			beq !noMsb+
 			txa
 			ora #%00100000
@@ -110,6 +188,26 @@ CROWN: {
 		!noMsb:
 			txa
 			sta $d010
+
+
+		// 	lda (CROWN_POS_X), y //X lsb
+		// 	clc
+		// 	adc CROWN_THROW_OFFSET_X
+		// 	sta VIC.SPRITE_5_X
+
+		// 	lda $d010
+		// 	and #%11011111
+		// 	tax
+		// 	iny
+		// 	lda (CROWN_POS_X), y //msb
+		// 	adc #$00
+		// 	beq !noMsb+
+		// 	txa
+		// 	ora #%00100000
+		// 	tax
+		// !noMsb:
+		// 	txa
+		// 	sta $d010
 
 			//Only fall if player doesnt have crown
 			lda PlayerHasCrown
@@ -190,9 +288,7 @@ CROWN: {
 			rts
 	}
 
-	ThrowYOffset:
-		//.byte 76,77,78,79, 79,79,79,79, 79,78,78,78, 77,77
-		.byte 3,3,4,4,4,4,4,4,4,4,4,4,3,3
+
 
 	Fall: {
 			lda #<Crown_X

@@ -129,14 +129,13 @@ Entry:
 		beq !Loop-
 		dec PerformFrameCodeFlag
 
-			
+
 			inc ZP_COUNTER
 
 			// inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
 			// inc $d020 //2
-			jsr CROWN.DrawCrown
 			// inc $d020 //3
 			jsr PLAYER.PlayerControl
 			// inc $d020 //4
@@ -144,6 +143,8 @@ Entry:
 			// inc $d020 //5
  			jsr PLAYER.GetCollisions
 			jsr PLAYER.DrawPlayer
+ 			jsr CROWN.DrawCrown
+			
 
 			// inc $d020 //6
 			jsr PROJECTILES.UpdateProjectiles

@@ -40,7 +40,6 @@ PLAYER: {
 	Player2_Lives:
 		.byte $04
 
-* = *
 	Player1_X:
 			// Fractional / LSB / MSB   
 			.byte $00, $88, $00 // 1/256th pixel accuracy
@@ -90,7 +89,8 @@ PLAYER: {
 			.byte $00
 	Player2_JumpIndex:
 			.byte $00
-
+	
+	Player_WalkIndex:
 	Player1_WalkIndex:
 			.byte $00
 	Player2_WalkIndex:
@@ -108,6 +108,7 @@ PLAYER: {
 			.byte $00
 
 
+* = *
 	Player_State:
 	Player1_State:
 			.byte $00
@@ -126,6 +127,12 @@ PLAYER: {
 			.byte $00
 	DefaultFrame:
 			.byte $40, $40
+
+	Player_Size:
+	Player1_Size:
+			.byte $00
+	Player2_Size:
+			.byte $02
 
 
 
@@ -640,7 +647,20 @@ PLAYER: {
 				sta CURRENT_FRAME
 
 			!SetFrame:
+				ldx CURRENT_PLAYER
+				dex
+				lda Player_Size, x
+				tax
+
 				lda CURRENT_FRAME
+			!SizeLoop:
+				cpx #$00
+				beq !NoSizeInc+
+				clc
+				adc #$18
+				dex
+				jmp !SizeLoop-
+			!NoSizeInc:
 				ldx CURRENT_PLAYER
 				sta [SPRITE_POINTERS + 5], x
 
@@ -971,6 +991,7 @@ PLAYER: {
 			.label PlayerFloorCollision = VECTOR2
 			.label PlayerJumpIndex = VECTOR3
 			.label PlayerY = VECTOR4
+			.label PlayerSize = VECTOR5
 
 			.label CURRENT_PLAYER = TEMP1
 
@@ -1002,6 +1023,11 @@ PLAYER: {
 			lda #>Player1_Y
 			sta PlayerY + 1
 
+			lda #<Player1_Size
+			sta PlayerSize
+			lda #>Player1_Size
+			sta PlayerSize + 1
+
 			lda Player_IsDying + 0
 			sta PLAYER_DYING
 
@@ -1026,6 +1052,12 @@ PLAYER: {
 			sta PlayerY
 			lda #>Player2_Y
 			sta PlayerY + 1
+
+			lda #<Player2_Size
+			sta PlayerSize
+			lda #>Player2_Size
+			sta PlayerSize + 1
+
 			lda Player_IsDying + 1
 			sta PLAYER_DYING
 	
@@ -1052,7 +1084,18 @@ PLAYER: {
 		!CheckCol:
 			lda (PlayerFloorCollision),y
 			and #UTILS.COLLISION_SOLID
-			bne !NotFalling+
+			beq !Falling+
+
+
+			lda (PlayerSize), y
+			cmp #$02
+			bcc !NotFalling+
+			lda (PlayerState), y
+			and #STATE_FALL
+			beq !NotFalling+
+			lda #$08
+			sta IRQ.ScreenShakeTimer
+			jmp !NotFalling+
 
 		!Falling:
 			lda (PlayerState), y
