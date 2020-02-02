@@ -29,6 +29,8 @@ PLAYER: {
 
 	.label FIRE_HELD_THRESHOLD = 15
 
+	DefaultLeftRightFrames:
+			.byte 67, 64
 	PlayersActive:
 			.byte $00
 
@@ -38,6 +40,7 @@ PLAYER: {
 	Player2_Lives:
 		.byte $04
 
+* = *
 	Player1_X:
 			// Fractional / LSB / MSB   
 			.byte $00, $88, $00 // 1/256th pixel accuracy
@@ -104,6 +107,7 @@ PLAYER: {
 	Player2_ThrowIndex:
 			.byte $00
 
+
 	Player_State:
 	Player1_State:
 			.byte $00
@@ -146,21 +150,73 @@ PLAYER: {
 
 
 
-			lda #$03
+			lda #$04
 			sta Player1_Lives
-			lda #$02
+			lda #$04
 			sta Player2_Lives
 
 
-			lda #[PLAYER_1 + PLAYER_2]
-			sta PlayersActive
-
-			lda #STATE_FACE_RIGHT
-			sta Player1_State
-			sta Player2_State
+			ldx #$00
+			jsr SpawnPlayer
+			ldx #$01
+			jsr SpawnPlayer
 			rts
 	}
 
+
+	SpawnPlayer: {
+			//X = 0 or 1 = Player 1 or 2
+			lda PlayersActive
+			ora TABLES.PowerOfTwo, x
+			sta PlayersActive
+
+			//MAP LOOKUP : TODO
+
+			cpx #$00
+			bne !Plyr2+
+		!Plyr1:
+			lda #[STATE_FACE_RIGHT + STATE_WALK_RIGHT]
+			sta Player1_State
+			lda #$00
+			sta Player1_IsDying
+			lda DefaultLeftRightFrames + 1
+			sta DefaultFrame + 0	
+
+			lda MAPDATA.MAP_1.PlayerSpawns + 0
+			sta PLAYER.Player1_X + 1
+			lda MAPDATA.MAP_1.PlayerSpawns + 1
+			sta PLAYER.Player1_X + 2
+			lda MAPDATA.MAP_1.PlayerSpawns + 2
+			sta PLAYER.Player1_Y + 0
+			jmp !PlayerSpecificsDone+
+
+		!Plyr2:
+			lda #[STATE_FACE_LEFT + STATE_WALK_LEFT]
+			sta Player2_State
+			lda #$00
+			sta Player2_IsDying	
+			lda DefaultLeftRightFrames + 0
+			sta DefaultFrame + 1	
+			lda MAPDATA.MAP_1.PlayerSpawns + 3
+			sta PLAYER.Player2_X + 1
+			lda MAPDATA.MAP_1.PlayerSpawns + 4
+			sta PLAYER.Player2_X + 2
+			lda MAPDATA.MAP_1.PlayerSpawns + 5
+			sta PLAYER.Player2_Y + 0
+
+		!PlayerSpecificsDone:
+			rts
+	}
+
+	KillPlayer: {
+			//Y = 0 or 1 = Player 1 or 2
+			
+			tya 
+			tax
+			dec Player_Lives, x
+			jsr SpawnPlayer
+			rts
+	}
 
 	GetCollisions: {
 
@@ -689,21 +745,7 @@ PLAYER: {
 			lda Player1_State, y
 			ora #STATE_EATING
 			sta Player1_State, y
-			iny	
-			cpy CROWN.PlayerHasCrown
-			bne !+
-			lda Player1_X + 0
-			sta CROWN.Crown_X + 0
-			lda Player1_X + 1
-			sta CROWN.Crown_X + 1
-			lda Player1_X + 2
-			sta CROWN.Crown_X + 2
-			lda Player1_Y
-			sta CROWN.Crown_Y
-			lda #$00
-			sta CROWN.PlayerHasCrown
-		!:
-			dey
+			jsr CROWN.DropCrown
 			jmp !+
 
 		!FirePressed:
@@ -838,7 +880,7 @@ PLAYER: {
 			and #[255 - STATE_FACE_RIGHT - STATE_WALK_RIGHT]
 			ora #[STATE_WALK_LEFT + STATE_FACE_LEFT]
 			sta Player1_State, y
-			lda #67
+			lda DefaultLeftRightFrames + 0
 			sta DefaultFrame, y
 			jmp !Right+
 		!:
@@ -915,7 +957,7 @@ PLAYER: {
 			ora #[STATE_WALK_RIGHT + STATE_FACE_RIGHT]
 			sta Player1_State, y
 
-			lda #64
+			lda DefaultLeftRightFrames + 1
 			sta DefaultFrame, y
 		!:
 		!SkipMovement:
@@ -996,7 +1038,18 @@ PLAYER: {
 
 		!FallCheck:
 			lda PLAYER_DYING
-			bne !Falling+
+			beq !CheckCol+
+			
+			lda (PlayerY), y
+			cmp #$e0
+			bcc !Falling+
+
+			ldy CURRENT_PLAYER
+			dey
+			jsr KillPlayer
+			jmp !SkipEntireIteration+
+
+		!CheckCol:
 			lda (PlayerFloorCollision),y
 			and #UTILS.COLLISION_SOLID
 			bne !NotFalling+
@@ -1077,7 +1130,7 @@ PLAYER: {
 			sta (PlayerJumpIndex), y
 
 		!Skip:
-
+		!SkipEntireIteration:
 			dec CURRENT_PLAYER
 			beq !+
 			jmp !Loop-

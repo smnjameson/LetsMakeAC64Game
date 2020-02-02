@@ -28,12 +28,11 @@
 	CHAR_COLORS:
 		.import binary "../../assets/maps/cols.bin"
 
-	MAP_1:
-		.import binary "../../assets/maps/map_1.bin"
-
 	HUD_DATA:
 		.import binary "../../assets/maps/hud.bin"
 
+	#import "mapdata.asm"
+		
 * = $eec0 "Dynamic sprite absorb frames" // #187-191 / $bb-$bf
 		.fill 64, $ff	
 		.fill 64, $cc	

@@ -26,8 +26,8 @@ BasicUpstart2(Entry)
 
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
-
 #import "enemies/enemymacros.asm"
+#import "enemies/pipes.asm"
 
 Random: { 
         lda seed
@@ -113,12 +113,14 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
+		jsr PIPES.Initialise
 		jsr CROWN.Initialise
 		//Generate all sprites
 		lda #$10
 		jsr SPRITEWARP.generate
 		lda #$10
 		jsr SPRITEWARP.generate
+
 
 
 	//Inf loop
@@ -129,7 +131,6 @@ Entry:
 
 			
 			inc ZP_COUNTER
-			
 
 			// inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
@@ -149,6 +150,7 @@ Entry:
 
 			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
+			jsr PIPES.Update
 			jsr HUD.DrawLives
 
 			jsr $1003
@@ -167,6 +169,7 @@ Entry:
 		.fill 256, (sin((i/256) * (PI * 2)) * cos((i/128) * (PI * 2)) * 60 + 150) & $fe 
 	CosTableY:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
+
 #import "maps/assets.asm"
 
 

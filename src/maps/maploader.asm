@@ -18,9 +18,9 @@
 			sta Color + 2
 
 			//Initialise the map lookup self mod
-			lda #<MAP_1 //$00  
+			lda #<MAPDATA.MAP_1.Level //$00  
 			sta Tile + 1
-			lda #>MAP_1 //$c0  
+			lda #>MAPDATA.MAP_1.Level //$c0  
 			sta Tile + 2
 
 			//Reset row counter

@@ -69,13 +69,14 @@ CROWN: {
 			sta CROWN_POS_Y + 1
 
 
-			// .break
 			ldy #$00
 			lda (CROWN_POS_Y), y //Y lsb
 			sta VIC.SPRITE_5_Y
 			tya 
 			pha 
 
+				lda PlayerHasCrown 
+				beq !SkipThrowOffset+
 				//Check for crown offset
 				ldy CROWN_OFFSET_TEMP1
 				lda PLAYER.Player_State, y
@@ -88,13 +89,6 @@ CROWN: {
 				sbc ThrowYOffset, y
 				sta VIC.SPRITE_5_Y
 
-				// ldy CROWN_OFFSET_TEMP1
-				// lda PLAYER.Player_ThrowIndex, y
-				// tay
-				// lda VIC.SPRITE_5_X
-				// clc
-				// adc ThrowXOffset, y
-				// sta VIC.SPRITE_5_X
 
 
 		!SkipThrowOffset:
@@ -142,6 +136,58 @@ CROWN: {
 			.word Crown_Y
 			.word PLAYER.Player1_Y
 			.word PLAYER.Player2_Y
+	}
+
+
+	DropCrown: {
+			iny	
+			cpy CROWN.PlayerHasCrown
+			bne !SkipDrop+
+
+			sty DROP_CROWN_TEMP
+			cpy #$01
+			bne !Player2+
+		!Player1:
+			lda #<PLAYER.Player1_X
+			sta PLAYER_X_POINTER + 0
+			lda #>PLAYER.Player1_X
+			sta PLAYER_X_POINTER + 1
+			lda #<PLAYER.Player1_Y
+			sta PLAYER_Y_POINTER + 0
+			lda #>PLAYER.Player1_Y
+			sta PLAYER_Y_POINTER + 1
+			jmp !PlayerPointerDone+
+		!Player2:
+			lda #<PLAYER.Player2_X
+			sta PLAYER_X_POINTER + 0
+			lda #>PLAYER.Player2_X
+			sta PLAYER_X_POINTER + 1
+			lda #<PLAYER.Player2_Y
+			sta PLAYER_Y_POINTER + 0
+			lda #>PLAYER.Player2_Y
+			sta PLAYER_Y_POINTER + 1		
+		!PlayerPointerDone:
+
+			ldy #$00
+			lda (PLAYER_X_POINTER), y
+			sta CROWN.Crown_X + 0
+			iny
+			lda (PLAYER_X_POINTER), y
+			sta CROWN.Crown_X + 1
+			iny
+			lda (PLAYER_X_POINTER), y
+			sta CROWN.Crown_X + 2
+			ldy #$00
+			lda (PLAYER_Y_POINTER), y
+			sta CROWN.Crown_Y
+			lda #$00
+			sta CROWN.PlayerHasCrown
+
+
+			ldy DROP_CROWN_TEMP
+		!SkipDrop:
+			dey
+			rts
 	}
 
 	ThrowYOffset:
@@ -239,7 +285,10 @@ CROWN: {
 			lda PLAYER.Player1_State
 			and #[PLAYER.STATE_EATING]
 			bne !+
-
+			
+			lda PLAYER.Player1_IsDying
+			bne !+
+			
 			lda #<PLAYER.Player1_X
 			ldx #>PLAYER.Player1_X
 			sta Sprite1_X + 0
@@ -267,6 +316,9 @@ CROWN: {
 			//Player 2
 			lda PLAYER.Player2_State
 			and #[PLAYER.STATE_EATING]
+			bne !+
+
+			lda PLAYER.Player2_IsDying
 			bne !+
 
 			lda #<PLAYER.Player2_X

@@ -11,7 +11,9 @@ ENEMIES: {
 	.label STATE_STUNNED    = %01000000
 	.label STATE_DYING   	= %10000000
 
-* = * "EnemyType"
+	EnemyTotalCount:
+		.byte $00
+
 	EnemyType: 
 		.fill MAX_ENEMIES, 0
 
@@ -65,41 +67,15 @@ ENEMIES: {
 
 
 	Initialise: {
-			//TEST
-			lda #$01
-			ldx #42 //Half value
-			ldy #80
-			jsr SpawnEnemy
-
-			lda #$02
-			ldx #129 //half value
-			ldy #120
-			jsr SpawnEnemy
-
-			//TEST
-			lda #$01
-			ldx #22 //Half value
-			ldy #60
-			jsr SpawnEnemy
-
-			lda #$02
-			ldx #29 //half value
-			ldy #80
-			jsr SpawnEnemy
-
-			//TEST
-			lda #$01
-			ldx #122 //Half value
-			ldy #180
-			jsr SpawnEnemy
-
-
 			rts
 	}
+
 
 	UpdateEnemies: {
 			.label ENEMY_BEHAVIOUR = VECTOR1
 			.label TEMP = TEMP11
+			lda #$00
+			sta ENEMY_COUNT_TEMP
 
 			ldy #MAX_ENEMIES - 1
 		!Loop:
@@ -112,6 +88,7 @@ ENEMIES: {
 			jmp !Skip+
 
 		!Active:
+			inc ENEMY_COUNT_TEMP
 		//EnemyIsActive
 			lda VIC.SPRITE_ENABLE
 			ora TABLES.PowerOfTwo, y
@@ -128,6 +105,10 @@ ENEMIES: {
 		!Skip:		
 			dey
 			bpl !Loop-
+
+
+			lda ENEMY_COUNT_TEMP
+			sta EnemyTotalCount
 			rts
 	}
 
@@ -196,6 +177,11 @@ ENEMIES: {
 			sta Sprite2_H
 
 
+			lda EnemyState, y
+			and #[STATE_STUNNED]
+			beq !+
+			jmp !Next+
+		!:
 
 			//Inefficient copy due to enemy data format
 			lda EnemyPosition_X1, y
@@ -240,6 +226,12 @@ ENEMIES: {
 
 			lda #$01
 			sta PLAYER.Player_IsDying, x
+			//Check if we have crown
+			sty ENEMY_COLLISION_TEMP1
+			txa 
+			tay
+			jsr CROWN.DropCrown
+			ldy ENEMY_COLLISION_TEMP1
 
 		!:
 		!Next:
@@ -290,10 +282,18 @@ ENEMIES: {
 
 			sta EnemyJumpFallIndex, x
 			sta EnemyState, x
+			sta EnemyFrame, x
+			sta EnemyColor, x
+			sta EnemyStunTimer, x
+			sta EnemyEatenBy, x
+			sta EnemyEatenIndex, x
+			sta EnemyEatenCounter, x
 
 			//Type
 			pla
 			sta EnemyType, x
+
+
 
 			//Call on spawn
 			ldy #BEHAVIOURS.BEHAVIOUR_SPAWN
@@ -328,6 +328,7 @@ ENEMIES: {
 					//seems to be incorrect x index
 					//CPU JAM #1 addr was set to $771e
 					//CPU JAM #2 addr was set to $BD7F
+* = * "Behaviour self mod"
 			jsr $BEEF
 			rts
 	}
