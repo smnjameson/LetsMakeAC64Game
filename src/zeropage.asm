@@ -85,3 +85,5 @@ SCREEN_SHAKE_VAL: .byte $00
 PIPE_DRAW: .word $0000
 PIPE_TEMP: .byte $00
 PIPE_DIR: .byte $00
+PIPE_LENGTH: .byte $00
+PIPE_CHARS: .dword $00000000
