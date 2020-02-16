@@ -33,7 +33,9 @@ TABLES: {
 	PlayerThrowCrownY:
 		.byte 3, 4,5,4,4, 4,4,4,4,4 ,4,4,4, 5,5
 	_PlayerThrowCrownY:
-
+	PlayerSizeCrownOffset:
+		.byte 0,1,6
+	__PlayerSizeCrownOffset:
 	
 	PlayerEatLeft: 
 		.byte 84,85,86
