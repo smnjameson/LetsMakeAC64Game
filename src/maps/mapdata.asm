@@ -14,11 +14,13 @@ MAPDATA: {
 		PipeSpawnX:
 			.byte $2c, $94, $1c, $64, $84
 		PipeSpawnY:
-			.byte $52, $62, $6a, $b2, $92
-		PipeLength:
-			.byte $00, $00, $00, $00, $00
-		PipeUpOrDown:
-			.byte $00, $00, $00, $00, $00
+			.byte $52, $62, $a2, $b2, $92
+		PipeStartX:
+			.byte $08, $22, $04, $16, $1e
+		PipeStartY:
+			.byte $00, $00, $13, $13, $13
+		PipeLengthAndDirection:	//Upper nibble = 1 if pipes goes down
+			.byte $14, $16, $04, $02, $06
 
 		DoorSpawnLoc:
 			.byte $16,$02
@@ -34,5 +36,8 @@ MAPDATA: {
 			.fill [__EnemyList - EnemyList], [[i*56]/[__EnemyList - EnemyList]]
 			.byte 56
 	}
+
+
+
 
 }

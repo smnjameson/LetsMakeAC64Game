@@ -74,8 +74,6 @@ ENEMIES: {
 	UpdateEnemies: {
 			.label ENEMY_BEHAVIOUR = VECTOR1
 			.label TEMP = TEMP11
-			lda #$00
-			sta ENEMY_COUNT_TEMP
 
 			ldy #MAX_ENEMIES - 1
 		!Loop:
@@ -88,7 +86,6 @@ ENEMIES: {
 			jmp !Skip+
 
 		!Active:
-			inc ENEMY_COUNT_TEMP
 		//EnemyIsActive
 			lda VIC.SPRITE_ENABLE
 			ora TABLES.PowerOfTwo, y
@@ -106,9 +103,6 @@ ENEMIES: {
 			dey
 			bpl !Loop-
 
-
-			lda ENEMY_COUNT_TEMP
-			sta EnemyTotalCount
 			rts
 	}
 
@@ -260,6 +254,7 @@ ENEMIES: {
 			beq !Found+
 			dex
 			bpl !Loop-
+
 		!Found:
 			//X is our enemy index	
 			//Spawn enemy
@@ -293,7 +288,7 @@ ENEMIES: {
 			pla
 			sta EnemyType, x
 
-
+			inc EnemyTotalCount
 
 			//Call on spawn
 			ldy #BEHAVIOURS.BEHAVIOUR_SPAWN

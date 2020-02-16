@@ -335,6 +335,7 @@ BEHAVIOURS: {
 			ldx #$01
 			jsr HUD.AddScore
 
+			dec ENEMIES.EnemyTotalCount
 			//Increment eat meter for player
 			pla //Gets PlayerNum, Stack = EnmemyNum
 			tax

@@ -82,3 +82,6 @@ ENEMY_COUNT_TEMP: .byte $00
 CROWN_X: .word $0000
 
 SCREEN_SHAKE_VAL: .byte $00
+PIPE_DRAW: .word $0000
+PIPE_TEMP: .byte $00
+PIPE_DIR: .byte $00

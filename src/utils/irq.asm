@@ -61,12 +61,10 @@ IRQ: {
 
 			ldx #BLACK
 			stx VIC.BACKGROUND_COLOR
-						
+
 			lda #$00	//Hide sprites
 			sta $d00c
-			sta $d00e
-
-
+			sta $d00e 
 
 			lda VIC.SCREEN_CONTROL_1
 			and #%11111000
@@ -77,11 +75,16 @@ IRQ: {
 			ora #%00010000
 			sta VIC.SCREEN_CONTROL_2
 
-			
-			
 
 			lda #$0a
 			sta VIC.EXTENDED_BG_COLOR_1
+
+			lda #$00	//Hide sprites
+			sta $d00a
+			lda $d010 
+			and #%00011111 
+			sta $d010 
+
 
 			lda #$01
 			sta PerformFrameCodeFlag
