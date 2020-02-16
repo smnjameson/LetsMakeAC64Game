@@ -80,4 +80,5 @@ CROWN_THROW_OFFSET_X:	.byte $00
 ENEMY_COUNT_TEMP: .byte $00
 
 CROWN_X: .word $0000
-RANDOM_VAL: .byte $00
+
+SCREEN_SHAKE_VAL: .byte $00

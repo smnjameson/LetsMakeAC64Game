@@ -20,7 +20,7 @@ PIPES: {
 
 			//Check if there are less than 5 enemies
 			lda ENEMIES.EnemyTotalCount
-			cmp #$05
+			cmp #$01
 			bcs !SpawnCheckComplete+
 
 			//If so check there are enemies left to spawn

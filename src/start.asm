@@ -14,7 +14,6 @@ BasicUpstart2(Entry)
 * = $1000 "Music"
 	.fill music.size, music.getData(i)
 
-
 #import "maps/maploader.asm"
 #import "player/player.asm"
 #import "player/projectiles.asm"
@@ -172,5 +171,15 @@ Entry:
 		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
 
 #import "maps/assets.asm"
+
+
+//This fixes the ghost byte issue on screen shake
+//By forcing all IRQs to run indirectly from the last 
+//page ensuring the ghost byte is always $FF
+* = $fff0 "IRQ Indirect vector"
+IRQ_Indirect:
+	.label IRQ_LSB = $fff1
+	.label IRQ_MSB = $fff2
+	jmp $BEEF
 
 

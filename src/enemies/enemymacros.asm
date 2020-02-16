@@ -17,6 +17,8 @@
 		lda ENEMIES.EnemyPosition_X1, y
 		sta VIC.SPRITE_0_X + [0 * 2], x
 		lda ENEMIES.EnemyPosition_Y1, y
+		clc
+		adc SCREEN_SHAKE_VAL
 		sta VIC.SPRITE_0_Y + [0 * 2], x
 		ldx INDEX
 		ldy ENEMIES.EnemyPosition_X2, x

@@ -130,7 +130,7 @@ PLAYER: {
 
 	Player_Size:
 	Player1_Size:
-			.byte $00
+			.byte $01
 	Player2_Size:
 			.byte $02
 
@@ -701,7 +701,6 @@ PLAYER: {
 			!EndMSB:
 				sta VIC.SPRITE_MSB
 
-
 				pla
 				tax
 				ldy #$00
@@ -710,6 +709,13 @@ PLAYER: {
 			!Skip:
 
 		!SkipFrameSet:
+				//Adjust for screen shake
+				lda VIC.SPRITE_6_Y, x
+				clc
+				adc SCREEN_SHAKE_VAL
+				sta VIC.SPRITE_6_Y, x
+
+
 			dec CURRENT_PLAYER
 			beq !+
 			jmp !Loop-

@@ -7,7 +7,7 @@ IRQ: {
 		.byte $00
 
 	ScreenShakeValues:
-		.byte 0,0,1,0,2,0,3,0,4
+		.byte 3,3,4,3,5,3,6,3,7
 
 	Setup: {
 		sei
@@ -22,8 +22,14 @@ IRQ: {
 
 		lda #<MainIRQ    
 		ldx #>MainIRQ
-		sta $fffe   // 0314
-		stx $ffff	// 0315
+		sta IRQ_LSB   // 0314
+		stx IRQ_MSB	// 0315
+
+
+		lda #<IRQ_Indirect
+		sta $fffe
+		lda #>IRQ_Indirect
+		sta $ffff
 
 		lda #$e2
 		sta $d012
@@ -45,33 +51,61 @@ IRQ: {
 
 	MainIRQ: {		
 		:StoreState()
-			ldx #$04
+
+
+
+			ldx #$03
 		!:
 			dex
 			bne !-
-			
+
+			ldx #BLACK
+			stx VIC.BACKGROUND_COLOR
+						
 			lda #$00	//Hide sprites
 			sta $d00c
 			sta $d00e
 
-			ldx #WHITE
-			lda VIC.SCREEN_CONTROL_2
+
+
+			lda VIC.SCREEN_CONTROL_1
 			and #%11111000
-			ora #%00011000 
-			tay
+			ora #%00000011
+			sta VIC.SCREEN_CONTROL_1
+
+			lda VIC.SCREEN_CONTROL_2
+			ora #%00010000
+			sta VIC.SCREEN_CONTROL_2
+
 			
-			stx VIC.BACKGROUND_COLOR
-			sty VIC.SCREEN_CONTROL_2
+			
+
 			lda #$0a
 			sta VIC.EXTENDED_BG_COLOR_1
 
 			lda #$01
 			sta PerformFrameCodeFlag
 
+
+			//Calculate any screen shake ready
+			//for the next IRQ
+			lda ScreenShakeValues
+			sta SCREEN_SHAKE_VAL
+			ldx ScreenShakeTimer
+			beq !NoShake+
+			dec ScreenShakeTimer
+			ldx ScreenShakeTimer
+			lda ScreenShakeValues, x
+		!NoShake:
+			sec
+			sbc #$03
+			sta SCREEN_SHAKE_VAL
+
+
 			lda #<SecondIRQ    
 			ldx #>SecondIRQ
-			sta $fffe   // 0314
-			stx $ffff	// 0315
+			sta IRQ_LSB   // 0314
+			stx IRQ_MSB	// 0315
 
 			lda #$00
 			sta $d012
@@ -92,42 +126,42 @@ IRQ: {
 			//Reset Values set by IRQ	
 			lda #LIGHT_BLUE
 			sta VIC.BACKGROUND_COLOR
-			lda VIC.SCREEN_CONTROL_2
-			and #%11110000
-			ora #%00010000 
-			sta VIC.SCREEN_CONTROL_2
+			lda VIC.SCREEN_CONTROL_1
+			and #%11111000
+			ora #%00000011 
+			sta VIC.SCREEN_CONTROL_1
 			lda #$05
 			sta VIC.EXTENDED_BG_COLOR_1
-
+			lda VIC.SCREEN_CONTROL_2
+			ora #%00010000
+			sta VIC.SCREEN_CONTROL_2
 			
 
-				//Now shake the screen
-				lda ScreenShakeTimer
-				beq !NoShake+
-				dec ScreenShakeTimer
-				ldx ScreenShakeTimer
-				lda ScreenShakeValues, x
-				sta RANDOM_VAL
-				lda VIC.SCREEN_CONTROL_2
-				and #%11111000
-				ora RANDOM_VAL
-				sta VIC.SCREEN_CONTROL_2	
-			!NoShake:
+			//Now shake the screen
+			lda VIC.SCREEN_CONTROL_1
+			and #%11111000
+			ora SCREEN_SHAKE_VAL
+			clc
+			adc #$03
+			sta VIC.SCREEN_CONTROL_1	
+			
 
 
 			lda #<MainIRQ    
 			ldx #>MainIRQ
-			sta $fffe   // 0314
-			stx $ffff	// 0315
+			sta IRQ_LSB   // 0314
+			stx IRQ_MSB	// 0315
 
-			lda #$e2
+			lda #$e2 //Adjust for screen Vscroll
+			clc
+			adc SCREEN_SHAKE_VAL
 			sta $d012
 			lda $d011
 			and #%01111111
 			sta $d011	
 
 			asl $d019 //Acknowledging the interrupt
-		:RestoreState();
+		:RestoreState()
 		rti
 	}
 }

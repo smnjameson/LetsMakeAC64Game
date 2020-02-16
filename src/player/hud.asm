@@ -1,16 +1,27 @@
 HUD: {
 	Initialise: {
 			ldy #$01
+
 			ldx #119
 		!Loop:
 			lda HUD_DATA, x
 			sta SCREEN_RAM + 22 * 40, x
-			lda #$00
-			sta VIC.COLOR_RAM + 22 * 40, x
-			
 			dex
 			bpl !Loop-
 
+			ldx #39
+		!Loop:
+			lda #$00
+			sta VIC.COLOR_RAM + 22 * 40, x
+			lda #$01
+			sta VIC.COLOR_RAM + 23 * 40, x
+			sta VIC.COLOR_RAM + 24 * 40, x
+			dex
+			bpl !Loop-
+
+
+
+			//Color the meter
 			ldx #$0e
 			lda #$0a
 		!Loop:
@@ -18,6 +29,12 @@ HUD: {
 			sta VIC.COLOR_RAM + 24 * 40 + 12, x
 			dex
 			bpl !Loop-
+
+			lda #$01
+			sta VIC.COLOR_RAM + 23 * 40 + 12
+			sta VIC.COLOR_RAM + 24 * 40 + 12
+			sta VIC.COLOR_RAM + 23 * 40 + 27
+			sta VIC.COLOR_RAM + 24 * 40 + 27
 
 			jsr UpdateEatMeter
 			rts

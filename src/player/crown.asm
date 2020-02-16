@@ -114,14 +114,27 @@ CROWN: {
 			!:
 				ldy #$00
 			!FetchedOffset:
+				//Y is the current walk index
+				ldx PlayerHasCrown
+				dex
+				lda PLAYER.Player_Size, x
+				cmp #$02
+				bcc !AddBob+
+				lda VIC.SPRITE_5_Y
+				jmp !NoAddBob+
+				
+			!AddBob:
 				lda VIC.SPRITE_5_Y
 				sec
 				sbc TABLES.PlayerCrownBob, y
+			!NoAddBob:
+				ldy PLAYER.Player_Size, x
+				sec
+				sbc TABLES.PlayerSizeCrownOffset, y
 				sta VIC.SPRITE_5_Y
 
 
 		!SkipThrowOffset:
-
 			ldy CROWN_OFFSET_TEMP1
 			lda PLAYER.Player_State, y
 			and #[PLAYER.STATE_FACE_LEFT]
@@ -216,6 +229,10 @@ CROWN: {
 			jsr PickUp
 		!:
 
+			lda VIC.SPRITE_5_Y	
+			clc
+			adc SCREEN_SHAKE_VAL
+			sta VIC.SPRITE_5_Y
 			rts
 
 
