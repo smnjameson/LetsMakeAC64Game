@@ -29,6 +29,9 @@ PLAYER: {
 
 	.label FIRE_HELD_THRESHOLD = 15
 
+	CurrentLevel:
+			.byte $00
+
 	DefaultLeftRightFrames:
 			.byte 67, 64
 	PlayersActive:
@@ -107,8 +110,6 @@ PLAYER: {
 	Player2_ThrowIndex:
 			.byte $00
 
-
-* = *
 	Player_State:
 	Player1_State:
 			.byte $00
@@ -130,9 +131,9 @@ PLAYER: {
 
 	Player_Size:
 	Player1_Size:
-			.byte $01
+			.byte $00
 	Player2_Size:
-			.byte $02
+			.byte $00
 
 
 
@@ -177,7 +178,21 @@ PLAYER: {
 			ora TABLES.PowerOfTwo, x
 			sta PlayersActive
 
-			//MAP LOOKUP : TODO
+
+			//MAP LOOKUP
+			lda PLAYER.CurrentLevel
+			asl
+			tay
+			lda MAPDATA.MAP_POINTERS, y
+			clc
+			adc #<MAPDATA.PlayerSpawnData
+			sta MAP_LOOKUP_VECTOR + 0
+			iny 
+			lda MAPDATA.MAP_POINTERS, y
+			adc #>MAPDATA.PlayerSpawnData
+			sta MAP_LOOKUP_VECTOR + 1
+
+			
 
 			cpx #$00
 			bne !Plyr2+
@@ -189,11 +204,15 @@ PLAYER: {
 			lda DefaultLeftRightFrames + 1
 			sta DefaultFrame + 0	
 
-			lda MAPDATA.MAP_1.PlayerSpawns + 0
+
+			ldy #$00
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player1_X + 1
-			lda MAPDATA.MAP_1.PlayerSpawns + 1
+			iny
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player1_X + 2
-			lda MAPDATA.MAP_1.PlayerSpawns + 2
+			iny
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player1_Y + 0
 			jmp !PlayerSpecificsDone+
 
@@ -203,12 +222,16 @@ PLAYER: {
 			lda #$00
 			sta Player2_IsDying	
 			lda DefaultLeftRightFrames + 0
-			sta DefaultFrame + 1	
-			lda MAPDATA.MAP_1.PlayerSpawns + 3
+			sta DefaultFrame + 1
+
+			ldy #$03
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player2_X + 1
-			lda MAPDATA.MAP_1.PlayerSpawns + 4
+			iny
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player2_X + 2
-			lda MAPDATA.MAP_1.PlayerSpawns + 5
+			iny
+			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player2_Y + 0
 
 		!PlayerSpecificsDone:

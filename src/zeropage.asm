@@ -87,3 +87,5 @@ PIPE_TEMP: .byte $00
 PIPE_DIR: .byte $00
 PIPE_LENGTH: .byte $00
 PIPE_CHARS: .dword $00000000
+
+MAP_LOOKUP_VECTOR: .word $0000

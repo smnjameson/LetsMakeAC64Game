@@ -17,10 +17,15 @@
 			lda #>VIC.COLOR_RAM //$c0  
 			sta Color + 2
 
+
 			//Initialise the map lookup self mod
-			lda #<MAPDATA.MAP_1.Level //$00  
+			lda PLAYER.CurrentLevel
+			asl 
+			tax
+			lda MAPDATA.MAP_POINTERS, x
 			sta Tile + 1
-			lda #>MAPDATA.MAP_1.Level //$c0  
+			inx
+			lda MAPDATA.MAP_POINTERS, x
 			sta Tile + 2
 
 			//Reset row counter

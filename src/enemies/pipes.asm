@@ -92,7 +92,7 @@ PIPES: {
 
 
 	UpdatePipeBulges: {
-			inc $d020
+			// inc $d020
 			ldx #$04
 		!Loop:
 			//Is there an active pipe?
@@ -124,7 +124,7 @@ PIPES: {
 		!Skip:
 			dex
 			bpl !Loop-
-			dec $d020
+			// dec $d020
 			rts
 	}
 
