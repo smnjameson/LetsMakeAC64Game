@@ -7,12 +7,30 @@ PIPES: {
 	PipesActive:	//Bulge will extend to pipe length + 1
 		//		|	|	/\ 	{} 	\/
 		//		/\ 	{} 	\/ 	|	|
-		* = * "PIPE ACTIVE"
+		.byte $00,$00,$00,$00,$00
+	PipeEnemyType:
 		.byte $00,$00,$00,$00,$00
 
+	MAPDATA_COPY: {	
+		PipeSpawnX:
+			.byte $2c, $94, $1c, $64, $84
+		PipeSpawnY:
+			.byte $52, $62, $a2, $b2, $92
+		PipeStartX:
+			.byte $08, $22, $04, $16, $1e
+		PipeStartY:
+			.byte $00, $00, $13, $13, $13
+		PipeLengthAndDirection:	//Upper nibble = 1 if pipes goes down
+			.byte $14, $16, $04, $02, $06
 
-
-
+		DoorSpawnLoc:
+			.byte $16,$02
+		SwitchSpawnLoc:
+			.byte $20,$04
+	}
+	__MAPDATA_COPY:
+		NumberOfEnemies:
+			.byte $00 //Autofilled by initialise function
 
 	NextEnemyIndex:
 		.byte $00
@@ -25,6 +43,45 @@ PIPES: {
 			sta PipesActive, x
 			dex
 			bpl !-
+
+
+		//Initialise selfmods based on current level
+			lda PLAYER.CurrentLevel
+			asl
+			tax 
+			lda MAPDATA.MAP_POINTERS, x
+			clc
+			adc #<MAPDATA.EnemyListData
+			sta Update.EnemyList + 1
+			sta SpawnEnemyFromPipe.EnemyList + 1
+			inx
+			lda MAPDATA.MAP_POINTERS, x
+			adc #>MAPDATA.EnemyListData
+			sta Update.EnemyList + 2
+			sta SpawnEnemyFromPipe.EnemyList + 2
+
+			lda PLAYER.CurrentLevel
+			asl
+			tax 
+			lda MAPDATA.MAP_POINTERS, x
+			clc
+			adc #<MAPDATA.PipeSpawnData
+			sta SelfMod + 1
+			inx
+			lda MAPDATA.MAP_POINTERS, x
+			adc #>MAPDATA.PipeSpawnData
+			sta SelfMod + 2
+
+			//Copy map data for easy access
+			ldx #$00
+		!Loop:
+		SelfMod:
+			lda $BEEF, x
+			sta MAPDATA_COPY, x
+			inx
+			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 1]
+			bne !Loop-
+
 			rts
 	}
 
@@ -40,7 +97,7 @@ PIPES: {
 
 			//Check if there are less than 5 enemies
 			ldx ENEMIES.EnemyTotalCount
-			ldy #$04
+			ldy #$04 //Pipe to cxheck next
 		!Loop:
 			lda PipesActive, y
 			beq !+
@@ -53,12 +110,15 @@ PIPES: {
 
 			bcs !SpawnCheckComplete+
 
-
+			
 
 			//If so check there are enemies left to spawn
 			ldx NextEnemyIndex
-			lda MAPDATA.MAP_1.EnemyList, x
+
+		EnemyList:
+			lda $BEEF, x 	//MAP_DATA EnemyList
 			beq !SpawnCheckComplete+
+
 
 
 			//Do we have an inactive pipe?
@@ -84,6 +144,10 @@ PIPES: {
 
 			inc PipesActive, x
 
+			lda NextEnemyIndex
+			sta PipeEnemyType, x
+			inc NextEnemyIndex
+
 		!SpawnCheckComplete:
 
 			dec SpawnDelayTimer
@@ -100,7 +164,7 @@ PIPES: {
 			beq !Skip+
 
 			//Has the bulge reached the end
-			lda MAPDATA.MAP_1.PipeLengthAndDirection, x
+			lda MAPDATA_COPY.PipeLengthAndDirection, x
 			and #$0f
 			clc
 			adc #$01	//At end when bulges is at length + 2
@@ -129,22 +193,22 @@ PIPES: {
 	}
 
 	ClearBulge: {
-			ldy MAPDATA.MAP_1.PipeStartY, x
+			ldy MAPDATA_COPY.PipeStartY, x
 			lda TABLES.ScreenRowLSB, y
 			sta PIPE_DRAW + 0
 			lda TABLES.ScreenRowMSB, y
 			sta PIPE_DRAW + 1
 
-			lda MAPDATA.MAP_1.PipeLengthAndDirection, x
+			lda MAPDATA_COPY.PipeLengthAndDirection, x
 			and #$f0
 			sta PIPE_DIR
-			lda MAPDATA.MAP_1.PipeLengthAndDirection, x			
+			lda MAPDATA_COPY.PipeLengthAndDirection, x			
 			and #$0f
 			sta PIPE_TEMP
 
 			clc
 		!Loop:
-			ldy MAPDATA.MAP_1.PipeStartX, x
+			ldy MAPDATA_COPY.PipeStartX, x
 			lda #$25
 			sta (PIPE_DRAW), y
 			iny
@@ -178,16 +242,16 @@ PIPES: {
 	DrawBulge: {
 			jsr ClearBulge
 
-			ldy MAPDATA.MAP_1.PipeStartY, x
+			ldy MAPDATA_COPY.PipeStartY, x
 			lda TABLES.ScreenRowLSB, y
 			sta PIPE_DRAW + 0
 			lda TABLES.ScreenRowMSB, y
 			sta PIPE_DRAW + 1
 
-			lda MAPDATA.MAP_1.PipeLengthAndDirection, x
+			lda MAPDATA_COPY.PipeLengthAndDirection, x
 			and #$f0
 			sta PIPE_DIR
-			lda MAPDATA.MAP_1.PipeLengthAndDirection, x			
+			lda MAPDATA_COPY.PipeLengthAndDirection, x			
 			and #$0f
 			sta PIPE_TEMP
 			clc
@@ -235,7 +299,7 @@ PIPES: {
 			cmp PipesActive, x
 			bne !NotTop+
 		!Top:
-			ldy MAPDATA.MAP_1.PipeStartX, x
+			ldy MAPDATA_COPY.PipeStartX, x
 			lda PIPE_CHARS + 0
 			sta (PIPE_DRAW), y
 			iny
@@ -249,7 +313,7 @@ PIPES: {
 			cmp PipesActive, x
 			bne !NotBottom+
 		!Bottom:
-			ldy MAPDATA.MAP_1.PipeStartX, x
+			ldy MAPDATA_COPY.PipeStartX, x
 			lda PIPE_CHARS + 2
 			sta (PIPE_DRAW), y
 			iny
@@ -291,16 +355,17 @@ PIPES: {
 
 			//Now we have a pipe to spawn at (X)
 			//Get enemy type
-			ldy NextEnemyIndex
-			lda MAPDATA.MAP_1.EnemyList, y
+			
+			ldy PipeEnemyType, x
+		EnemyList:
+			lda $BEEF, y //MAP_DATA EnemyList
 			pha
 			//Get Pipe X and Y
-			lda MAPDATA.MAP_1.PipeSpawnY, x
+			lda MAPDATA_COPY.PipeSpawnY, x
 			tay
-			lda MAPDATA.MAP_1.PipeSpawnX, x
+			lda MAPDATA_COPY.PipeSpawnX, x
 			tax
 			pla
-			inc NextEnemyIndex
 
 			jsr ENEMIES.SpawnEnemy
 

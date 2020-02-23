@@ -112,7 +112,6 @@ Entry:
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
-		jsr PIPES.Initialise
 		jsr CROWN.Initialise
 		//Generate all sprites
 		lda #$10

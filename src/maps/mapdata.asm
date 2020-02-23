@@ -8,6 +8,7 @@ MAPDATA: {
 	.label DoorSpawnData = MAP_1.DoorSpawnLoc - MAP_1
 	.label SwitchSpawnData = MAP_1.SwitchSpawnLoc - MAP_1
 	.label NumberEnemiesData = MAP_1.NumberEnemies - MAP_1
+	.label EnemyListData = MAP_1.EnemyList - MAP_1
 
 	MAP_1: {
 		Level:	//Level ALWAYS first data in map data
@@ -39,8 +40,10 @@ MAPDATA: {
 		NumberEnemies:
 			.byte [__EnemyList - EnemyList]
 
+
+		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,1,1,1, 2,2,2,2, 1,1,2,2
+			.byte 2,2,2,2, 2,2,2,2, 2,2,2,2
 		__EnemyList:
 			.byte 0
 
@@ -80,8 +83,9 @@ MAPDATA: {
 		NumberEnemies:
 			.byte [__EnemyList - EnemyList]
 
+
 		EnemyList:
-			.byte 1,1,1,1, 2,2,2,2, 1,1,2,2
+			.byte 2,2,2,2
 		__EnemyList:
 			.byte 0
 

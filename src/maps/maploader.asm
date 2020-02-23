@@ -128,6 +128,7 @@
 			
 			jsr BufferMap
 
+			jsr PIPES.Initialise
 			rts
 	}
 

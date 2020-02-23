@@ -29,8 +29,16 @@ PLAYER: {
 
 	.label FIRE_HELD_THRESHOLD = 15
 
+
 	CurrentLevel:
 			.byte $00
+
+	PlayerColors:
+			.byte $02, $07
+	PlayerInvulnRamp:
+			.byte $09,$02,$04,$0c,$0e,$0c,$04,$02
+			.byte $07,$07,$0f,$0c,$0e,$0c,$0f,$07
+			// .byte $07,$0f,$06,$0e,$06,$0f,$07,$01
 
 	DefaultLeftRightFrames:
 			.byte 67, 64
@@ -42,6 +50,12 @@ PLAYER: {
 		.byte $04
 	Player2_Lives:
 		.byte $04
+
+	Player_Invuln:
+	Player1_Invuln:
+		.byte $00
+	Player2_Invuln:
+		.byte $00
 
 	Player1_X:
 			// Fractional / LSB / MSB   
@@ -146,10 +160,10 @@ PLAYER: {
 			lda #$08
 			sta VIC.SPRITE_COLOR_5
 
-			lda #$05
+			lda PlayerColors + 0
 			sta VIC.SPRITE_COLOR_6
 
-			lda #$02
+			lda PlayerColors + 1
 			sta VIC.SPRITE_COLOR_7
 
 			lda #$40
@@ -192,7 +206,7 @@ PLAYER: {
 			adc #>MAPDATA.PlayerSpawnData
 			sta MAP_LOOKUP_VECTOR + 1
 
-			
+
 
 			cpx #$00
 			bne !Plyr2+
@@ -214,6 +228,10 @@ PLAYER: {
 			iny
 			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player1_Y + 0
+
+			lda #$ff 
+			sta Player1_Invuln 
+
 			jmp !PlayerSpecificsDone+
 
 		!Plyr2:
@@ -234,13 +252,15 @@ PLAYER: {
 			lda (MAP_LOOKUP_VECTOR), y
 			sta PLAYER.Player2_Y + 0
 
+			lda #$ff 
+			sta Player2_Invuln 
+
 		!PlayerSpecificsDone:
 			rts
 	}
 
 	KillPlayer: {
 			//Y = 0 or 1 = Player 1 or 2
-			
 			tya 
 			tax
 			dec Player_Lives, x
@@ -540,6 +560,27 @@ PLAYER: {
 				dex
 				lda DefaultFrame, x   //Default idle frame
 				sta CURRENT_FRAME
+
+
+				lda Player_Invuln, x
+				beq !NotInvuln+
+				lsr 
+				and #$07
+				cpx #$00
+				beq !Plyr1+
+				clc
+				adc #$08
+			!Plyr1:
+				tay
+				lda	PlayerInvulnRamp, y
+				sta VIC.SPRITE_COLOR_6, x
+				dec Player_Invuln, x
+				jmp !InvulnDone+
+			!NotInvuln:
+				lda PlayerColors, x
+				sta VIC.SPRITE_COLOR_6, x
+			!InvulnDone:
+
 
 				ldy #$00 //Set IZPY index
 			!AreWeThrowing:

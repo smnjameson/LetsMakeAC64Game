@@ -104,11 +104,37 @@ HUD: {
 			clc
 			lda PLAYER.Player1_EatCount
 			adc PLAYER.Player2_EatCount
-			tax
+			pha
+
 			//Accumulator has total eaten
 			//Bar has 56 units total
 			//Therefore we need to show (TotalEaten * 56) / TotalEnemies
+					lda PLAYER.CurrentLevel
+					asl
+					tax
+					lda MAPDATA.MAP_POINTERS, x
+					clc
+					adc #<MAPDATA.EnemyListData
+					sta SelfMod + 1
+					inx
+					lda MAPDATA.MAP_POINTERS, x
+					adc #>MAPDATA.EnemyListData
+					sta SelfMod + 2
 
+					lda SelfMod + 1
+					clc
+					adc PIPES.NumberOfEnemies
+					sta SelfMod + 1
+					lda SelfMod + 2
+					adc #$00
+					sta SelfMod + 2
+
+
+			pla
+			tax
+
+			inx //Fixes the offset casued by the null byte at the end of EnemyList
+		SelfMod:
 			lda MAPDATA.MAP_1.BarUnits, x
 
 			ldx #$00

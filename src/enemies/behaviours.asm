@@ -341,16 +341,16 @@ BEHAVIOURS: {
 			tax
 			dex
 
-///////////////////////
-//DEBUG////////////////
-	cpx #$ff	//CPU jam seems to be caused when this value hits $ff
-	bne !+		//because the playerNum returns as 0 instaead of 1/2
-				//Probably causes other JAMs				
-	.break
-	nop
-!:
-///////////////////////
-///////////////////////
+// ///////////////////////
+// //DEBUG////////////////
+// 	cpx #$ff	//CPU jam seems to be caused when this value hits $ff
+// 	bne !+		//because the playerNum returns as 0 instaead of 1/2
+// 				//Probably causes other JAMs				
+// 	.break
+// 	nop
+// !:
+// ///////////////////////
+// ///////////////////////
 
 
 		// :DebugHex(null, 9, 23, 220)

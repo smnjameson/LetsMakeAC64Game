@@ -134,6 +134,11 @@ ENEMIES: {
 			beq !+
 			jmp !Next+
 		!:
+			lda PLAYER.Player_Invuln, x
+			beq !+	
+			jmp !Next+
+		!:
+
 			cpx #$01
 			beq !Player2+
 		!Player1:
@@ -254,6 +259,9 @@ ENEMIES: {
 			beq !Found+
 			dex
 			bpl !Loop-
+			//No free enemy so restore stack and exit
+			pla 
+			rts 
 
 		!Found:
 			//X is our enemy index	
@@ -306,6 +314,7 @@ ENEMIES: {
 			.label INDEX = TEMP3
 
 			sty BEHAVIOUR_OFFSET
+			sty $eebf
 			stx INDEX
 			tax
 			clc
@@ -316,7 +325,6 @@ ENEMIES: {
 			adc #00
 			sta SelfMod + 2
 
-			stx $eebf //TEMPORARY FOR DEBUGGING
 				
 			ldx INDEX
 		SelfMod: //TODO : Investigate re: CPU JAM

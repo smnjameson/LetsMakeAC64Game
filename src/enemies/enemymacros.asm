@@ -372,6 +372,8 @@ CheckVsPlayerEat: {
 
 
 CheckVsProjectiles: {
+		// rts
+		
 		ldy #$00
 	!Loop:
 		lda PROJECTILES.Player1_Proj_Type, y

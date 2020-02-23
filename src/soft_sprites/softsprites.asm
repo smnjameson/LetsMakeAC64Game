@@ -378,7 +378,9 @@ SOFTSPRITES: {
 					 BUT it does allow the floor effects to work with 
 					 less cycle usage 
 				*/
-
+				// $c2f0
+				// $01f0
+				lda SpriteData_CLEAR_MSB, x
 				sta SCREEN_ROW + 1
 				sec
 				sbc #>[SCREEN_RAM- MAPLOADER.BUFFER]
