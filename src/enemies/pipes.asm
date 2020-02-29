@@ -31,6 +31,10 @@ PIPES: {
 	__MAPDATA_COPY:
 		NumberOfEnemies:
 			.byte $00 //Autofilled by initialise function
+		EnemyWeight:
+			.byte $00 //Autofilled by initialise function
+
+
 
 	NextEnemyIndex:
 		.byte $00
@@ -79,7 +83,7 @@ PIPES: {
 			lda $BEEF, x
 			sta MAPDATA_COPY, x
 			inx
-			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 1]
+			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 2]
 			bne !Loop-
 
 			rts

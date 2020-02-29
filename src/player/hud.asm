@@ -121,6 +121,7 @@ HUD: {
 					adc #>MAPDATA.EnemyListData
 					sta SelfMod + 2
 
+					//Add number of enemies to get to BArUnits
 					lda SelfMod + 1
 					clc
 					adc PIPES.NumberOfEnemies
@@ -135,7 +136,7 @@ HUD: {
 
 			inx //Fixes the offset casued by the null byte at the end of EnemyList
 		SelfMod:
-			lda MAPDATA.MAP_1.BarUnits, x
+			lda $BEEF, x
 
 			ldx #$00
 		!Loop:	

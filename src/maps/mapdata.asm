@@ -7,6 +7,7 @@ MAPDATA: {
 	.label PipeSpawnData = MAP_1.PipeSpawnX - MAP_1
 	.label DoorSpawnData = MAP_1.DoorSpawnLoc - MAP_1
 	.label SwitchSpawnData = MAP_1.SwitchSpawnLoc - MAP_1
+	.label EnemyWeightData = MAP_1.EnemyWeight - MAP_1
 	.label NumberEnemiesData = MAP_1.NumberEnemies - MAP_1
 	.label EnemyListData = MAP_1.EnemyList - MAP_1
 
@@ -40,14 +41,20 @@ MAPDATA: {
 		NumberEnemies:
 			.byte [__EnemyList - EnemyList]
 
+		EnemyWeight:
+			.byte max(1, round(56/[__EnemyList - EnemyList]))
+
+		//Additional static values go here, above order msut stay intact
+
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 2,2,2,2, 2,2,2,2, 2,2,2,2
+			.byte 2,2,2,2, 2,2,2,2
 		__EnemyList:
 			.byte 0
 
 		BarUnits:
+			//A list of values 0-56 in intervals numbering the same as total enemies
 			.fill [__EnemyList - EnemyList], [[i*56]/[__EnemyList - EnemyList]]
 			.byte 56
 	}
@@ -82,6 +89,10 @@ MAPDATA: {
 
 		NumberEnemies:
 			.byte [__EnemyList - EnemyList]
+
+		EnemyWeight:
+			.byte max(1, round(56/[__EnemyList - EnemyList]))
+		//Additional static values go here, above order msut stay intact
 
 
 		EnemyList:

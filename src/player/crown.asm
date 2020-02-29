@@ -401,7 +401,10 @@ CROWN: {
 			
 			lda PLAYER.Player1_IsDying
 			bne !+
-			
+	
+			lda PLAYER.Player1_Size_Timer
+			bne !+
+
 			lda #<PLAYER.Player1_X
 			ldx #>PLAYER.Player1_X
 			sta Sprite1_X + 0
@@ -432,6 +435,9 @@ CROWN: {
 			bne !+
 
 			lda PLAYER.Player2_IsDying
+			bne !+
+
+			lda PLAYER.Player2_Size_Timer
 			bne !+
 
 			lda #<PLAYER.Player2_X

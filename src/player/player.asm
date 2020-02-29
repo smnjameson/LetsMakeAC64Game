@@ -57,6 +57,12 @@ PLAYER: {
 	Player2_Invuln:
 		.byte $00
 
+	Player_Weight:
+	Player1_Weight:
+		.byte $00
+	Player2_Weight:
+		.byte $00
+
 	Player1_X:
 			// Fractional / LSB / MSB   
 			.byte $00, $88, $00 // 1/256th pixel accuracy
@@ -135,6 +141,10 @@ PLAYER: {
 	Player2_WalkSpeed:
 			.byte $80, $01
 
+	PlayerWalkSpeeds_LSB:
+			.byte $80,$40,$00
+	PlayerWalkSpeeds_MSB:
+			.byte $01,$01,$01
 
 	Player1_EatCount:
 			.byte $00
@@ -149,7 +159,12 @@ PLAYER: {
 	Player2_Size:
 			.byte $00
 
-
+	.label PLAYER_SIZE_TIME = $20
+	Player_Size_Timer:
+	Player1_Size_Timer:
+			.byte $00
+	Player2_Size_Timer:
+			.byte $00
 
 	Initialise: {
 			lda #$0a
@@ -177,6 +192,9 @@ PLAYER: {
 			lda #$04
 			sta Player2_Lives
 
+			lda #$00
+			sta Player1_Weight
+			sta Player2_Weight
 
 			ldx #$00
 			jsr SpawnPlayer
@@ -561,6 +579,8 @@ PLAYER: {
 				lda DefaultFrame, x   //Default idle frame
 				sta CURRENT_FRAME
 
+				jsr SetPlayerSize
+
 
 				lda Player_Invuln, x
 				beq !NotInvuln+
@@ -780,19 +800,143 @@ PLAYER: {
 				sta VIC.SPRITE_6_Y, x
 
 
+				jsr PlayerSizeAnimation
+
 			dec CURRENT_PLAYER
 			beq !+
 			jmp !Loop-
 		!:
 
-			//Set MSB for crown
-
-
 			rts
 	}
 
+	PlayerSizeAnimation: {
+			.label CURRENT_PLAYER = TEMP2
+
+			ldx CURRENT_PLAYER
+			dex
+
+			lda Player_Size_Timer, x
+			bne !DoAnim+
+			rts
+		!DoAnim:
+			dec Player_Size_Timer, x
+			//$d017 height $d01d width
+
+			txa
+			tay 
+			jsr CROWN.DropCrown
+			
+			//Reset values
+			lda $d01d
+			and TABLES.InvPowerOfTwo + 6, x
+			sta $d01d
+			lda $d017
+			and TABLES.InvPowerOfTwo + 6, x
+			sta $d017
 
 
+			lda Player_Size_Timer, x
+			and #$0f
+			tay
+			lda SizeSinus, y
+			bpl !+
+			eor #$ff
+		!:
+			cmp #$40
+			bcc !NoExpand+
+
+			lda SizeSinus, y
+			bmi !VerticalExpand+
+			bpl !HorizontalExpand+
+		!NoExpand:
+			rts
+
+		!HorizontalExpand:
+			txa 
+			asl 
+			tay
+			lda $d01d
+			ora TABLES.PowerOfTwo + 6, x
+			sta $d01d
+			lda VIC.SPRITE_6_X, y
+			sec
+			sbc #$0c
+			sta VIC.SPRITE_6_X, y	
+			bcs !+
+			lda $d011
+			and TABLES.InvPowerOfTwo + 6, x
+			sta $d011	
+		!:		
+			rts
+
+		!VerticalExpand:
+			txa 
+			asl 
+			tay		
+			lda $d017
+			ora TABLES.PowerOfTwo + 6, x
+			sta $d017
+			lda VIC.SPRITE_6_Y, y
+			sec
+			sbc #$0b
+			sta VIC.SPRITE_6_Y, y
+			rts
+	}
+
+	SizeSinus:
+		.fill $10, sin([i/$10] * PI * 2) * 127
+
+
+
+	SetPlayerSize: {
+		//KEEP X - DOnt BASH!
+		//Set the correct playersize
+			txa //Player number 0or1
+			asl
+			tay //Speed offset 0 or 2
+
+			lda Player_Size, x
+			pha
+
+			lda Player_Weight, x
+			cmp #$12
+			bcs !Size1+
+		!Size0:
+			lda #$00
+			sta Player_Size, x
+			lda PlayerWalkSpeeds_LSB + 0
+			sta Player1_WalkSpeed + 0, y
+			lda PlayerWalkSpeeds_MSB + 0
+			sta Player1_WalkSpeed + 1, y
+			jmp !SizeComplete+
+		!Size1:
+			cmp #$24
+			bcs !Size2+
+			lda #$01
+			sta Player_Size, x
+			lda PlayerWalkSpeeds_LSB + 1
+			sta Player1_WalkSpeed + 0, y
+			lda PlayerWalkSpeeds_MSB + 1
+			sta Player1_WalkSpeed + 1, y
+			jmp !SizeComplete+
+		!Size2:
+			lda #$02
+			sta Player_Size, x
+			lda PlayerWalkSpeeds_LSB + 2
+			sta Player1_WalkSpeed + 0, y
+			lda PlayerWalkSpeeds_MSB + 2
+			sta Player1_WalkSpeed + 1, y
+
+		!SizeComplete:
+			pla
+			cmp Player_Size, x
+			beq !Exit+
+			lda #PLAYER_SIZE_TIME
+			sta Player_Size_Timer, x
+		!Exit:
+			rts
+	}
 
 
 	PlayerControl: {
