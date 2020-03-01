@@ -67,8 +67,15 @@ PLATFORMS: {
 			rts
 	}
 
+	FillPlatformToggle:
+			.byte $00
 	FillPlatform: {
-			
+			inc FillPlatformToggle
+			lda FillPlatformToggle
+			and #$01
+			beq !+
+			rts
+		!:
 			lda #$00
 			sta PLATFORM_COMPLETE
 
