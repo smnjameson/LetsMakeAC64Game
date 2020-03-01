@@ -159,7 +159,7 @@ PLAYER: {
 	Player2_Size:
 			.byte $00
 
-	.label PLAYER_SIZE_TIME = $20
+	.label PLAYER_SIZE_TIME = $40
 	Player_Size_Timer:
 	Player1_Size_Timer:
 			.byte $00
@@ -811,6 +811,7 @@ PLAYER: {
 	}
 
 	PlayerSizeAnimation: {
+
 			.label CURRENT_PLAYER = TEMP2
 
 			ldx CURRENT_PLAYER
@@ -821,23 +822,26 @@ PLAYER: {
 			rts
 		!DoAnim:
 			dec Player_Size_Timer, x
-			//$d017 height $d01d width
+			
 
 			txa
+			pha
 			tay 
 			jsr CROWN.DropCrown
-			
+			pla 
+			tax
+
 			//Reset values
-			lda $d01d
+			lda VIC.SPRITE_X_EXPAND
 			and TABLES.InvPowerOfTwo + 6, x
-			sta $d01d
-			lda $d017
+			sta VIC.SPRITE_X_EXPAND
+			lda VIC.SPRITE_Y_EXPAND
 			and TABLES.InvPowerOfTwo + 6, x
-			sta $d017
+			sta VIC.SPRITE_Y_EXPAND
 
 
 			lda Player_Size_Timer, x
-			and #$0f
+			and #$1f
 			tay
 			lda SizeSinus, y
 			bpl !+
@@ -856,17 +860,19 @@ PLAYER: {
 			txa 
 			asl 
 			tay
-			lda $d01d
+			lda VIC.SPRITE_X_EXPAND
 			ora TABLES.PowerOfTwo + 6, x
-			sta $d01d
+			sta VIC.SPRITE_X_EXPAND
+
+			
 			lda VIC.SPRITE_6_X, y
 			sec
 			sbc #$0c
 			sta VIC.SPRITE_6_X, y	
 			bcs !+
-			lda $d011
+			lda VIC.SPRITE_MSB
 			and TABLES.InvPowerOfTwo + 6, x
-			sta $d011	
+			sta VIC.SPRITE_MSB	
 		!:		
 			rts
 
@@ -874,18 +880,19 @@ PLAYER: {
 			txa 
 			asl 
 			tay		
-			lda $d017
+			lda VIC.SPRITE_Y_EXPAND
 			ora TABLES.PowerOfTwo + 6, x
-			sta $d017
+			sta VIC.SPRITE_Y_EXPAND
+		
 			lda VIC.SPRITE_6_Y, y
 			sec
-			sbc #$0b
+			sbc #$15
 			sta VIC.SPRITE_6_Y, y
 			rts
 	}
 
 	SizeSinus:
-		.fill $10, sin([i/$10] * PI * 2) * 127
+		.fill $20, sin([i/$20] * PI * 2) * 127
 
 
 

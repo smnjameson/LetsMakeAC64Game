@@ -15,6 +15,7 @@ BasicUpstart2(Entry)
 	.fill music.size, music.getData(i)
 
 #import "maps/maploader.asm"
+#import "maps/platforms.asm"
 #import "player/player.asm"
 #import "player/projectiles.asm"
 #import "player/hud.asm"
@@ -98,7 +99,7 @@ Entry:
 		lda #$01	//Initialize current song
 		jsr $1000
 
-
+		
 		//Setup generated tables
 		lda #180
 		ldx #$04
@@ -151,7 +152,7 @@ Entry:
 			jsr ENEMIES.UpdateEnemies
 			jsr PIPES.Update
 			jsr HUD.DrawLives
-
+			jsr PLATFORMS.UpdateColorOrigins
 			jsr $1003
 
 			lda #$00

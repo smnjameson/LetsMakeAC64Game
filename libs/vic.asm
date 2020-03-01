@@ -30,11 +30,13 @@ VIC: {
 	.label SPRITE_ENABLE = $d015
 	.label SCREEN_CONTROL_2 = $d016
 
+	.label SPRITE_Y_EXPAND = $d017
 	.label MEMORY_SETUP = $d018
 
 	.label INTERRUPT_CONTROL = $d01a
 	
 	.label SPRITE_MULTICOLOR = $d01c
+	.label SPRITE_X_EXPAND = $d01d
 
 	.label BORDER_COLOR = $d020
 	.label BACKGROUND_COLOR = $d021

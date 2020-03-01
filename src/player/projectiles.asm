@@ -15,6 +15,11 @@ PROJECTILES: {
 	Player_Proj_Gravity:
 			.byte $18, $00
 
+	Player_Projectile_Color:
+	Player1_Projectile_Color:
+			.byte $0e, $0e
+	Player2_Projectile_Color:
+			.byte $0f, $0f
 
 	Player_Projectile_XOffset: //Horizontal spawn offset based on player direction
 			.byte $10, $08
@@ -262,8 +267,17 @@ PROJECTILES: {
 			clc
 			adc #>[$d800 - MAPLOADER.BUFFER]
 			sta SCREEN_LOOKUP + 1
-			lda #$0a
-			sta (COLOR_LOOKUP), y
+
+			tya 
+			clc
+			adc COLOR_LOOKUP + 0
+			sta COLOR_LOOKUP + 0
+			lda COLOR_LOOKUP + 1
+			adc #$00
+			sta COLOR_LOOKUP + 1
+			lda COLOR_LOOKUP + 0
+			ldy COLOR_LOOKUP + 1
+			jsr PLATFORMS.AddNewColorOrigin
 		// !b1:
 		// 	jmp !b1-
 
@@ -383,6 +397,11 @@ PROJECTILES: {
 			jsr SOFTSPRITES.AddSprite
 			tax
 			lda #$0f //TODO : Look up the color in a type table
+
+			lda PLAYER_NUM
+			asl
+			tay
+			lda Player_Projectile_Color, y
 			sta SOFTSPRITES.SpriteColor, X
 
 			rts

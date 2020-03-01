@@ -317,6 +317,7 @@ ENEMIES: {
 			sty $eebf
 			stx INDEX
 			tax
+
 			clc
 			lda BEHAVIOURS.EnemyLSB, x
 			adc BEHAVIOUR_OFFSET
@@ -334,6 +335,7 @@ ENEMIES: {
 * = * "Behaviour self mod"
 			jsr $BEEF
 			rts
+
 	}
 
 
