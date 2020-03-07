@@ -16,6 +16,7 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
+#import "maps/door.asm"
 #import "player/player.asm"
 #import "player/projectiles.asm"
 #import "player/hud.asm"
@@ -114,6 +115,7 @@ Entry:
 		jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
 		jsr CROWN.Initialise
+		jsr DOOR.Initialise
 		//Generate all sprites
 		lda #$10
 		jsr SPRITEWARP.generate
@@ -153,6 +155,9 @@ Entry:
 			jsr PIPES.Update
 			jsr HUD.DrawLives
 			jsr PLATFORMS.UpdateColorOrigins
+			inc $d020
+			jsr DOOR.Update
+			dec $d020
 			jsr $1003
 
 			lda #$00
