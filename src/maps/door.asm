@@ -154,8 +154,69 @@ DOOR: {
 			rts
 	}
 
+	Player1Exiting:
+			.byte $00
+	Player2Exiting:
+			.byte $00
+	ExitUpdate: {
+			lda DoorSpawned
+			bne !+
+			rts
+		!:	
+			lda DoorAnimRow
+			cmp #$1f	
+			beq !+
+			rts
+		!:
+			//Set Door bounding box (half x)
+			lda PIPES.MAPDATA_COPY.DoorSpawnLoc + 0 //X char pos
+			asl
+			asl
+			adc #$0c //Add border			
+			sta COLLISION_POINT_X
+			lda PIPES.MAPDATA_COPY.DoorSpawnLoc + 1 //Y char pos
+			asl
+			asl
+			asl
+			adc #$32 //add border
+			sta COLLISION_POINT_Y
+			lda #$00
+			sta COLLISION_POINT_X_OFFSET
+			sta COLLISION_POINT_Y_OFFSET
+			lda #$10
+			sta COLLISION_WIDTH
+			lda #$40
+			sta COLLISION_HEIGHT
+
+
+			//Get player bounding box
+			lda PLAYER.Player1_X + 2
+			lsr
+			lda PLAYER.Player1_X + 1
+			ror
+			sta COLLISION_POINT_X1
+			lda PLAYER.Player1_Y + 1
+			sta COLLISION_POINT_Y1
+			lda #$04
+			sta COLLISION_POINT_X1_OFFSET
+			lda #$08
+			sta COLLISION_WIDTH1
+			lda #$06
+			sta COLLISION_POINT_Y1_OFFSET
+			lda #$0f 
+			sta COLLISION_HEIGHT1
+
+
+			jsr UTILS.GetSpriteCollision
+			bcc !+
+			inc $d020
+		!:
+			rts
+	}
+
 
 	Update: {
+			jsr ExitUpdate
 			jsr SwitchUpdate
 			//Has door spawned? If not should it?
 			lda DoorSpawned
