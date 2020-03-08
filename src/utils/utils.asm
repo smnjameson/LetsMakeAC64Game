@@ -1,6 +1,7 @@
 UTILS: {
 	.label COLLISION_SOLID = %00010000
 	.label COLLISION_COLORABLE = %00100000
+	.label COLLISION_SWITCH = %01000000
 
 	GetCharacterAt: {
 		//x register = x char position

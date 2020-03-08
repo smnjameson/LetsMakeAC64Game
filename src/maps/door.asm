@@ -7,24 +7,163 @@ DOOR: {
 	DoorAnimRow:
 		.byte $00
 
+	SwitchPressed:
+		.byte $00
+	SwitchColorTimer:
+		.byte $00
+	SwitchRamp:
+		.byte $09,$0f,$0b,$0d,$0c,$0a,$0e,$08
+	__SwitchRamp:
+
 	Initialise: {
 			lda #$00
 			sta DoorSpawned
 			sta DoorAnimRow
+			sta SwitchPressed
 			rts
 	}
 
-	Update: {
-			//Has door spawned? If not should it?
-			lda DoorSpawned
-			bne !Spawned+
+	SwitchUpdate: {
+			lda SwitchPressed
+			beq !+
+			rts
+		!:
+			//Sets up switch lookup
+			clc
+			ldx PIPES.MAPDATA_COPY.SwitchSpawnLoc + 1
+			lda TABLES.ScreenRowLSB, x
+			adc PIPES.MAPDATA_COPY.SwitchSpawnLoc + 0
+			sta DOOR_VECTOR1 + 0
+			lda TABLES.ScreenRowMSB, x
+			adc #$00
+			sta DOOR_VECTOR1 + 1
 
+			//First check if level is compelte
 			//Is the bar full?
 			lda PLAYER.Player1_EatCount
 			clc
 			adc PLAYER.Player2_EatCount 
 			cmp PIPES.NumberOfEnemies
-			beq !SpawnDoor+
+			bne !Player1+
+
+				//cycle the switch colors
+				lda DOOR_VECTOR1 + 0
+				sta DOOR_VECTOR2 + 0
+				lda DOOR_VECTOR1 + 1
+				clc
+				adc #$18 //Map to color from screen ram
+				sta DOOR_VECTOR2 + 1
+				inc SwitchColorTimer
+				lda SwitchColorTimer
+				lsr
+				and #$07
+				tax
+				lda SwitchRamp, x
+				ldy #$03
+			!Loop:
+				sta (DOOR_VECTOR2), y
+				dey
+				bpl !Loop-
+
+
+			lda PLAYER.Player1_FloorANDCollision
+			and PLAYER.Player2_FloorANDCollision
+			and #$40
+			beq !Player1+
+			//Both players on switch
+			lda #$01
+			sta SwitchPressed
+			lda #$0c
+			ldy #$03
+		!Loop:
+			sta (DOOR_VECTOR2), y
+			dey
+			bpl !Loop-
+			jmp !FullyActivateSwitch+
+
+
+			//Check player 1 first
+		!Player1:
+			lda PLAYER.Player1_FloorANDCollision
+			and #$40
+			beq !Player2+
+			lda PLAYER.Player1_Size
+			beq !Player2+
+			jmp !SwitchOnAndPartialActive+
+
+		!Player2:
+			lda PLAYER.Player2_FloorANDCollision
+			and #$40
+			beq !DonePlayerChecks+
+			lda PLAYER.Player2_Size
+			beq !DonePlayerChecks+
+			jmp !SwitchOnAndPartialActive+
+
+		!DonePlayerChecks:
+			jmp !SwitchNotActive+
+
+
+		!FullyActivateSwitch:
+			ldy #$00
+			lda #$44
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$45
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$46
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$47
+			sta (DOOR_VECTOR1), y
+			jmp !Exit+
+
+		!SwitchOnAndPartialActive:
+			ldy #$00
+			lda #$40
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$41
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$42
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$43
+			sta (DOOR_VECTOR1), y
+			jmp !Exit+
+
+
+		!SwitchNotActive:
+			ldy #$00
+			lda #$3c
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$3d
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$3e
+			sta (DOOR_VECTOR1), y
+			iny
+			lda #$3f
+			sta (DOOR_VECTOR1), y
+
+			jmp !Exit+
+
+		!Exit:
+			rts
+	}
+
+
+	Update: {
+			jsr SwitchUpdate
+			//Has door spawned? If not should it?
+			lda DoorSpawned
+			bne !Spawned+
+
+			//Is the bar full?
+			lda SwitchPressed
+			bne !SpawnDoor+
 			rts
 
 		!SpawnDoor:
@@ -83,7 +222,11 @@ DOOR: {
 
 		!Spawned:
 			//It has spawned so advance the update
-			
+			lda ZP_COUNTER
+			and #$01
+			beq !+
+			rts
+		!:
 			//Do we need to shift?
 			lda DoorAnimRow
 			cmp #$1f

@@ -97,6 +97,11 @@ PLAYER: {
 	Player2_FloorCollision:
 			.byte $00
 
+	Player1_FloorANDCollision:
+			.byte $00
+	Player2_FloorANDCollision:
+			.byte $00
+
 	Player1_RightCollision:
 			.byte $00
 	Player2_RightCollision:
@@ -298,6 +303,7 @@ PLAYER: {
 		tax
 		lda CHAR_COLORS, x
 		sta Player1_FloorCollision
+		sta Player1_FloorANDCollision
 
 		
 		lda #$00
@@ -310,7 +316,9 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_FloorCollision
 		sta Player1_FloorCollision
-
+		lda CHAR_COLORS, x
+		and Player1_FloorANDCollision
+		sta Player1_FloorANDCollision
 
 
 
@@ -384,7 +392,7 @@ PLAYER: {
 		tax
 		lda CHAR_COLORS, x
 		sta Player2_FloorCollision
-
+		sta Player2_FloorANDCollision
 		
 		lda #$01
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
@@ -396,7 +404,9 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player2_FloorCollision
 		sta Player2_FloorCollision
-
+		lda CHAR_COLORS, x
+		and Player2_FloorANDCollision
+		sta Player2_FloorANDCollision
 
 		//Get Left Collision
 		lda #$00
@@ -423,6 +433,7 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player2_LeftCollision
 		sta Player2_LeftCollision
+
 	!Skip:
 
 
@@ -790,6 +801,21 @@ PLAYER: {
 				ldy #$00
 				lda (PlayerY), y
 				sta VIC.SPRITE_6_Y, x
+
+				ldy CURRENT_PLAYER
+				dey
+				lda DOOR.SwitchPressed
+				beq !NoSwitchAdjust+
+				lda Player1_FloorANDCollision, y
+				and #$40
+				beq !NoSwitchAdjust+
+				lda VIC.SPRITE_6_Y, x
+				clc
+				adc #$02
+				sta VIC.SPRITE_6_Y, x
+			!NoSwitchAdjust:
+
+
 			!Skip:
 
 		!SkipFrameSet:

@@ -36,7 +36,7 @@ MAPDATA: {
 		DoorSpawnLoc:
 			.byte $16,$02
 		SwitchSpawnLoc:
-			.byte $20,$04
+			.byte $0a,$10
 
 		NumberEnemies:
 			.byte [__EnemyList - EnemyList]
@@ -49,7 +49,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte $02, $02
+			// .byte $02, $02
 
 		__EnemyList:
 			.byte 0

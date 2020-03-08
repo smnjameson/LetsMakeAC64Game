@@ -155,9 +155,7 @@ Entry:
 			jsr PIPES.Update
 			jsr HUD.DrawLives
 			jsr PLATFORMS.UpdateColorOrigins
-			inc $d020
 			jsr DOOR.Update
-			dec $d020
 			jsr $1003
 
 			lda #$00

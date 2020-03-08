@@ -35,6 +35,12 @@ PLATFORMS: {
 			ldy #$00
 			lda (PLATFORM_LOOKUP), y
 			and #$0f
+			cmp #$0c
+			bne !+
+			lda #$00
+			sta COLOR_ORIGIN_MSB, x
+			rts
+		!:
 			sta ORIGINAL_COLOR, x
 
 			inx 

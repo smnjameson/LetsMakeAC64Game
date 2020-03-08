@@ -17,7 +17,7 @@ PROJECTILES: {
 
 	Player_Projectile_Color:
 	Player1_Projectile_Color:
-			.byte $0e, $0e
+			.byte $0a, $0a
 	Player2_Projectile_Color:
 			.byte $0f, $0f
 
