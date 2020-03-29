@@ -147,8 +147,25 @@ IRQ: {
 			clc
 			adc #$03
 			sta VIC.SCREEN_CONTROL_1	
-			
 
+			
+				lda TRANSITION.TransitionFLDActive
+				beq !+
+				lda #<FLDIRQ    
+				ldx #>FLDIRQ
+				sta IRQ_LSB   // 0314
+				stx IRQ_MSB	// 0315
+
+				lda #$20 //Adjust for screen Vscroll
+				clc
+				adc SCREEN_SHAKE_VAL
+				sta $d012
+				lda $d011
+				and #%01111111
+				sta $d011	
+
+				jmp !ExitIRQ+
+			!:
 
 			lda #<MainIRQ    
 			ldx #>MainIRQ
@@ -163,8 +180,31 @@ IRQ: {
 			and #%01111111
 			sta $d011	
 
+		!ExitIRQ:
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState()
 		rti
+	}
+
+	FLDIRQ: {
+		:StoreState()
+		
+			lda #<MainIRQ    
+			ldx #>MainIRQ
+			sta IRQ_LSB   // 0314
+			stx IRQ_MSB	// 0315
+
+			lda #$e2 //Adjust for screen Vscroll
+			clc
+			adc SCREEN_SHAKE_VAL
+			sta $d012
+			lda $d011
+			and #%01111111
+			sta $d011	
+
+		!ExitIRQ:
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState()
+		rti		
 	}
 }

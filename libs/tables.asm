@@ -45,7 +45,7 @@ TABLES: {
 		.byte 80,81,82
 	__PlayerEatRight: 
 
-
+	
 	PlayerThrowLeft: 
 		.byte 76,77,78,79, 79,79,79,79,79, 78,78,78, 77,77
 	__PlayerThrowLeft: 
@@ -54,7 +54,9 @@ TABLES: {
 		.byte 72,73,74,75,75,75,75,75,75,74,74,74,73,73
 	__PlayerThrowRight: 
 
-
+	PlayerExitAnimation: 
+		.byte $90,$91,$92,$93,$94,$95,$96,$97,$98,$96,$97,$98
+	__PlayerExitAnimation: 
 
 	PowerOfTwo:
 		.byte 1,2,4,8,16,32,64,128

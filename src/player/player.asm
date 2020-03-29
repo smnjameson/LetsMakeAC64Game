@@ -171,6 +171,13 @@ PLAYER: {
 	Player2_Size_Timer:
 			.byte $00
 
+	Player_ExitIndex:
+	Player1_ExitIndex:
+			.byte $ff
+	Player2_ExitIndex:
+			.byte $ff
+
+
 	Initialise: {
 			lda #$0a
 			sta VIC.SPRITE_MULTICOLOR_1
@@ -200,6 +207,10 @@ PLAYER: {
 			lda #$00
 			sta Player1_Weight
 			sta Player2_Weight
+
+			lda #$ff
+			sta Player1_ExitIndex
+			sta Player2_ExitIndex
 
 			ldx #$00
 			jsr SpawnPlayer
@@ -728,6 +739,10 @@ PLAYER: {
 			!Skip:
 
 
+
+
+
+
 				lda (PlayerState), y
 				and #[STATE_WALK_RIGHT]	
 				bne !Right+
@@ -741,9 +756,32 @@ PLAYER: {
 				lda TABLES.PlayerWalkRight, x
 				sta CURRENT_FRAME
 
+
 			!SetFrame:
 				ldx CURRENT_PLAYER
 				dex
+
+				//CHECK FOR EXIT ANIMATION OVERRIDE
+					ldy Player_ExitIndex, x
+					bmi !skipExitOverride+
+					cpy #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
+					bne !+
+					lda #$5f
+					sta CURRENT_FRAME
+					jmp !skipExitOverride+
+				!:
+					lda TABLES.PlayerExitAnimation, y
+					sta CURRENT_FRAME
+					lda ZP_COUNTER
+					and #$07
+					bne !+
+					inc Player_ExitIndex, x
+				!:
+					lda CURRENT_FRAME
+					jmp !NoSizeInc+
+				!skipExitOverride:
+
+
 				lda Player_Size, x
 				tax
 
@@ -817,6 +855,7 @@ PLAYER: {
 
 
 			!Skip:
+
 
 		!SkipFrameSet:
 				//Adjust for screen shake
@@ -993,8 +1032,17 @@ PLAYER: {
 			beq !+
 			rts
 		!:
+			lda Player_ExitIndex, y
+			bmi !+
+			rts
+		!:
 
 		!Fire:
+			
+			lda DOOR.DoorSpawned
+			beq !+
+			jmp !Up+	//If door has spawned then ewe can no longer eat or throw
+		!:
 			lda JOY_ZP1, y
 			and #JOY_FR
 			bne !FirePressed+

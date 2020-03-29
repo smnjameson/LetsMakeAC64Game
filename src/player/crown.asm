@@ -31,6 +31,7 @@ CROWN: {
 		!:
 
 		!Crown:
+
 			lda $d015
 			ora #%00100000
 			sta $d015
@@ -41,6 +42,14 @@ CROWN: {
 		!:
 			tay
 			dey
+				//Disable if player exiting
+				lda PLAYER.Player_ExitIndex, y
+				bmi !+
+				lda $d015
+				and #%11011111
+				sta $d015			
+		!:
+
 			sty CROWN_OFFSET_TEMP1
 			lda PLAYER.Player1_State, y
 			and #[PLAYER.STATE_FACE_LEFT]

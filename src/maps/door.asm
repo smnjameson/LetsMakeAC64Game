@@ -159,6 +159,9 @@ DOOR: {
 	Player2Exiting:
 			.byte $00
 	ExitUpdate: {
+			.label DOOR_WIDTH = $10
+			.label DOOR_HEIGHT = $20
+
 			lda DoorSpawned
 			bne !+
 			rts
@@ -168,52 +171,93 @@ DOOR: {
 			beq !+
 			rts
 		!:
+
 			//Set Door bounding box (half x)
 			lda PIPES.MAPDATA_COPY.DoorSpawnLoc + 0 //X char pos
 			asl
 			asl
 			adc #$0c //Add border			
-			sta COLLISION_POINT_X
+			sta DOOR_POSITION_X
 			lda PIPES.MAPDATA_COPY.DoorSpawnLoc + 1 //Y char pos
 			asl
 			asl
 			asl
 			adc #$32 //add border
-			sta COLLISION_POINT_Y
-			lda #$00
-			sta COLLISION_POINT_X_OFFSET
-			sta COLLISION_POINT_Y_OFFSET
-			lda #$10
-			sta COLLISION_WIDTH
-			lda #$40
-			sta COLLISION_HEIGHT
+			sta DOOR_POSITION_Y
 
 
+			//Check each player
+			ldx #$01
+		!Loop:
+			//Only check if not exiting
+			lda PLAYER.Player_ExitIndex, x
+			bpl !Skip+
+
+			//Check Y
+			lda PLAYER.Player1_Y + 0, x
+			clc
+			adc #$15	//Add player height
+			cmp DOOR_POSITION_Y
+			bcc !Skip+
+			lda PLAYER.Player1_Y + 0, x
+			sec
+			sbc #DOOR_HEIGHT
+			cmp DOOR_POSITION_Y
+			bcs !Skip+
+
+			//Check X
 			//Get player bounding box
+			cpx #$00
+			bne !Plyr2+
+		!Plyr1:
 			lda PLAYER.Player1_X + 2
 			lsr
 			lda PLAYER.Player1_X + 1
+			jmp !DonePlyr+
+		!Plyr2:
+			lda PLAYER.Player2_X + 2
+			lsr
+			lda PLAYER.Player2_X + 1
+		!DonePlyr:
 			ror
-			sta COLLISION_POINT_X1
-			lda PLAYER.Player1_Y + 1
-			sta COLLISION_POINT_Y1
-			lda #$04
-			sta COLLISION_POINT_X1_OFFSET
-			lda #$08
-			sta COLLISION_WIDTH1
-			lda #$06
-			sta COLLISION_POINT_Y1_OFFSET
-			lda #$0f 
-			sta COLLISION_HEIGHT1
+			sta DOOR_TEMP1
+			sec
+			sbc #$02
+			cmp DOOR_POSITION_X
+			bcc !Skip+
+			lda DOOR_TEMP1
+			sec
+			sbc #DOOR_WIDTH
+			clc
+			adc #$0c
+			cmp DOOR_POSITION_X
+			bcs !Skip+
 
 
-			jsr UTILS.GetSpriteCollision
-			bcc !+
-			inc $d020
-		!:
+
+			
+			//Only able to exit if on the ground
+			lda PLAYER.Player_State, x
+			and #[PLAYER.STATE_JUMP + PLAYER.STATE_FALL]
+			bne !Skip+
+
+
+
+			ldy PLAYER.Player_Size, x
+			lda PlayerSizeAnimIndexStart, y
+			sta PLAYER.Player_ExitIndex, x
+
+		!Skip:
+			dex
+			bpl !Loop-
+
+
+
 			rts
 	}
 
+	PlayerSizeAnimIndexStart:
+		.byte $06,$03,$00
 
 	Update: {
 			jsr ExitUpdate

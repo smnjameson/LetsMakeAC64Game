@@ -30,6 +30,8 @@ BasicUpstart2(Entry)
 #import "enemies/enemymacros.asm"
 #import "enemies/pipes.asm"
 
+#import "animation/transition.asm"
+
 Random: { 
         lda seed
         beq doEor
@@ -131,36 +133,54 @@ Entry:
 		dec PerformFrameCodeFlag
 
 
+		//Are we in normal loop?
+		lda PLAYER.Player1_ExitIndex
+		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
+		bne !NormalLoop+
+		lda PLAYER.Player2_ExitIndex
+		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
+		bne !NormalLoop+
+		jmp !NotNormalLoop+
+
+
+		/// NORMAL GAME LOOP ///////////////////////////////////////////
+		!NormalLoop:
 			inc ZP_COUNTER
 
-			// inc $d020 //1
 			jsr SOFTSPRITES.UpdateSprites
 			
-			// inc $d020 //2
-			// inc $d020 //3
 			jsr PLAYER.PlayerControl
-			// inc $d020 //4
 			jsr PLAYER.JumpAndFall
-			// inc $d020 //5
  			jsr PLAYER.GetCollisions
 			jsr PLAYER.DrawPlayer
  			jsr CROWN.DrawCrown
 			
 
-			// inc $d020 //6
 			jsr PROJECTILES.UpdateProjectiles
 
-			// inc $d020 //7
 			jsr ENEMIES.UpdateEnemies
 			jsr PIPES.Update
 			jsr HUD.DrawLives
 			jsr PLATFORMS.UpdateColorOrigins
 			jsr DOOR.Update
 			jsr $1003
+			jmp !Loop- 
+		!NotNormalLoop:
+		/////////////////////////////////
 
-			lda #$00
-			sta $d020
-		jmp !Loop- 
+		
+		/////////////////////////////////
+		!EndLevelTransition:
+			
+			jsr TRANSITION.Update
+			jsr $1003
+			jmp !Loop- 
+		!NotEndLevelTransition:
+		/////////////////////////////////
+
+
+
+		
 
 
 	PerformFrameCodeFlag:
