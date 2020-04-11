@@ -125,7 +125,10 @@ IRQ: {
 	SecondIRQ: {
 		:StoreState()
 
-
+			lda TRANSITION.TransitionFLDActive
+			beq !+
+			jmp HudFLDIRQSetup
+		!:
 			//Reset Values set by IRQ	
 			lda #LIGHT_BLUE
 			sta VIC.BACKGROUND_COLOR
@@ -149,22 +152,21 @@ IRQ: {
 			sta VIC.SCREEN_CONTROL_1	
 
 			
-				lda TRANSITION.TransitionFLDActive
-				beq !+
-				lda #<FLDIRQ    
-				ldx #>FLDIRQ
-				sta IRQ_LSB   // 0314
-				stx IRQ_MSB	// 0315
 
-				lda #$20 //Adjust for screen Vscroll
-				clc
-				adc SCREEN_SHAKE_VAL
-				sta $d012
-				lda $d011
-				and #%01111111
-				sta $d011	
+				// lda #<FLDIRQ    
+				// ldx #>FLDIRQ
+				// sta IRQ_LSB   // 0314
+				// stx IRQ_MSB	// 0315
 
-				jmp !ExitIRQ+
+				// lda #$20 //Adjust for screen Vscroll
+				// clc
+				// adc SCREEN_SHAKE_VAL
+				// sta $d012
+				// lda $d011
+				// and #%01111111
+				// sta $d011	
+
+				// jmp !ExitIRQ+
 			!:
 
 			lda #<MainIRQ    
@@ -186,21 +188,72 @@ IRQ: {
 		rti
 	}
 
-	FLDIRQ: {
-		:StoreState()
-		
-			lda #<MainIRQ    
-			ldx #>MainIRQ
+
+	HudFLDIRQSetup: {
+			lda #<HudFLDIRQ    
+			ldx #>HudFLDIRQ
 			sta IRQ_LSB   // 0314
 			stx IRQ_MSB	// 0315
 
 			lda #$e2 //Adjust for screen Vscroll
-			clc
-			adc SCREEN_SHAKE_VAL
 			sta $d012
 			lda $d011
 			and #%01111111
 			sta $d011	
+
+		!ExitIRQ:
+			asl $d019 //Acknowledging the interrupt
+		:RestoreState()
+		rti
+	}
+
+
+	HudFLDIRQ: {
+		:StoreState()
+			lda #$00
+			sta $d015
+
+			lda $d012
+			cmp $d012
+			beq *-3
+
+				lda $d011
+				pha
+				
+				ldy TRANSITION.TransitionFLDIndex
+			!Loop:
+				lda $d012
+				clc
+				adc #$01
+				and #$07
+				ora #$18
+				
+
+				ldx $d012
+				cpx #$d012
+				beq *-3
+
+				sta $d011
+
+				dey
+				bpl !Loop- //5	
+
+				//Now force a badline
+				// nop
+				// nop
+
+				// lda $d012
+				// clc
+				// adc #$01
+				// and #$07
+				// ora #$d018
+				// sta $d011
+
+				pla 
+				sta $d011
+
+			lda #$01
+			sta PerformFrameCodeFlag
 
 		!ExitIRQ:
 			asl $d019 //Acknowledging the interrupt

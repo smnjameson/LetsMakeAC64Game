@@ -3,9 +3,13 @@ TRANSITION: {
 		.byte $00
 	TransitionComplete:
 		.byte $00
+*=* "TransitionFLDActive"
 	TransitionFLDActive:
 		.byte $00
 	TransitionIndex:
+		.byte $00
+				
+	TransitionFLDIndex:
 		.byte $00
 
 
@@ -32,19 +36,23 @@ TRANSITION: {
 			sta TransitionComplete
 			sta TransitionIndex
 			sta TransitionFLDActive
+			sta TransitionFLDIndex
 			rts
 	}
 
-	Update: {
-			lda TransitionActive
-			bne !+
-			jsr Init
-		!:
+	Update: {	
 
 			lda TransitionFLDActive
 			beq !+
 			jmp UpdateFLD
 		!:
+
+			lda TransitionActive
+			bne !+
+			jsr Init
+		!:
+
+
 			ldx #$03
 		!Loop:
 			jsr Random
@@ -75,6 +83,18 @@ TRANSITION: {
 	}
 
 	UpdateFLD: {
+			lda ZP_COUNTER
+			and #$07
+			bne !end+
+			ldx TransitionFLDIndex
+			inx
+			cpx #$10
+			beq !+
+
+			stx TransitionFLDIndex
+		!:
+			stx $d020
+		!end:
 			rts
 	}
 

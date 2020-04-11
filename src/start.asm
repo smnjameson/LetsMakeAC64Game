@@ -31,6 +31,7 @@ BasicUpstart2(Entry)
 #import "enemies/pipes.asm"
 
 #import "animation/transition.asm"
+#import "intro/titlescreen.asm"
 
 Random: { 
         lda seed
@@ -79,7 +80,12 @@ Entry:
 		sta VIC.SPRITE_ENABLE
 		sta VIC.SPRITE_MULTICOLOR	
 
-		jsr IRQ.Setup
+		//Disable CIA interrupts
+		sei
+		lda #$7f
+		sta $dc0d
+		sta $dc0d
+		cli
 
 		//Bank out BASIC and Kernal ROM
 		lda $01
@@ -99,8 +105,7 @@ Entry:
 
 		jsr Random.init
 
-		lda #$01	//Initialize current song
-		jsr $1000
+
 
 		
 		//Setup generated tables
@@ -108,10 +113,24 @@ Entry:
 		ldx #$04
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
-		jsr MAPLOADER.DrawMap
- 
 
-		jsr PLAYER.Initialise
+
+	!INTRO:
+		jsr TITLE_SCREEN.Initialise
+	!IntroLoop:
+		// .break
+		inc ZP_COUNTER
+		jsr TITLE_SCREEN.Update
+		bcc !IntroLoop-
+
+
+	!GAME_ENTRY:
+		lda #$01	//Initialize current song
+		jsr $1000
+		jsr IRQ.Setup
+
+		jsr MAPLOADER.DrawMap
+ 		jsr PLAYER.Initialise
 		jsr HUD.Initialise
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
@@ -125,13 +144,13 @@ Entry:
 		jsr SPRITEWARP.generate
 
 
-
 	//Inf loop
 	!Loop:
 		lda PerformFrameCodeFlag
 		beq !Loop-
 		dec PerformFrameCodeFlag
 
+		inc ZP_COUNTER
 
 		//Are we in normal loop?
 		lda PLAYER.Player1_ExitIndex
@@ -145,15 +164,13 @@ Entry:
 
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
 		!NormalLoop:
-			inc ZP_COUNTER
-
 			jsr SOFTSPRITES.UpdateSprites
 			
 			jsr PLAYER.PlayerControl
 			jsr PLAYER.JumpAndFall
  			jsr PLAYER.GetCollisions
 			jsr PLAYER.DrawPlayer
- 			jsr CROWN.DrawCrown
+		 	jsr CROWN.DrawCrown
 			
 
 			jsr PROJECTILES.UpdateProjectiles
