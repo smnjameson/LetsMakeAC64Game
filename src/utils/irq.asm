@@ -51,9 +51,6 @@ IRQ: {
 
 	MainIRQ: {		
 		:StoreState()
-
-
-
 			ldx #$03
 		!:
 			dex
@@ -67,7 +64,7 @@ IRQ: {
 			sta $d00e 
 
 			lda VIC.SCREEN_CONTROL_1
-			and #%11111000
+			and #%01111000
 			ora #%00000011
 			sta VIC.SCREEN_CONTROL_1
 
@@ -110,14 +107,17 @@ IRQ: {
 			sta IRQ_LSB   // 0314
 			stx IRQ_MSB	// 0315
 
-			lda #$00
+			lda #$01
 			sta $d012
 			lda $d011
-			and #%11111111
+			and #%01111111
 			sta $d011	
 
+
+
+
 			asl $d019 //Acknowledging the interrupt
-		:RestoreState();
+		:RestoreState()
 		rti
 	}
 
@@ -133,7 +133,7 @@ IRQ: {
 			lda #LIGHT_BLUE
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_1
-			and #%11111000
+			and #%01111000
 			ora #%00000011 
 			sta VIC.SCREEN_CONTROL_1
 			lda #$05
@@ -145,7 +145,7 @@ IRQ: {
 
 			//Now shake the screen
 			lda VIC.SCREEN_CONTROL_1
-			and #%11111000
+			and #%01111000
 			ora SCREEN_SHAKE_VAL
 			clc
 			adc #$03
@@ -183,10 +183,29 @@ IRQ: {
 			sta $d011	
 
 		!ExitIRQ:
+
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState()
 		rti
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	HudFLDIRQSetup: {
@@ -202,6 +221,7 @@ IRQ: {
 			sta $d011	
 
 		!ExitIRQ:
+
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState()
 		rti
@@ -209,7 +229,7 @@ IRQ: {
 
 
 	HudFLDIRQ: {
-		:StoreState()
+		:StoreState()	
 			lda #$00
 			sta $d015
 

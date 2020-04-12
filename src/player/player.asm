@@ -324,6 +324,7 @@ PLAYER: {
 		sta Player1_FloorANDCollision
 		jmp !PlayerOneComplete+
 	!:
+
 		//Get floor collisions for each foot for Player 1
 		lda #$00
 		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
@@ -413,7 +414,7 @@ PLAYER: {
 
 
 
-		//Get floor collisions for each foot player 2
+		// Get floor collisions for each foot player 2
 		lda PlayersActive
 		and #$02
 		bne !+
@@ -580,7 +581,7 @@ PLAYER: {
 			lda CURRENT_PLAYER
 			and PlayersActive
 			bne !+
-			jmp !SkipFrameSet+
+			jmp !SkipPlayerCompletely+
 		!:
 
 			lda CURRENT_PLAYER
@@ -905,6 +906,7 @@ PLAYER: {
 
 				jsr PlayerSizeAnimation
 
+		!SkipPlayerCompletely:
 			dec CURRENT_PLAYER
 			beq !+
 			jmp !Loop-
@@ -1050,21 +1052,35 @@ PLAYER: {
 
 
 	PlayerControl: {
-		lda PlayersActive
-		and #$01
-		beq !+
-		ldy #$00
-		jsr PlayerControlFunc
+		!Player1:
+			lda PlayersActive
+			and #$01
+			bne !+
+			lda $dc00
+			and #$10
+			bne !Player2+
+			ldx #$00
+			jsr SpawnPlayer
+		!:
+			ldy #$00
+			jsr PlayerControlFunc
 
-	!:
-		lda PlayersActive
-		and #$02
-		beq !+
-		ldy #$01
-		jsr PlayerControlFunc
 
-	!:
-		rts
+		!Player2:
+			lda PlayersActive
+			and #$02
+			bne !+
+			lda $dc01
+			and #$10
+			bne !Done+
+			ldx #$01
+			jsr SpawnPlayer
+		!:
+			ldy #$01
+			jsr PlayerControlFunc
+
+		!Done:
+			rts
 	}
 
 	PlayerControlFunc: {
