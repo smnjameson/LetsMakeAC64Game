@@ -404,6 +404,9 @@ CROWN: {
 
 
 			//Player 1
+			lda PLAYER.PlayersActive
+			and #$01
+			beq !+
 			lda PLAYER.Player1_State
 			and #[PLAYER.STATE_EATING]
 			bne !+
@@ -439,6 +442,9 @@ CROWN: {
 
 
 			//Player 2
+			lda PLAYER.PlayersActive
+			and #$02
+			beq !+
 			lda PLAYER.Player2_State
 			and #[PLAYER.STATE_EATING]
 			bne !+

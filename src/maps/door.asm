@@ -65,11 +65,12 @@ DOOR: {
 				dey
 				bpl !Loop-
 
-
+				
 			lda PLAYER.Player1_FloorANDCollision
 			and PLAYER.Player2_FloorANDCollision
 			and #$40
 			beq !Player1+
+
 			//Both players on switch
 			lda #$01
 			sta SwitchPressed

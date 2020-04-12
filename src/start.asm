@@ -114,7 +114,6 @@ Entry:
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
 
-
 	!INTRO:
 		jsr TITLE_SCREEN.Initialise
 	!IntroLoop:
@@ -152,13 +151,24 @@ Entry:
 
 		inc ZP_COUNTER
 
-		//Are we in normal loop?
+
+		//Are we both exiting?? Are we in normal loop?
+		lda PLAYER.PlayersActive
+		and #$01
+		beq !+
 		lda PLAYER.Player1_ExitIndex
 		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 		bne !NormalLoop+
+
+	!:
+		lda PLAYER.PlayersActive
+		and #$02
+		beq !+
 		lda PLAYER.Player2_ExitIndex
 		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 		bne !NormalLoop+
+	!:
+
 		jmp !NotNormalLoop+
 
 
@@ -178,6 +188,7 @@ Entry:
 			jsr ENEMIES.UpdateEnemies
 			jsr PIPES.Update
 			jsr HUD.DrawLives
+			jsr HUD.Update
 			jsr PLATFORMS.UpdateColorOrigins
 			jsr DOOR.Update
 			jsr $1003

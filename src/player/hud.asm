@@ -1,4 +1,7 @@
 HUD: {
+	PreviousPlayersActive:
+			.byte $00
+
 	Initialise: {
 			ldy #$01
 
@@ -37,10 +40,227 @@ HUD: {
 			sta VIC.COLOR_RAM + 24 * 40 + 27
 
 			jsr UpdateEatMeter
+
+			lda #$00
+			sta PreviousPlayersActive
+
+			jsr Update
 			rts
 
 
 	}
+
+
+
+
+
+		.encoding "screencode_upper"
+	Player1Row1:
+		.text "PLAYER "
+		.byte $f8
+	Player2Row1:
+		.text "PLAYER "
+		.byte $f9
+	PlayerRow2:	
+		.text "00000000"
+
+	PressFireRow1:
+		.text " INSERT "
+	PressFireRow2:	
+		.text "  COIN  "
+	PlayerColors:
+		.byte $05,$03
+	PlayerActiveColors:
+		.byte $00,$00
+
+	FlashInsertCoin: {
+			lda PLAYER.PlayersActive
+			cmp #$03
+			bne !+
+			rts
+		!:
+
+			lda ZP_COUNTER
+			and #$10
+			beq !On+
+		!Off:
+			lda #$00
+			sta PlayerActiveColors + 0
+			sta PlayerActiveColors + 1
+			jmp !Done+
+		!On:
+			lda PlayerColors + 0
+			sta PlayerActiveColors + 0
+			lda PlayerColors + 1
+			sta PlayerActiveColors + 1
+		!Done:
+
+
+
+
+			lda PLAYER.PlayersActive
+			and #$01
+			bne !Player2+
+		!Player1:
+			ldx #$07
+			lda PlayerActiveColors + 0
+		!:
+			sta VIC.COLOR_RAM + 23 * 40 + 0, x
+			sta VIC.COLOR_RAM + 24 * 40 + 0, x
+			dex
+			bpl !-
+
+
+		!Player2:
+			lda PLAYER.PlayersActive
+			and #$02
+			bne !PlayerDone+
+
+			ldx #$07
+			lda PlayerActiveColors + 1
+		!:
+			sta VIC.COLOR_RAM + 23 * 40 + 32, x
+			sta VIC.COLOR_RAM + 24 * 40 + 32, x
+			dex
+			bpl !-
+
+		!PlayerDone:
+			rts
+	}
+
+	Update: {
+			lda PreviousPlayersActive
+			cmp PLAYER.PlayersActive
+			bne !+
+
+			jsr FlashInsertCoin
+			rts
+
+		!:
+			lda PLAYER.PlayersActive
+			sta PreviousPlayersActive
+
+			lda PLAYER.PlayersActive 
+			and #$01
+			beq !Player1Inactive+
+
+		!Player1Active:
+			ldx #$07
+		!loop:
+			lda Player1Row1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 + 0, x
+			lda #$05
+			sta VIC.COLOR_RAM + 23 * 40 + 0, x
+			lda #$dc
+			sta SCREEN_RAM + 24 * 40 + 0, x
+			lda #$01
+			sta VIC.COLOR_RAM + 24 * 40 + 0, x
+			dex
+			bpl !loop-
+
+			jmp !Player1Done+
+
+		!Player1Inactive:
+			ldx #$07
+		!loop:
+			lda PressFireRow1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 + 0, x
+			lda #$05
+			sta VIC.COLOR_RAM + 23 * 40 + 0, x
+
+
+			lda PressFireRow2, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 24 * 40 + 0, x
+			lda #$05
+			sta VIC.COLOR_RAM + 24 * 40 + 0, x			
+			dex
+			bpl !loop-
+		!Player1Done:
+
+
+
+			lda PLAYER.PlayersActive 
+			and #$02
+			beq !Player2Inactive+
+
+		!Player2Active:
+			ldx #$07
+		!loop:
+			lda Player2Row1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 +32, x
+			lda #$03
+			sta VIC.COLOR_RAM + 23 * 40 + 32, x
+			lda #$dc
+			sta SCREEN_RAM + 24 * 40 + 32, x
+			lda #$01
+			sta VIC.COLOR_RAM + 24 * 40 + 32, x
+			dex
+			bpl !loop-
+			jmp !Player2Done+
+
+		!Player2Inactive:
+			ldx #$07
+		!loop:
+			lda PressFireRow1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 + 32, x
+			lda #$03
+			sta VIC.COLOR_RAM + 23 * 40 + 32, x
+
+
+			lda PressFireRow2, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 24 * 40 + 32, x
+			lda #$03
+			sta VIC.COLOR_RAM + 24 * 40 + 32, x			
+			dex
+			bpl !loop-
+		!Player2Done:
+
+
+
+
+			rts
+	}
+
+
+
+
+
 
 	//Acc = Score to add (25) (BCD Format) $25 = 25
 	//X = trailing zeros count (1)

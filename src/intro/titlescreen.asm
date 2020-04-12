@@ -68,7 +68,7 @@ TITLE_SCREEN: {
 			and #$10
 			bne !+
 		!PlayerTwoFire:
-			lda #$03
+			lda #$02
 			sta PLAYER.PlayersActive
 			sec
 			rts

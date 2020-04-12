@@ -126,6 +126,12 @@ ENEMIES: {
 	!Loop:
 			
 		//Define player dimenisons
+			txa
+			lda TABLES.PowerOfTwo,x
+			and PLAYER.PlayersActive
+			bne !+
+			jmp !Next+
+		!:
 			//Player 1
 			// lda PLAYER.Player1_State
 			// and #[PLAYER.STATE_EATING]

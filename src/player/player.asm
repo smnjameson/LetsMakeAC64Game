@@ -212,10 +212,22 @@ PLAYER: {
 			sta Player1_ExitIndex
 			sta Player2_ExitIndex
 
+			lda PlayersActive
+			and #$01
+			beq !+
 			ldx #$00
 			jsr SpawnPlayer
+
+		!:
+
+			lda PlayersActive
+			and #$02
+			beq !+	
 			ldx #$01
 			jsr SpawnPlayer
+
+		!:
+
 			rts
 	}
 
@@ -304,6 +316,14 @@ PLAYER: {
 
 	GetCollisions: {
 
+
+		lda PlayersActive
+		and #$01
+		bne !+
+		lda #$40
+		sta Player1_FloorANDCollision
+		jmp !PlayerOneComplete+
+	!:
 		//Get floor collisions for each foot for Player 1
 		lda #$00
 		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
@@ -386,12 +406,22 @@ PLAYER: {
 		ora Player1_RightCollision
 		sta Player1_RightCollision
 	!Skip:
+	!PlayerOneComplete:
+
 
 
 
 
 
 		//Get floor collisions for each foot player 2
+		lda PlayersActive
+		and #$02
+		bne !+
+		lda #$40
+		sta Player2_FloorANDCollision
+		jmp !PlayerTwoComplete+
+	!:
+
 		lda #$01
 		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
 		ldy #20
@@ -474,6 +504,7 @@ PLAYER: {
 		ora Player2_RightCollision
 		sta Player2_RightCollision
 	!Skip:
+	!PlayerTwoComplete:
 
 		rts
 	}
@@ -545,6 +576,13 @@ PLAYER: {
 		sta CURRENT_PLAYER
 
 		!Loop:
+
+			lda CURRENT_PLAYER
+			and PlayersActive
+			bne !+
+			jmp !SkipFrameSet+
+		!:
+
 			lda CURRENT_PLAYER
 			cmp #$01
 			bne !Player2+
@@ -1012,10 +1050,20 @@ PLAYER: {
 
 
 	PlayerControl: {
+		lda PlayersActive
+		and #$01
+		beq !+
 		ldy #$00
 		jsr PlayerControlFunc
+
+	!:
+		lda PlayersActive
+		and #$02
+		beq !+
 		ldy #$01
 		jsr PlayerControlFunc
+
+	!:
 		rts
 	}
 
@@ -1294,6 +1342,13 @@ PLAYER: {
 		sta CURRENT_PLAYER
 
 		!Loop:
+			lda CURRENT_PLAYER //1 or 2
+			and PlayersActive  
+			bne !+
+			jmp !SkipEntireIteration+
+		!:
+
+
 			lda CURRENT_PLAYER
 			cmp #$01
 			bne !Player2+
@@ -1357,7 +1412,8 @@ PLAYER: {
 			sta PLAYER_DYING
 	
 		!PlayerSetupComplete:
-		
+			
+
 			ldy #$00
 			lda (PlayerState), y
 			and #STATE_JUMP
