@@ -34,10 +34,10 @@ PLAYER: {
 			.byte $00
 
 	PlayerColors:
-			.byte $02, $07
+			.byte $02, $05
 	PlayerInvulnRamp:
-			.byte $09,$02,$04,$0c,$0e,$0c,$04,$02
-			.byte $07,$07,$0f,$0c,$0e,$0c,$0f,$07
+		.byte $01,$0a,$08,$0b,$02,$0b,$08,$0a
+		.byte $01,$0d,$0d,$0b,$05,$0b,$0d,$0d
 			// .byte $07,$0f,$06,$0e,$06,$0f,$07,$01
 
 	DefaultLeftRightFrames:
@@ -181,7 +181,7 @@ PLAYER: {
 	Initialise: {
 			lda #$0a
 			sta VIC.SPRITE_MULTICOLOR_1
-			lda #$06
+			lda #$0b
 			sta VIC.SPRITE_MULTICOLOR_2
 
 			lda #$08

@@ -3,13 +3,12 @@ TRANSITION: {
 		.byte $00
 	TransitionComplete:
 		.byte $00
-*=* "TransitionFLDActive"
-	TransitionFLDActive:
+	TransitionHUDActive:
 		.byte $00
 	TransitionIndex:
 		.byte $00
 				
-	TransitionFLDIndex:
+	TransitionHUDIndex:
 		.byte $00
 
 
@@ -35,16 +34,17 @@ TRANSITION: {
 			lda #$00
 			sta TransitionComplete
 			sta TransitionIndex
-			sta TransitionFLDActive
-			sta TransitionFLDIndex
+			sta TransitionHUDActive
+			sta TransitionHUDIndex
 			rts
 	}
 
 	Update: {	
 
-			lda TransitionFLDActive
+			lda TransitionHUDActive
+
 			beq !+
-			jmp UpdateFLD
+			jmp UpdateHUDTransition
 		!:
 
 			lda TransitionActive
@@ -77,23 +77,44 @@ TRANSITION: {
 			lda TransitionIndex
 			bne !+
 			lda #$01
-			sta TransitionFLDActive
+			sta TransitionHUDIndex
+			sta TransitionHUDActive
 		!:
 			rts
 	}
 
-	UpdateFLD: {
-			lda ZP_COUNTER
-			and #$07
-			bne !end+
-			ldx TransitionFLDIndex
-			inx
-			cpx #$10
-			beq !+
+	UpdateHUDTransition: {
 
-			stx TransitionFLDIndex
+			// lda ZP_COUNTER
+			// and #$01
+			// bne !end+
+			ldx TransitionHUDIndex
+			inx
+			cpx #$29
+			bne !+
+			
+			jsr BONUS.Start
 		!:
-			stx $d020
+			stx TransitionHUDIndex
+
+
+			ldx #$26
+		!:
+			lda SCREEN_RAM + $28 * $17, x
+			sta SCREEN_RAM + $28 * $17 + 1, x
+			lda SCREEN_RAM + $28 * $18, x
+			sta SCREEN_RAM + $28 * $18 + 1, x
+			lda VIC.COLOR_RAM + $28 * $17, x
+			sta VIC.COLOR_RAM + $28 * $17 + 1, x
+			lda VIC.COLOR_RAM + $28 * $18, x
+			sta VIC.COLOR_RAM + $28 * $18 + 1, x
+			dex
+			bpl !-
+			lda #$00
+			sta SCREEN_RAM + $28 * $17
+			sta SCREEN_RAM + $28 * $18
+
+
 		!end:
 			rts
 	}

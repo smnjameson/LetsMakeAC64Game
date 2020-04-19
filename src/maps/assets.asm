@@ -44,3 +44,7 @@
 	CHAR_SET:
 		.import binary "../../assets/maps/chars.bin"   //roll 12!
 
+
+* = $f800 "Charset"
+	INTRO_CHAR_SET:
+		.import binary "../../assets/maps/introchars.bin"   //roll 12!

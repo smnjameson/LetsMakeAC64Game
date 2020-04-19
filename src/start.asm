@@ -32,6 +32,7 @@ BasicUpstart2(Entry)
 
 #import "animation/transition.asm"
 #import "intro/titlescreen.asm"
+#import "animation/bonus.asm"
 
 Random: { 
         lda seed
@@ -126,7 +127,7 @@ Entry:
 	!GAME_ENTRY:
 		lda #$01	//Initialize current song
 		jsr $1000
-		jsr IRQ.Setup
+		jsr IRQ.Setup 
 
 		jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise
@@ -136,6 +137,7 @@ Entry:
 		jsr ENEMIES.Initialise
 		jsr CROWN.Initialise
 		jsr DOOR.Initialise
+		jsr BONUS.Initialise
 		//Generate all sprites
 		lda #$10
 		jsr SPRITEWARP.generate
@@ -151,6 +153,12 @@ Entry:
 
 		inc ZP_COUNTER
 
+
+		//Check if transiiton is over and jump to Bonus screen if so
+		lda BONUS.BonusActive
+		beq !+
+		jmp !BonusScreen+
+	!:
 
 		//Are we both exiting?? Are we in normal loop?
 		lda PLAYER.PlayersActive
@@ -168,7 +176,6 @@ Entry:
 		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 		bne !NormalLoop+
 	!:
-
 		jmp !NotNormalLoop+
 
 
@@ -199,18 +206,19 @@ Entry:
 		
 		/////////////////////////////////
 		!EndLevelTransition:
-			
 			jsr TRANSITION.Update
 			jsr $1003
 			jmp !Loop- 
-		!NotEndLevelTransition:
+		// !NotEndLevelTransition:
+
+
 		/////////////////////////////////
-
-
-
+		!BonusScreen:
+			jsr BONUS.Update
+			jsr $1003
+			jmp !Loop- 
+		/////////////////////////////////
 		
-
-
 	PerformFrameCodeFlag:
 		.byte $00
 

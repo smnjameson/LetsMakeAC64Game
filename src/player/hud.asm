@@ -26,7 +26,7 @@ HUD: {
 
 			//Color the meter
 			ldx #$0e
-			lda #$0a
+			lda #$0e
 		!Loop:
 			sta VIC.COLOR_RAM + 23 * 40 + 12, x
 			sta VIC.COLOR_RAM + 24 * 40 + 12, x
@@ -68,8 +68,8 @@ HUD: {
 		.text " INSERT "
 	PressFireRow2:	
 		.text "  COIN  "
-	PlayerColors:
-		.byte $05,$03
+	PlayerColors: 
+		.byte $02,$05
 	PlayerActiveColors:
 		.byte $00,$00
 
@@ -155,7 +155,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 0, x
-			lda #$05
+			lda #$02
 			sta VIC.COLOR_RAM + 23 * 40 + 0, x
 			lda #$dc
 			sta SCREEN_RAM + 24 * 40 + 0, x
@@ -177,7 +177,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 0, x
-			lda #$05
+			lda #$02
 			sta VIC.COLOR_RAM + 23 * 40 + 0, x
 
 
@@ -189,7 +189,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 24 * 40 + 0, x
-			lda #$05
+			lda #$02
 			sta VIC.COLOR_RAM + 24 * 40 + 0, x			
 			dex
 			bpl !loop-
@@ -212,7 +212,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 +32, x
-			lda #$03
+			lda #$05
 			sta VIC.COLOR_RAM + 23 * 40 + 32, x
 			lda #$dc
 			sta SCREEN_RAM + 24 * 40 + 32, x
@@ -233,7 +233,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 32, x
-			lda #$03
+			lda #$05
 			sta VIC.COLOR_RAM + 23 * 40 + 32, x
 
 
@@ -245,7 +245,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 24 * 40 + 32, x
-			lda #$03
+			lda #$05
 			sta VIC.COLOR_RAM + 24 * 40 + 32, x			
 			dex
 			bpl !loop-
