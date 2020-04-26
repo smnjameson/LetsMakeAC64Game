@@ -14,11 +14,11 @@ BONUS: {
 		.byte $00
 
 	BonusCounters:	//x1000 + x250 + 15000
-		.byte $18,$60,$01
+		.byte $10,$50,$01
 	BonusPlayer1Counters:
-		.byte $0b,$31
+		.byte $10,$50
 	BonusPlayer2Counters:
-		.byte $0d,$2f
+		.byte $00,$00
 	BonusCountersOriginal:	//copied from BonusCounters at start
 		.byte $00,$00,$00
 
@@ -142,10 +142,10 @@ BONUS: {
 
 			ldx #$0f	
 		!Loop:
-			lda #$2e
-			sta (BONUS_VECTOR1), y
-			lda #$01
-			sta (BONUS_VECTOR2), y
+			// lda #$2e
+			// sta (BONUS_VECTOR1), y
+			// lda #$01
+			// sta (BONUS_VECTOR2), y
 
 
 			iny
@@ -164,10 +164,10 @@ BONUS: {
 
 
 
-			lda #$2f
-			sta (BONUS_VECTOR1), y
-			lda #$01
-			sta (BONUS_VECTOR2), y
+			// lda #$2f
+			// sta (BONUS_VECTOR1), y
+			// lda #$01
+			// sta (BONUS_VECTOR2), y
 			tya 
 			sec
 			sbc #$05
@@ -230,12 +230,58 @@ BONUS: {
 			ldx #$01
 			jsr ClearBar
 
+
+			jsr DrawCrownBonus
 			rts
 
 
 	}
 
+	CrownTextLine1:
+		.encoding "screencode_upper"
+		.text "CROWN"
+	CrownTextLine2:
+		.text "BONUS"
+	CrownTextLine3:
+		.text ";1:25"
+	CrownTextPosition:
+		.byte $02, $21
 
+
+	DrawCrownBonus: {
+			lda PLAYER.PlayersActive
+			cmp #$03
+			beq !+
+			rts
+		!:
+
+			lda CROWN.PlayerHasCrown
+			bne !+
+			rts
+		!:
+
+			sec
+			sbc #$01
+			tax
+			lda CrownTextPosition, x
+			tay
+
+			ldx #$00
+		!:
+			lda CrownTextLine1, x
+			sta SCREEN_RAM + $09 * $28, y
+			lda CrownTextLine2, x
+			sta SCREEN_RAM + $0a * $28, y
+			lda CrownTextLine3, x
+			sta SCREEN_RAM + $0d * $28, y
+			iny
+			inx
+			cpx #$05
+			bne !-
+
+
+			rts
+	}
 
 	BonusIRQ: {
 			pha
@@ -595,6 +641,20 @@ BONUS: {
 
 
 	SetBar: {
+			ldy CROWN.PlayerHasCrown
+			dey
+			bmi !+
+			sty BONUS_BAR_TEMP
+			cpx BONUS_BAR_TEMP
+			bne !+
+			pha
+			lsr
+			lsr
+			sta BONUS_BAR_TEMP
+			pla
+			clc
+			adc BONUS_BAR_TEMP
+		!:
 			// .break
 		//X = player num 0,1
 		//A = Bar Height 0-127, halved from 0-255
