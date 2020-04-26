@@ -65,7 +65,7 @@ Random: {
         sta $dd0e
         rts
 }
-
+		
 Entry:
 		lda #$0e
 		sta VIC.BACKGROUND_COLOR
