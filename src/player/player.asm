@@ -1,5 +1,11 @@
 * = * "PLAYER CODE"
 PLAYER: {
+	.label POWERUP_SPEED = $01
+	.label POWERUP_INVULN = $02
+	.label POWERUP_COLOR = $03
+	.label POWERUP_JUMP = $04
+	.label POWERUP_FREEZE = $05
+	.label POWERUP_SCORE = $06
 
 
 	.label STATE_JUMP 		= %00000001
@@ -11,8 +17,10 @@ PLAYER: {
 	.label STATE_THROWING 	= %01000000
 	.label STATE_EATING 	= %10000000
 
+
 	.label PLAYER_1 = %00000001
 	.label PLAYER_2 = %00000010
+
 
 	.label JOY_UP = %00001
 	.label JOY_DN = %00010
@@ -29,6 +37,8 @@ PLAYER: {
 
 	.label FIRE_HELD_THRESHOLD = 15
 
+	FreezeColor:
+			.byte $06
 
 	CurrentLevel:
 			.byte $00
@@ -141,6 +151,7 @@ PLAYER: {
 	Player2_State:
 			.byte $00
 
+	Player_WalkSpeed:
 	Player1_WalkSpeed:
 			.byte $80, $01
 	Player2_WalkSpeed:
@@ -176,6 +187,20 @@ PLAYER: {
 			.byte $ff
 	Player2_ExitIndex:
 			.byte $ff
+
+	Player_PowerupType:
+	Player1_PowerupType:
+			.byte $00
+	Player2_PowerupType:
+			.byte $00
+	Player_PowerupTimer:
+	Player1_PowerupTimer:
+			.byte $00
+	Player2_PowerupTimer:
+			.byte $00
+
+	Player_Freeze_Active:
+			.byte $00
 
 
 	Initialise: {
@@ -228,6 +253,11 @@ PLAYER: {
 
 		!:
 
+			lda #$00
+			sta Player1_PowerupTimer
+			sta Player2_PowerupTimer
+			sta Player_Freeze_Active
+
 			rts
 	}
 
@@ -278,6 +308,9 @@ PLAYER: {
 			lda #$ff 
 			sta Player1_Invuln 
 
+			lda #$00
+			sta Player1_PowerupTimer
+
 			jmp !PlayerSpecificsDone+
 
 		!Plyr2:
@@ -300,6 +333,9 @@ PLAYER: {
 
 			lda #$ff 
 			sta Player2_Invuln 
+
+			lda #$00
+			sta Player2_PowerupTimer
 
 		!PlayerSpecificsDone:
 			rts
@@ -640,7 +676,20 @@ PLAYER: {
 				lda DefaultFrame, x   //Default idle frame
 				sta CURRENT_FRAME
 
+				jsr UpdatePlayerPowerup
 				jsr SetPlayerSize
+
+
+				txa
+				clc
+				adc #$01
+				eor #$03
+				cmp Player_Freeze_Active
+				bne !+
+				lda FreezeColor
+				sta VIC.SPRITE_COLOR_6, x
+				jmp !InvulnDone+
+			!:
 
 
 				lda Player_Invuln, x
@@ -652,12 +701,14 @@ PLAYER: {
 				clc
 				adc #$08
 			!Plyr1:
+
 				tay
 				lda	PlayerInvulnRamp, y
 				sta VIC.SPRITE_COLOR_6, x
 				dec Player_Invuln, x
 				jmp !InvulnDone+
 			!NotInvuln:
+
 				lda PlayerColors, x
 				sta VIC.SPRITE_COLOR_6, x
 			!InvulnDone:
@@ -915,6 +966,32 @@ PLAYER: {
 			rts
 	}
 
+
+	UpdatePlayerPowerup: {
+			lda Player_PowerupTimer, x
+			beq !+
+			dec Player_PowerupTimer, x
+
+		!Skip:
+			rts
+		!:
+				//If we go from 1 to 0 on timer and powerup is freeze
+		//The turn off freeze
+			inx
+			cpx Player_Freeze_Active
+			bne !Skip+
+			lda #$00
+			sta Player_Freeze_Active
+		!Skip:
+			dex 
+
+			lda #$00
+			sta Player_PowerupType, x
+
+			rts
+	}
+
+
 	PlayerSizeAnimation: {
 
 			.label CURRENT_PLAYER = TEMP2
@@ -1005,7 +1082,7 @@ PLAYER: {
 		//KEEP X - DOnt BASH!
 		//Set the correct playersize
 			txa //Player number 0or1
-			asl
+			asl //Because speed value is 16 bit
 			tay //Speed offset 0 or 2
 
 			lda Player_Size, x
@@ -1018,9 +1095,9 @@ PLAYER: {
 			lda #$00
 			sta Player_Size, x
 			lda PlayerWalkSpeeds_LSB + 0
-			sta Player1_WalkSpeed + 0, y
+			sta Player_WalkSpeed + 0, y
 			lda PlayerWalkSpeeds_MSB + 0
-			sta Player1_WalkSpeed + 1, y
+			sta Player_WalkSpeed + 1, y
 			jmp !SizeComplete+
 		!Size1:
 			cmp #$24
@@ -1028,19 +1105,32 @@ PLAYER: {
 			lda #$01
 			sta Player_Size, x
 			lda PlayerWalkSpeeds_LSB + 1
-			sta Player1_WalkSpeed + 0, y
+			sta Player_WalkSpeed + 0, y
 			lda PlayerWalkSpeeds_MSB + 1
-			sta Player1_WalkSpeed + 1, y
+			sta Player_WalkSpeed + 1, y
 			jmp !SizeComplete+
 		!Size2:
 			lda #$02
 			sta Player_Size, x
 			lda PlayerWalkSpeeds_LSB + 2
-			sta Player1_WalkSpeed + 0, y
+			sta Player_WalkSpeed + 0, y
 			lda PlayerWalkSpeeds_MSB + 2
-			sta Player1_WalkSpeed + 1, y
+			sta Player_WalkSpeed + 1, y
 
 		!SizeComplete:
+			lda Player_PowerupType, x
+			cmp #POWERUP_SPEED
+			bne !+
+			
+			//SPEED POWERUP - Now double the speed
+			lda Player_WalkSpeed + 0, y
+			asl 
+			lda Player_WalkSpeed + 0, y
+			lda Player_WalkSpeed + 1, y
+			rol 
+			sta Player_WalkSpeed + 1, y
+
+		!:
 			pla
 			cmp Player_Size, x
 			beq !Exit+
@@ -1061,7 +1151,10 @@ PLAYER: {
 			bne !Player2+
 			ldx #$00
 			jsr SpawnPlayer
-		!:
+		!:	
+			lda Player_Freeze_Active
+			cmp #$02
+			beq !Player2+
 			ldy #$00
 			jsr PlayerControlFunc
 
@@ -1076,6 +1169,9 @@ PLAYER: {
 			ldx #$01
 			jsr SpawnPlayer
 		!:
+			lda Player_Freeze_Active
+			cmp #$01
+			beq !Done+
 			ldy #$01
 			jsr PlayerControlFunc
 
@@ -1395,7 +1491,7 @@ PLAYER: {
 			sta PlayerSize + 1
 
 			lda Player_IsDying + 0
-			sta PLAYER_DYING
+			sta PLAYER_DYING 
 
 			jmp !PlayerSetupComplete+
 		!Player2:
@@ -1527,6 +1623,27 @@ PLAYER: {
 			sec
 			sbc TABLES.JumpAndFallTable, x
 			sta (PlayerY), y
+
+			//We are using a jump powerup so subtract again
+			txa 
+			pha
+			lda ZP_COUNTER
+			and #$01
+			beq !+
+			ldx CURRENT_PLAYER
+			dex
+			lda Player_PowerupType, x
+			cmp #POWERUP_JUMP
+			bne !+
+			lda (PlayerY), y
+			sec
+			sbc TABLES.JumpAndFallTable, x
+			sta (PlayerY), y		
+		!:
+			pla
+			tax
+
+
 			inx
 			cpx #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable]
 			bne !+

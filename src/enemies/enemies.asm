@@ -106,6 +106,8 @@ ENEMIES: {
 			rts
 	}
 
+
+
 	CheckPlayerCollision: {
 		//Y is the current enemy
 			.label Sprite1_X = COLLISION_POINT_X
@@ -138,10 +140,6 @@ ENEMIES: {
 			// bne !+
 			lda PLAYER.Player_IsDying, x
 			beq !+
-			jmp !Next+
-		!:
-			lda PLAYER.Player_Invuln, x
-			beq !+	
 			jmp !Next+
 		!:
 
@@ -188,6 +186,7 @@ ENEMIES: {
 			jmp !Next+
 		!:
 
+
 			//Inefficient copy due to enemy data format
 			lda EnemyPosition_X1, y
 			sta EnemyXCopy + 1
@@ -206,6 +205,7 @@ ENEMIES: {
 			lda #>EnemyYCopy
 			sta Sprite1_Y + 1
 
+			//TODO: Make these values dynamic per enemy type?
 			lda #$04
 			sta Sprite1_XOFF
 			lda #$10
@@ -219,7 +219,45 @@ ENEMIES: {
 			jsr UTILS.GetSpriteCollision
 			ldy ENEMY_COLLISION_TEMP1
 
-			bcc !+	
+			bcc !Next+	
+
+			//Player has hit the enemy
+				lda EnemyType, y
+				bpl !+
+
+			//We've hit a powerup!
+				stx POWERUP_PLAYER_NUM
+				pha
+				tya 
+				tax 
+				pla
+				ldy #$06
+				jsr CallBehaviour
+				
+				//Accumulator is now the powerup type!
+				ldx POWERUP_PLAYER_NUM
+				clc
+				adc #$01
+				sta PLAYER.Player_PowerupType,x 
+				lda #$ff
+				sta PLAYER.Player_PowerupTimer,x 					
+
+				lda PLAYER.Player_PowerupType, x 
+				cmp #PLAYER.POWERUP_FREEZE
+				bne !skip+
+				inx 
+				stx PLAYER.Player_Freeze_Active
+				dex
+			!skip:
+
+
+				jmp !Next+
+			!:
+
+				lda PLAYER.Player_Invuln, x
+				beq !+	
+				jmp !Next+
+			!:
 
 				//Initiate a jump for death anim
 				lda PLAYER.Player1_State, x
@@ -302,7 +340,9 @@ ENEMIES: {
 			pla
 			sta EnemyType, x
 
+			bmi !+
 			inc EnemyTotalCount
+		!:
 
 			//Call on spawn
 			ldy #BEHAVIOURS.BEHAVIOUR_SPAWN
@@ -320,9 +360,15 @@ ENEMIES: {
 			.label INDEX = TEMP3
 
 			sty BEHAVIOUR_OFFSET
-			sty $eebf
 			stx INDEX
 			tax
+
+			//X is now the enemy type number
+			//If enemy type is 255 then its a powerup so change to 0
+			//to pick up behaviour in jump table
+			bpl !+
+			ldx #$00
+		!:
 
 			clc
 			lda BEHAVIOURS.EnemyLSB, x

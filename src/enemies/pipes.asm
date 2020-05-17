@@ -101,7 +101,7 @@ PIPES: {
 
 			//Check if there are less than 5 enemies
 			ldx ENEMIES.EnemyTotalCount
-			ldy #$04 //Pipe to cxheck next
+			ldy #$04 //Pipe to check next
 		!Loop:
 			lda PipesActive, y
 			beq !+
@@ -370,6 +370,7 @@ PIPES: {
 			lda MAPDATA_COPY.PipeSpawnX, x
 			tax
 			pla
+
 
 			jsr ENEMIES.SpawnEnemy
 

@@ -39,8 +39,7 @@ MAPDATA: {
 			.byte $0a,$10
 
 		NumberEnemies:
-			.byte [__EnemyList - EnemyList]
-
+			.byte 2 //__EnemyList - EnemyList - Countof255
 		EnemyWeight:
 			.byte max(1, round(56/[__EnemyList - EnemyList]))
 
@@ -49,7 +48,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			// .byte 1,1,1,1
+			.byte 1,2,255
 
 		__EnemyList:
 			.byte 0
@@ -89,7 +88,7 @@ MAPDATA: {
 			.byte $20,$04
 
 		NumberEnemies:
-			.byte [__EnemyList - EnemyList]
+			.byte 4 //__EnemyList - EnemyList - Countof255
 
 		EnemyWeight:
 			.byte max(1, round(56/[__EnemyList - EnemyList]))

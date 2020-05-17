@@ -2,6 +2,7 @@
 
 BasicUpstart2(Entry)
 
+
 #import "../libs/tables.asm" 
 #import "../libs/vic.asm"
 #import "../libs/macros.asm"
@@ -95,7 +96,7 @@ Entry:
 		sta $01
 
 
-		//Set VIC BANK 3
+		//Set VIC BANK 3	
 		lda $dd00
 		and #%11111100
 		sta $dd00 
@@ -202,7 +203,7 @@ Entry:
 			jmp !Loop- 
 		!NotNormalLoop:
 		/////////////////////////////////
-
+ 
 		
 		/////////////////////////////////
 		!EndLevelTransition:

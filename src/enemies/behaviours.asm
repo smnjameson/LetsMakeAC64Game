@@ -1,12 +1,12 @@
 BEHAVIOURS: {
 
 	EnemyLSB:
-		.byte $ff
+		.byte <PowerUp
 		.byte <Enemy_001
 		.byte <Enemy_002
 
 	EnemyMSB:
-		.byte $ff
+		.byte >PowerUp
 		.byte >Enemy_001
 		.byte >Enemy_002
 
@@ -16,6 +16,58 @@ BEHAVIOURS: {
 	.label BEHAVIOUR_DEATH = 6;
 
 
+	//Powerup behaviour
+	PowerUp: {
+			jmp !OnSpawn+ 
+			jmp !OnUpdate+ 
+			jmp !OnDeath+
+
+			.label POWERUP_TYPE = $00
+			.label BOUNCE = $01
+
+		!OnSpawn:
+				jsr Random
+				and #$03
+				lda #$04
+				:setStaticMemory(POWERUP_TYPE, null)
+
+				:setStaticMemory(BOUNCE, $00)
+
+				:getStaticMemory(POWERUP_TYPE)
+				clc
+				adc #$38
+				:setEnemyFrame(null)
+				rts
+
+		!OnUpdate:
+				:setEnemyColor(1, 1)
+
+				:getStaticMemory(BOUNCE)
+				beq !Fall+
+				sec 
+				sbc #$01
+				:setStaticMemory(BOUNCE, null)
+				:UpdatePosition(0, -96)
+				jmp !Finish+
+
+			!Fall:
+				:doFall(12, 12)
+				bcs !Finish+
+				:setStaticMemory(BOUNCE, $10)
+				
+			!Finish:
+				:PositionEnemy() //Draw!!
+				rts
+
+		!OnDeath:	
+				// .break
+				lda #$00
+				sta ENEMIES.EnemyType, x
+				:getStaticMemory(POWERUP_TYPE)
+
+				rts
+
+	}
 
 	//Flying candy monster bounces of scenery
 	Enemy_001: {
@@ -42,7 +94,7 @@ BEHAVIOURS: {
 				jsr Random
 				and #$01
 				asl
-				clc
+				clc 
 				adc #$ff
 				:setStaticMemory(DY, null)
 
@@ -168,6 +220,8 @@ BEHAVIOURS: {
 				bcc !+
 				jmp !Done+
 			!:
+				lda PLAYER.Player_Freeze_Active
+				bne !Skip+
 				//Do walk animation
 				lda ZP_COUNTER
 				and #$03

@@ -2,12 +2,16 @@
 		.label INDEX = TEMP8
 		.label STOREY = TEMP7
 
+
 		sty STOREY
 		stx INDEX
 
 		lda ENEMIES.EnemyFrame, x
 		sta SPRITE_POINTERS + 0, x
+
+
 		lda ENEMIES.EnemyColor, x
+	!Skip:
 		sta VIC.SPRITE_COLOR_0, x
 
 		txa
@@ -32,10 +36,24 @@
 		sta $d010
 		ldy STOREY
 		ldx INDEX
+
+
+		lda PLAYER.Player_Freeze_Active
+		beq !+
+		lda PLAYER.FreezeColor
+		sta VIC.SPRITE_COLOR_0, x
+	!:
 }
 
 
 .macro UpdatePosition(xpos, ypos) {
+		pha
+		lda PLAYER.Player_Freeze_Active
+		beq !+
+		pla
+		jmp !EndMacro+
+	!:
+		pla
 	.if(xpos == null && ypos == null) {
 		sty TEMP10
 
@@ -105,6 +123,7 @@
 			sta ENEMIES.EnemyPosition_Y1, x 
 		}	
 	}
+	!EndMacro:
 }
 
 .macro setEnemyFrame(frame) {
@@ -116,6 +135,7 @@
 
 
 .macro setEnemyColor(color, color2) {
+
 	.if(color2 !=  null) {
 		lda ZP_COUNTER
 		and #$01
@@ -130,6 +150,7 @@
 			lda #color
 		}
 	}
+	!Set:
 	sta ENEMIES.EnemyColor, x
 }
 
