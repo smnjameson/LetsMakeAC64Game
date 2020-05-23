@@ -1,11 +1,11 @@
 * = * "PLAYER CODE"
 PLAYER: {
-	.label POWERUP_SPEED = $01
-	.label POWERUP_INVULN = $02
+	.label POWERUP_SPEED = $01 //Done
+	.label POWERUP_INVULN = $02 //Done
 	.label POWERUP_COLOR = $03
-	.label POWERUP_JUMP = $04
-	.label POWERUP_FREEZE = $05
-	.label POWERUP_SCORE = $06
+	.label POWERUP_JUMP = $04  //Done
+	.label POWERUP_FREEZE = $05 //Done
+	.label POWERUP_SCORE = $06 //Done 
 
 
 	.label STATE_JUMP 		= %00000001
@@ -37,8 +37,21 @@ PLAYER: {
 
 	.label FIRE_HELD_THRESHOLD = 15
 
+	FreezeColorRamp:
+			.byte $03,$0e,$06,$06,$06,$06,$06,$0e
+	SpeedColorRamp:
+			.byte $0f,$0a,$04,$04,$04,$04,$04,$0a
+	JumpColorRamp:
+			.byte $0f,$0c,$08,$08,$08,$08,$08,$0c
+	FreezeColorIndex:
+			.byte $01
 	FreezeColor:
 			.byte $06
+	SpeedColor:
+			.byte $06
+	JumpColor:
+			.byte $06
+
 
 	CurrentLevel:
 			.byte $00
@@ -201,7 +214,10 @@ PLAYER: {
 
 	Player_Freeze_Active:
 			.byte $00
-
+	ColorSwitchActive:
+			.byte $00
+	ColorSwitchRow:
+			.byte $00
 
 	Initialise: {
 			lda #$0a
@@ -257,6 +273,7 @@ PLAYER: {
 			sta Player1_PowerupTimer
 			sta Player2_PowerupTimer
 			sta Player_Freeze_Active
+			sta ColorSwitchActive
 
 			rts
 	}
@@ -709,6 +726,25 @@ PLAYER: {
 				jmp !InvulnDone+
 			!NotInvuln:
 
+
+				lda Player_PowerupType, x
+				cmp #POWERUP_SPEED
+				bne !NotSpeed+
+				lda SpeedColor
+				sta VIC.SPRITE_COLOR_6, x
+				jmp !InvulnDone+
+			!NotSpeed:
+
+
+				lda Player_PowerupType, x
+				cmp #POWERUP_JUMP
+				bne !NotJump+
+				lda JumpColor
+				sta VIC.SPRITE_COLOR_6, x
+				jmp !InvulnDone+
+			!NotJump:
+
+
 				lda PlayerColors, x
 				sta VIC.SPRITE_COLOR_6, x
 			!InvulnDone:
@@ -968,14 +1004,50 @@ PLAYER: {
 
 
 	UpdatePlayerPowerup: {
+			//Do any color switching
+
+
+			lda ColorSwitchActive
+			beq !skip+
+			txa 
+			pha 
+			jsr DoColorSwitch
+			pla
+			tax 
+
+		!skip:
+			//Do powerup color ramps
+			lda ZP_COUNTER
+			and #$03
+			bne !+
+			inc FreezeColorIndex
+			lda FreezeColorIndex
+			and #$07
+			tay 
+			lda FreezeColorRamp, y 
+			sta FreezeColor
+			lda SpeedColorRamp, y 
+			sta SpeedColor
+			lda JumpColorRamp, y 
+			sta JumpColor
+		!:
+
 			lda Player_PowerupTimer, x
 			beq !+
 			dec Player_PowerupTimer, x
 
+			//Are we invuln
+			lda Player_PowerupType, x
+			cmp #POWERUP_INVULN
+			bne !Skip+
+			lda Player_PowerupTimer, x
+			sta Player1_Invuln, x
+
 		!Skip:
 			rts
 		!:
-				//If we go from 1 to 0 on timer and powerup is freeze
+		
+		//If we go from 1 to 0 on timer and powerup is freeze
 		//The turn off freeze
 			inx
 			cpx Player_Freeze_Active
@@ -1624,12 +1696,13 @@ PLAYER: {
 			sbc TABLES.JumpAndFallTable, x
 			sta (PlayerY), y
 
+
 			//We are using a jump powerup so subtract again
 			txa 
 			pha
-			lda ZP_COUNTER
-			and #$01
-			beq !+
+			// lda ZP_COUNTER
+			// and #$01
+			// beq !+
 			ldx CURRENT_PLAYER
 			dex
 			lda Player_PowerupType, x
@@ -1637,12 +1710,11 @@ PLAYER: {
 			bne !+
 			lda (PlayerY), y
 			sec
-			sbc TABLES.JumpAndFallTable, x
+			sbc #$01//TABLES.JumpAndFallTable, x
 			sta (PlayerY), y		
 		!:
 			pla
 			tax
-
 
 			inx
 			cpx #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable]
@@ -1665,6 +1737,63 @@ PLAYER: {
 
 			rts
 	}
+
+
+	DoColorSwitch: {
+
+			ldx ColorSwitchRow
+
+			lda TABLES.ScreenRowLSB, x
+			sta SCREEN_SMOD + 1
+			sta COLOR_SMOD + 1
+			sta COLOR_SMOD2 + 1
+			lda TABLES.ScreenRowMSB,x
+			sta SCREEN_SMOD + 2
+			clc
+			adc #[$d8 - [>SCREEN_RAM]]
+			sta COLOR_SMOD + 2
+			sta COLOR_SMOD2 + 2
+
+			ldx #$27
+		!:
+		SCREEN_SMOD:
+			ldy $BEEF, x 
+			lda CHAR_COLORS, y
+			and #UTILS.COLLISION_COLORABLE
+			beq !skip+
+		COLOR_SMOD:
+			lda $BEEF, x
+			and #$0f
+			cmp #$09
+			beq !skip+
+			tay 
+			lda ColorSwitchTable - 8 , y
+			lda #$01
+		COLOR_SMOD2:
+			sta $BEEF,x
+		!skip:
+			dex
+			bpl !-
+
+
+
+			ldx ColorSwitchRow
+
+			inx
+			cpx #$16
+			bne !+
+	
+			ldx #$00
+			stx ColorSwitchActive
+		!:
+
+			stx ColorSwitchRow
+			inc $d020
+			rts
+	}
+
+	ColorSwitchTable:
+			.byte $08,$09,$0d,$0b,$0c,$0a,$0e,$0f
 }
 
 

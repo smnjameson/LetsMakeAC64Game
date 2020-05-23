@@ -251,6 +251,25 @@ ENEMIES: {
 			!skip:
 
 
+				lda PLAYER.Player_PowerupType, x 
+				cmp #PLAYER.POWERUP_SCORE
+				bne !skip+
+				txa 
+				tay //Playernumber
+				lda #$15
+				ldx #$02
+				jsr HUD.AddScore					
+			!skip:
+
+				lda PLAYER.Player_PowerupType, x 
+				cmp #PLAYER.POWERUP_COLOR
+				bne !skip+
+				lda #$01
+				sta PLAYER.ColorSwitchActive
+				lda #$00
+				sta PLAYER.ColorSwitchRow					
+			!skip:		
+
 				jmp !Next+
 			!:
 

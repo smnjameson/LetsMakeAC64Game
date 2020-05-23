@@ -38,24 +38,27 @@ MAPDATA: {
 		SwitchSpawnLoc:
 			.byte $0a,$10
 
+		.label NUMBER_OF_ENEMIES = 2
 		NumberEnemies:
-			.byte 2 //__EnemyList - EnemyList - Countof255
-		EnemyWeight:
-			.byte max(1, round(56/[__EnemyList - EnemyList]))
+			.byte NUMBER_OF_ENEMIES //__EnemyList - EnemyList - Countof255
 
+		EnemyWeight:
+			.byte max(1, round(56/NUMBER_OF_ENEMIES))
+			
+		NumberOfPowerups:
+			.byte 2
 		//Additional static values go here, above order msut stay intact
 
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,2,255
-
+			.byte 1,255,2,255
 		__EnemyList:
 			.byte 0
 
 		BarUnits:
 			//A list of values 0-56 in intervals numbering the same as total enemies
-			.fill [__EnemyList - EnemyList], [[i*56]/[__EnemyList - EnemyList]]
+			.fill NUMBER_OF_ENEMIES, [[i*56]/NUMBER_OF_ENEMIES]
 			.byte 56
 	}
 
@@ -94,6 +97,8 @@ MAPDATA: {
 			.byte max(1, round(56/[__EnemyList - EnemyList]))
 		//Additional static values go here, above order msut stay intact
 
+		NumberOfPowerups:
+			.byte 0
 
 		EnemyList:
 			.byte 2,2,2,2

@@ -33,7 +33,8 @@ PIPES: {
 			.byte $00 //Autofilled by initialise function
 		EnemyWeight:
 			.byte $00 //Autofilled by initialise function
-
+		NumberOfPowerups:
+			.byte $00 //Autofilled by initialise function
 
 
 	NextEnemyIndex:
@@ -83,11 +84,14 @@ PIPES: {
 			lda $BEEF, x
 			sta MAPDATA_COPY, x
 			inx
-			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 2]
+			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 3] //+3 for the extra data (NumEnemies/Weight/NumPowerups etc)
 			bne !Loop-
 
 			rts
 	}
+
+
+
 
 	Update: {
 			//Check the spawn timer

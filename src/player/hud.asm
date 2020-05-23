@@ -345,6 +345,7 @@ HUD: {
 					lda SelfMod + 1
 					clc
 					adc PIPES.NumberOfEnemies
+					adc PIPES.NumberOfPowerups
 					sta SelfMod + 1
 					lda SelfMod + 2
 					adc #$00

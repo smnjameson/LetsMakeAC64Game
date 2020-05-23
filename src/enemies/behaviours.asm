@@ -28,7 +28,7 @@ BEHAVIOURS: {
 		!OnSpawn:
 				jsr Random
 				and #$03
-				lda #$04
+				lda #$02
 				:setStaticMemory(POWERUP_TYPE, null)
 
 				:setStaticMemory(BOUNCE, $00)

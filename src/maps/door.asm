@@ -38,7 +38,7 @@ DOOR: {
 			adc #$00
 			sta DOOR_VECTOR1 + 1
 
-			//First check if level is compelte
+			//First check if level is complete
 			//Is the bar full?
 			lda PLAYER.Player1_EatCount
 			clc
@@ -65,7 +65,16 @@ DOOR: {
 				dey
 				bpl !Loop-
 
-				
+			
+
+			lda PLAYER.Player1_State
+			and #%11000000
+			bne !DonePlayerChecks+
+			
+			lda PLAYER.Player2_State
+			and #%11000000
+			bne !DonePlayerChecks+
+
 			lda PLAYER.Player1_FloorANDCollision
 			and PLAYER.Player2_FloorANDCollision
 			and #$40
