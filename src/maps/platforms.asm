@@ -64,7 +64,6 @@ PLATFORMS: {
 			bne !+
 			beq !Skip+
 		!:
-
 			jsr FillPlatform
 
 		!Skip:
@@ -72,6 +71,7 @@ PLATFORMS: {
 			bpl !Loop-
 			rts
 	}
+
 
 	FillPlatformToggle:
 			.byte $00
@@ -85,6 +85,7 @@ PLATFORMS: {
 			lda #$00
 			sta PLATFORM_COMPLETE
 
+			.break
 			//left
 		!Loop:
 			ldy #$00

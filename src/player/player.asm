@@ -2,7 +2,7 @@
 PLAYER: {
 	.label POWERUP_SPEED = $01 //Done
 	.label POWERUP_INVULN = $02 //Done
-	.label POWERUP_COLOR = $03
+	.label POWERUP_COLOR = $03 //Done
 	.label POWERUP_JUMP = $04  //Done
 	.label POWERUP_FREEZE = $05 //Done
 	.label POWERUP_SCORE = $06 //Done 
@@ -1764,11 +1764,8 @@ PLAYER: {
 		COLOR_SMOD:
 			lda $BEEF, x
 			and #$0f
-			cmp #$09
-			beq !skip+
 			tay 
-			lda ColorSwitchTable - 8 , y
-			lda #$01
+			lda ColorSwitchTable, y
 		COLOR_SMOD2:
 			sta $BEEF,x
 		!skip:
@@ -1788,12 +1785,12 @@ PLAYER: {
 		!:
 
 			stx ColorSwitchRow
-			inc $d020
 			rts
 	}
 
 	ColorSwitchTable:
-			.byte $08,$09,$0d,$0b,$0c,$0a,$0e,$0f
+			.byte $00,$01,$02,$03,$04,$05,$06,$07
+			.byte $08,$09,$0f,$0b,$0c,$0d,$0e,$0a
 }
 
 
