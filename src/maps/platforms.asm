@@ -16,6 +16,7 @@ PLATFORMS: {
 			//A = LSB
 			//Y = MSB
 			//x = Projectile index	
+			// .break
 			stx PLATFORM_TEMP //X = DO NOT BASH
 			pha
 			lda PROJECTILES.Player_Projectile_Color, x
@@ -59,8 +60,13 @@ PLATFORMS: {
 		!Loop:
 			lda COLOR_ORIGIN_LSB, x
 			sta PLATFORM_LOOKUP + 0
+			sta PLATFORM_CHAR_LOOKUP + 0
 			lda COLOR_ORIGIN_MSB, x
 			sta PLATFORM_LOOKUP + 1
+			sec
+			sbc #[$d8 - [>SCREEN_RAM]]
+			sta PLATFORM_CHAR_LOOKUP + 1
+
 			bne !+
 			beq !Skip+
 		!:
@@ -76,19 +82,32 @@ PLATFORMS: {
 	FillPlatformToggle:
 			.byte $00
 	FillPlatform: {
-			inc FillPlatformToggle
-			lda FillPlatformToggle
-			and #$01
-			beq !+
-			rts
-		!:
+		// 	inc FillPlatformToggle
+		// 	lda FillPlatformToggle
+		// 	and #$01
+		// 	beq !+
+		// 	rts
+		// !:
 			lda #$00
 			sta PLATFORM_COMPLETE
 
-			.break
 			//left
 		!Loop:
 			ldy #$00
+			tya 
+			pha 
+			lda (PLATFORM_CHAR_LOOKUP), y
+			tay
+			lda CHAR_COLORS, y
+			and #UTILS.COLLISION_COLORABLE
+			bne !skip+
+			inc PLATFORM_COMPLETE
+			pla
+			jmp !DoneLeft+
+		!skip:
+			pla
+			tay
+
 			lda (PLATFORM_LOOKUP), y
 			and #$0f
 			cmp NEW_COLOR, x
@@ -98,9 +117,13 @@ PLATFORMS: {
 			sec
 			sbc #$01
 			sta PLATFORM_LOOKUP + 0
+			sta PLATFORM_CHAR_LOOKUP + 0
 			lda PLATFORM_LOOKUP + 1
 			sbc #$00
 			sta PLATFORM_LOOKUP + 1
+			sec
+			sbc #[$d8 - [>SCREEN_RAM]]
+			sta PLATFORM_CHAR_LOOKUP + 1			
 			jmp !Loop-
 
 		!FoundNewColor:
@@ -119,6 +142,20 @@ PLATFORMS: {
 			//right
 			ldy #$01
 		!Loop:
+			tya 
+			pha 
+			lda (PLATFORM_CHAR_LOOKUP), y
+			tay
+			lda CHAR_COLORS, y
+			and #UTILS.COLLISION_COLORABLE
+			bne !skip+
+			inc PLATFORM_COMPLETE
+			pla
+			jmp !DoneRight+
+		!skip:
+			pla
+			tay
+
 			lda (PLATFORM_LOOKUP), y
 			and #$0f
 			cmp NEW_COLOR, x
