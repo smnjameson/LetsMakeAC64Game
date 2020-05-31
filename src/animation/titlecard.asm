@@ -49,6 +49,7 @@ TITLECARD: {
 			sta TransitionTopIndex
 			lda #$00
 			sta TransitionSideIndex
+
 			lda #$00
 			sta isComplete
 			lda #$32
@@ -248,7 +249,6 @@ TITLECARD: {
 			lda TransitionSideIndex
 			cmp #[__SideTransitionIn - SideTransitionIn - 1]
 			bne !Exit+
-
 			lda #$01
 			sta isComplete
 		!Exit:
@@ -287,7 +287,14 @@ TITLECARD: {
 			sta $d01d
 
 			ldx TransitionSideIndex
+			lda TransitionDirection
+			bpl !In+
+		!Out:
+			lda SideTransitionOut, x
+			jmp !Done+
+		!In:
 			lda SideTransitionIn, x
+		!Done:
 			sta $d00e
 			sec
 			sbc #$30
@@ -316,20 +323,36 @@ TITLECARD: {
 		!:
 			stx TransitionSideIndex
 
+
 			rts
 	}
 
 	SideTransitionIn:
 			:easeOutBounce(0,71,70)
 	__SideTransitionIn:	
+	SideTransitionOut:
+			:easeInQuart(71,0,40)
+	__SideTransitionOut:	
 
 	TopTransitionIn:
 			:easeOutBounce(0,47,70)
 	__TopTransitionIn:	 
+	TopTransitionOut:
+			:easeInQuart(47,0,40)
+	__TopTransitionOut:	
 
 	DrawTopTrim: {
 			ldx TransitionTopIndex
+			lda TransitionDirection
+			bpl !In+
+		!Out:
+			lda TopTransitionOut, x
+			jmp !Done+
+		!In:
 			lda TopTransitionIn, x
+		!Done:
+
+
 			sta TITLECARD_EASE_INDEX
 			lsr
 			lsr
@@ -405,6 +428,7 @@ TITLECARD: {
 
 
 		//Increment or decrement index to animate
+	
 			ldx TransitionTopIndex
 			inx 
 			cpx #[__TopTransitionIn - TopTransitionIn]
@@ -413,6 +437,7 @@ TITLECARD: {
 		!:
 			stx TransitionTopIndex
 
+		!Exit:
 			rts	
 	}
 }

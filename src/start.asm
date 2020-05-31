@@ -117,6 +117,8 @@ Entry:
 
 
 	!INTRO_TRANSITION:
+		lda #$01
+		sta TITLECARD.TransitionDirection
 		jsr TITLECARD.Initialise
 	!:
 		lda TITLECARD.isComplete
@@ -130,6 +132,12 @@ Entry:
 		jsr TITLE_SCREEN.Update
 		bcc !IntroLoop-
 
+		lda #$ff
+		sta TITLECARD.TransitionDirection
+		jsr TITLECARD.Initialise
+	!:
+		lda TITLECARD.isComplete
+		beq !-
 
 	!GAME_ENTRY:
 		sei
@@ -142,7 +150,7 @@ Entry:
 		lda #$01	//Initialize current song
 		jsr $1000
 		
-		
+
 		jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise
 		jsr HUD.Initialise
