@@ -11,17 +11,14 @@ TITLE_SCREEN: {
 
 	Initialise: {
 
-			lda #$00
-			sta $d021
-
 			ldx #$09
 		!:
 			lda PressFire, x
 			cmp #$20
 			beq !Skip+
-			clc
-			adc #$e5
-			sta SCREEN_RAM + $0c * $28 + $0f, x
+			// clc
+			// adc #$e5
+			sta SCREEN_RAM + $0e * $28 + $13, x
 		!Skip:
 			dex
 			bpl !-
@@ -29,7 +26,9 @@ TITLE_SCREEN: {
 	}
 
 	Update: {
-			lda #$ff
+
+
+			lda #$e0
 			cmp $d012
 			bne *-3
 
@@ -47,7 +46,7 @@ TITLE_SCREEN: {
 			ldx #$09
 		!:
 			lda ColorRamp, y
-			sta VIC.COLOR_RAM + $0c * $28 + $0f, x
+			sta VIC.COLOR_RAM + $0e * $28 + $13, x
 			dex
 			bpl !-
 
@@ -78,4 +77,6 @@ TITLE_SCREEN: {
 			clc
 			rts
 	}
+
+
 }

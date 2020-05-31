@@ -34,6 +34,7 @@ BasicUpstart2(Entry)
 #import "animation/transition.asm"
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
+#import "animation/titlecard.asm"
 
 Random: { 
         lda seed
@@ -104,32 +105,44 @@ Entry:
 		//Set screen and character memory
 		lda #%00001100
 		sta VIC.MEMORY_SETUP
-
 		jsr Random.init
 
-
-
-		
 		//Setup generated tables
 		lda #180
 		ldx #$04
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
+		jsr IRQ.Setup 
+
+
+
+	!INTRO_TRANSITION:
+		jsr TITLECARD.Initialise
+	!:
+		lda TITLECARD.isComplete
+		beq !-
+
 
 	!INTRO:
+	IntroCallback:
 		jsr TITLE_SCREEN.Initialise
 	!IntroLoop:
-		// .break
-		inc ZP_COUNTER
 		jsr TITLE_SCREEN.Update
 		bcc !IntroLoop-
 
 
 	!GAME_ENTRY:
+		sei
+		lda #<IRQ.MainIRQ    
+		ldx #>IRQ.MainIRQ
+		sta IRQ_LSB   // 0314
+		stx IRQ_MSB	// 0315
+		cli
+
 		lda #$01	//Initialize current song
 		jsr $1000
-		jsr IRQ.Setup 
-
+		
+		
 		jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise
 		jsr HUD.Initialise
@@ -139,6 +152,8 @@ Entry:
 		jsr CROWN.Initialise
 		jsr DOOR.Initialise
 		jsr BONUS.Initialise
+
+
 		//Generate all sprites
 		lda #$10
 		jsr SPRITEWARP.generate

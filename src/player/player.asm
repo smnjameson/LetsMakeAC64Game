@@ -220,10 +220,26 @@ PLAYER: {
 			.byte $00
 
 	Initialise: {
+			lda #%00001100
+			sta $d018
+
+
 			lda #$0a
 			sta VIC.SPRITE_MULTICOLOR_1
 			lda #$0b
 			sta VIC.SPRITE_MULTICOLOR_2
+
+			//Reset screen/sprite attributes from intro
+			lda #$ff
+			sta $d01c
+			lda #$00
+			sta $d01d
+			sta $d01b
+			lda $d011
+			and #%11110000
+			ora #%00001011
+			sta $d011
+
 
 			lda #$08
 			sta VIC.SPRITE_COLOR_5

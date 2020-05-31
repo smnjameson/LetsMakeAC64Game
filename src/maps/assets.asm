@@ -32,7 +32,11 @@
 		.import binary "../../assets/maps/hud.bin"
 
 	#import "mapdata.asm"
-		
+
+* = $ec00 "Reserved for intro sprites"
+	.import binary "../../assets/sprites/title_card.bin"
+
+
 * = $eec0 "Dynamic sprite absorb frames" // #187-191 / $bb-$bf
 		.fill 64, $ff	
 		.fill 64, $cc	
