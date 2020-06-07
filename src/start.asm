@@ -10,6 +10,7 @@ BasicUpstart2(Entry)
 #import "utils/utils.asm"
 #import "utils/irq.asm"
 
+#import "intro/introtext.asm"
 
 .var music = LoadSid("../assets/sound/cuteplatform.sid")
 * = $1000 "Music"
@@ -45,7 +46,7 @@ Random: {
     doEor:    
         eor #$1d
         eor $dc04
-        eor $dd04
+        eor $dd04	
     noEor:  
         sta seed
         rts
@@ -117,27 +118,21 @@ Entry:
 
 
 	!INTRO_TRANSITION:
-		lda #$01
-		sta TITLECARD.TransitionDirection
-		jsr TITLECARD.Initialise
-	!:
-		lda TITLECARD.isComplete
-		beq !-
-
-
+		jsr TITLECARD.TransitionIn
 	!INTRO:
 	IntroCallback:
 		jsr TITLE_SCREEN.Initialise
 	!IntroLoop:
+		lda TITLECARD.UpdateReady
+		beq !IntroLoop-
+		lda #$00
+		sta TITLECARD.UpdateReady
 		jsr TITLE_SCREEN.Update
 		bcc !IntroLoop-
+		jsr TITLE_SCREEN.Destroy
+		jsr TITLECARD.TransitionOut
 
-		lda #$ff
-		sta TITLECARD.TransitionDirection
-		jsr TITLECARD.Initialise
-	!:
-		lda TITLECARD.isComplete
-		beq !-
+
 
 	!GAME_ENTRY:
 		sei
@@ -145,6 +140,13 @@ Entry:
 		ldx #>IRQ.MainIRQ
 		sta IRQ_LSB   // 0314
 		stx IRQ_MSB	// 0315
+		
+		lda #$e2
+		sta $d012
+		lda $d011
+		and #%01111111
+		sta $d011	
+
 		cli
 
 		lda #$01	//Initialize current song
@@ -238,9 +240,15 @@ Entry:
 
 		/////////////////////////////////
 		!BonusScreen:
+			// lda TITLECARD.UpdateReady
+			// beq !IntroLoop-
+			// lda #$00
+			// sta TITLECARD.UpdateReady
+			//UPDATE BONUS
 			jsr BONUS.Update
 			jsr $1003
 			jmp !Loop- 
+			
 		/////////////////////////////////
 		
 	PerformFrameCodeFlag:

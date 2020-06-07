@@ -77,3 +77,14 @@
 		.byte floor(c *(t*t*t*t) + b);
 	}
 }
+
+.macro easeLinear(start, finish, length) {
+	.var d = length
+	.var b = start
+	.var c = finish - start
+	
+	.for(var i=0; i <= d; i++) {
+		.var t = i/d;
+		.byte floor(c * t + b);
+	}
+}

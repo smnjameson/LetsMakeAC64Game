@@ -239,7 +239,12 @@ PLAYER: {
 			and #%11110000
 			ora #%00001011
 			sta $d011
-
+			lda $d016
+			and #%11110000
+			ora #%00001000
+			sta $d016
+			lda #$00
+			sta $d023
 
 			lda #$08
 			sta VIC.SPRITE_COLOR_5

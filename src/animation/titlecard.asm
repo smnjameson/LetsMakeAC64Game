@@ -11,7 +11,7 @@ TITLECARD: {
 		.byte $00
 
 	SideSpritePositions:
-		.byte $32, $32
+		.byte $24, $24
 
 	TransitionTopIndex:
 		.byte $27
@@ -19,6 +19,8 @@ TITLECARD: {
 	TransitionSideIndex:
 		.byte $48
 
+	UpdateReady:
+		.byte $00
 
 	Initialise: {
 			sei
@@ -52,10 +54,8 @@ TITLECARD: {
 
 			lda #$00
 			sta isComplete
-			lda #$32
+			lda #$35
 			sta SideSpritePositions
-
-
 
 
 			lda #$07
@@ -84,10 +84,7 @@ TITLECARD: {
 			ora #%01000000
 			sta $d01d
 
-			lda #$18
-			sta $d00c
-			lda #$48
-			sta $d00e
+
 
 			lda #$32
 			sta $d00d
@@ -99,10 +96,37 @@ TITLECARD: {
 			ora #%00010000
 			sta $d016
 
+			jsr SetSideSprites
+			jsr DrawTopTrim
+
+			lda #$04
+			sta $d023
+
 			asl $d019
 			cli
 			rts
 	}
+
+	TransitionIn: {
+			lda #$01
+			sta TITLECARD.TransitionDirection
+			jsr TITLECARD.Initialise
+		!:
+			lda TITLECARD.isComplete
+			beq !-
+			rts
+	}
+
+	TransitionOut: {
+			lda #$ff
+			sta TITLECARD.TransitionDirection
+			jsr TITLECARD.Initialise
+		!:
+			lda TITLECARD.isComplete
+			beq !-
+			rts
+	}
+
 
 	TransitionIRQ_1: {
 		sta RestoreAcc + 1
@@ -117,8 +141,6 @@ TITLECARD: {
 			lda SideSpritePositions + 0
 			sta SideSpritePositions + 1
 
-			sec
-			sbc #$04
 			sta $d012
 
 			lda #<TransitionIRQ_2
@@ -130,16 +152,6 @@ TITLECARD: {
 		lda isComplete
 		cmp #$01
 		bne !+
-
-		// lda #$02
-		// sta isComplete
-		// pla
-		// pla
-
-		// lda CompleteCallback + 0
-		// pha 
-		// lda CompleteCallback + 1
-		// pha
 
 	!:
 
@@ -164,33 +176,55 @@ TITLECARD: {
 			sta $d00f
 
 			pha
+
+
 			//Positional based stuff
 			lda SideSpriteIndex
 			cmp #$00
 			bne !+		
 			lda $d016
+			and #%11100000
 			ora #%00010000
 			sta $d016
+			lda #$ff
+			sta $d01b
+
+			lda ZP_COUNTER
+			and #$01
+			bne !skip+
+			jsr AnimateTopTrim
+		!skip:
 			jmp !MCFinished+
+
+
 		!:
 			cmp #$04
 			bne !+	
 			lda $d016
 			and #%11101111
 			sta $d016
+
+			lda #$00
+			sta $d01b
+			jmp !MCFinished+			
+
+		!:	
+			cmp #$08
+			bne !+	
+			lda $d016
+			and #%11101000
+			ora TITLE_SCREEN.ScrollerFineIndex + 1
+			sta $d016
+
+			lda #$00
+			sta $d01b
+
 			jmp !MCFinished+			
 		!:	
-			lda #$00 
-			sta $d020
+
+
 		!MCFinished:
-			lda ZP_COUNTER
-			and #$01
-			bne !+
-			ldx SideSpritePositions + 1
-			cpx #$33
-			bcs !+
-			jsr AnimateTopTrim
-		!:
+
 			pla
 
 
@@ -201,7 +235,7 @@ TITLECARD: {
 
 
 			sec 
-			sbc #$04
+			sbc #$02
 			sta $d012
 
 			jmp Exit
@@ -215,18 +249,13 @@ TITLECARD: {
 			lda #$00
 			sta $d012	
 
-			ldx SideSpritePositions + 0
-			dex
-			cpx #$1d
-			bne !+
-			ldx #$32
-		!:
-			stx SideSpritePositions + 0
-
 			jsr SetSideSprites
 			jsr DrawTopTrim
-				
+			jsr AnimateSideSprites
 			jsr CheckComplete
+
+			lda #$01
+			sta UpdateReady
 	Exit:
 		inc SideSpriteIndex
 		asl $d019 
@@ -239,10 +268,25 @@ TITLECARD: {
 		rti		
 	}
 
+
+
 	CheckComplete: {
 			lda isComplete
 			bne !Exit+
 
+			lda TransitionDirection
+			bpl !In+
+		!Out:
+			lda TransitionTopIndex
+			cmp #[__TopTransitionOut - TopTransitionOut - 1]
+			bne !Exit+
+			lda TransitionSideIndex
+			cmp #[__SideTransitionOut - SideTransitionOut - 1]
+			bne !Exit+
+			lda #$01
+			sta isComplete		
+			jmp !Exit+
+		!In:	
 			lda TransitionTopIndex
 			cmp #[__TopTransitionIn - TopTransitionIn - 1]
 			bne !Exit+
@@ -280,6 +324,22 @@ TITLECARD: {
 			bpl !loop-
 			rts		
 	}
+
+	AnimateSideSprites: {
+			ldy $ec42
+			ldx #$00
+		!:
+			lda $ec45, x
+			sta $ec42, x
+			inx
+			inx 
+			inx 
+			cpx #$3f
+			bne !-
+			sty $ec42 + $3c
+			rts
+	}
+
 
 	SetSideSprites: {
 			lda $d01d
@@ -338,7 +398,7 @@ TITLECARD: {
 			:easeOutBounce(0,47,70)
 	__TopTransitionIn:	 
 	TopTransitionOut:
-			:easeInQuart(47,0,40)
+			:easeLinear(47,0,40)
 	__TopTransitionOut:	
 
 	DrawTopTrim: {
@@ -346,6 +406,7 @@ TITLECARD: {
 			lda TransitionDirection
 			bpl !In+
 		!Out:
+
 			lda TopTransitionOut, x
 			jmp !Done+
 		!In:
@@ -370,6 +431,7 @@ TITLECARD: {
 			sta ColorMod2 + 2
 
 
+			//Draw space below trim then trim
 			//toggle char 1b & 1c
 			ldx #$4f
 		!:	
@@ -395,9 +457,10 @@ TITLECARD: {
 			lsr
 			lsr
 			tax 
-			beq !Exit+
+			beq !NoSpaceBehindTrim+ //Dont draw red space behind if trim on last line
 
 
+			//Draw red space behind trim
 			lda ScreenMod + 1
 			sec 
 			sbc #$28
@@ -415,6 +478,7 @@ TITLECARD: {
 			sta $BEEF, x
 			dex
 			bpl !-
+		!NoSpaceBehindTrim:
 
 
 		!Exit:
@@ -441,3 +505,4 @@ TITLECARD: {
 			rts	
 	}
 }
+

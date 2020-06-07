@@ -32,6 +32,10 @@ BONUS: {
 	}
 
 	Start: {
+			jsr TITLECARD.TransitionIn
+
+
+
 			lda #$01
 			sta BonusActive
 
