@@ -84,7 +84,8 @@ TITLECARD: {
 			ora #%01000000
 			sta $d01d
 
-
+			lda #%11000000
+			sta $d015
 
 			lda #$32
 			sta $d00d
@@ -108,6 +109,24 @@ TITLECARD: {
 	}
 
 	TransitionIn: {
+			//Backup the sprites at C400-C7ff to 0400-07ff
+			// Duplicate screen data from c000 to c400
+			ldx #$00
+		!:
+			.for(var i = 0; i<4; i++) {
+				lda $c400 + i * $100, x
+				sta $0400 + i * $100, x
+				lda $c000 + i * $100, x
+				sta $c400 + i * $100, x
+			}
+			dex
+			bne !-
+
+			lda #$00
+			sta TRANSITION_BARS.UpdateDirection
+			lda #$00
+			jsr TRANSITION_BARS.Init
+
 			lda #$01
 			sta TITLECARD.TransitionDirection
 			jsr TITLECARD.Initialise
@@ -124,6 +143,76 @@ TITLECARD: {
 		!:
 			lda TITLECARD.isComplete
 			beq !-
+
+			lda $d011
+			bmi *-3
+			lda $d011
+			bpl *-3
+				
+			sei
+			lda #$01
+			sta TRANSITION_BARS.UpdateDirection
+			lda #$01
+			jsr TRANSITION_BARS.Init
+
+
+			lda #$0e
+			sta $d021
+			lda #$00
+			sta $d023
+			lda #%00001100
+			sta $d018
+			lda $d016
+			and #%11110000
+			ora #%00011000
+			sta $d016			
+			lda $d011	
+			and #%11110000
+			ora #%00001011
+			sta $d011	
+
+					//TODO Draw the correct stuff behind the transition sprites
+					jsr MAPLOADER.DrawMap
+
+					ldx #$00
+				!:	
+					.for(var i=0 ;i<4; i++) {
+						lda $c000 + i * $fa, x
+						sta $c400 + i * $fa, x
+					}
+					inx
+					cpx #$fa
+					bne !-
+
+					ldx #$77
+				!:
+					lda #$90
+					sta SCREEN_RAM + $16 * $28, x 
+					sta SCREEN_RAM + $0400 + $16 * $28, x 
+					lda #$08
+					sta $d800 + $16 * $28, x 
+					dex
+					bpl !-
+
+		!:
+			lda TRANSITION_BARS.ChangeDirection
+			beq !-
+
+			sei
+
+			//Restore the sprites to C400-C7ff from 0400-07ff
+			ldx #$00
+		!:
+			.for(var i = 0; i<4; i++) {
+				lda $0400 + i * $100, x
+				sta $c400 + i * $100, x
+			}
+			dex
+			bne !-
+
+			lda #$00
+			sta $d01d
+			sta $d017
 			rts
 	}
 

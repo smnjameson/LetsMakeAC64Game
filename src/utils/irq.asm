@@ -16,14 +16,14 @@ IRQ: {
 		sta $dc0d
 		sta $dd0d
 
-		lda $d01a
-		ora #%00000001	
-		sta $d01a
+		// lda $d01a
+		// ora #%00000001	
+		// sta $d01a
 
-		lda #<MainIRQ    
-		ldx #>MainIRQ
-		sta IRQ_LSB   // 0314
-		stx IRQ_MSB	// 0315
+		// lda #<MainIRQ    
+		// ldx #>MainIRQ
+		// sta IRQ_LSB   // 0314
+		// stx IRQ_MSB	// 0315
 
 
 		lda #<IRQ_Indirect
@@ -42,6 +42,24 @@ IRQ: {
 		rts
 	}
 
+	InitGameIRQ: {
+		sei
+		lda #<MainIRQ    
+		ldx #>MainIRQ
+		sta IRQ_LSB   // 0314
+		stx IRQ_MSB	// 0315
+
+		lda #$e2
+		sta $d012
+		lda $d011
+		and #%01111111
+		sta $d011	
+
+		asl $d019
+		
+		cli
+		rts
+	}
 	ColorRamp1:
 		.byte $0b, $02, $02, $04, $0e, $03, $0d, $01
 

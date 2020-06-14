@@ -33,6 +33,7 @@ BasicUpstart2(Entry)
 #import "enemies/pipes.asm"
 
 #import "animation/transition.asm"
+
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
 #import "animation/titlecard.asm"
@@ -54,7 +55,7 @@ Random: {
         .byte $62
 
 
-    init:
+    init: 
         lda #$ff
         sta $dc05
         sta $dd05
@@ -70,7 +71,7 @@ Random: {
 }
 		
 Entry:
-		lda #$0e
+		lda #$00
 		sta VIC.BACKGROUND_COLOR
 		lda #$00
 		sta VIC.BORDER_COLOR
@@ -116,46 +117,57 @@ Entry:
 		jsr IRQ.Setup 
 
 
-
 	!INTRO_TRANSITION:
 		jsr TITLECARD.TransitionIn
-	!INTRO:
-	IntroCallback:
-		jsr TITLE_SCREEN.Initialise
-	!IntroLoop:
-		lda TITLECARD.UpdateReady
-		beq !IntroLoop-
-		lda #$00
-		sta TITLECARD.UpdateReady
-		jsr TITLE_SCREEN.Update
-		bcc !IntroLoop-
-		jsr TITLE_SCREEN.Destroy
+
+			!INTRO:
+			IntroCallback:
+				jsr TITLE_SCREEN.Initialise
+			!IntroLoop:
+				lda TITLECARD.UpdateReady
+				beq !IntroLoop-
+				lda #$00
+				sta TITLECARD.UpdateReady
+				jsr TITLE_SCREEN.Update
+				bcc !IntroLoop-
+				jsr TITLE_SCREEN.Destroy
+
+
 		jsr TITLECARD.TransitionOut
 
 
 
 	!GAME_ENTRY:
-		sei
-		lda #<IRQ.MainIRQ    
-		ldx #>IRQ.MainIRQ
-		sta IRQ_LSB   // 0314
-		stx IRQ_MSB	// 0315
+		// sei
+		// lda #<IRQ.MainIRQ    
+		// ldx #>IRQ.MainIRQ
+		// sta IRQ_LSB   // 0314
+		// stx IRQ_MSB	// 0315
 		
-		lda #$e2
-		sta $d012
-		lda $d011
-		and #%01111111
-		sta $d011	
+		// lda #$e2
+		// sta $d012
+		// lda $d011
+		// and #%01111111
+		// sta $d011	
 
-		cli
+		// cli
+
+		//Generate all sprites
+		lda #$10
+		jsr SPRITEWARP.generate
+		lda #$10
+		jsr SPRITEWARP.generate
+
 
 		lda #$01	//Initialize current song
 		jsr $1000
 		
 
-		jsr MAPLOADER.DrawMap
+		// jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise
 		jsr HUD.Initialise
+		jsr IRQ.InitGameIRQ
+
 		jsr SOFTSPRITES.Initialise
 		jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
@@ -164,11 +176,8 @@ Entry:
 		jsr BONUS.Initialise
 
 
-		//Generate all sprites
-		lda #$10
-		jsr SPRITEWARP.generate
-		lda #$10
-		jsr SPRITEWARP.generate
+			// inc $d020
+			// jmp *-3
 
 
 	//Inf loop
@@ -263,6 +272,9 @@ Entry:
 
 #import "maps/assets.asm"
 
+
+* = $b600 "Transition Bars"
+#import "animation/transition_bars.asm"
 
 //This fixes the ghost byte issue on screen shake
 //By forcing all IRQs to run indirectly from the last 
