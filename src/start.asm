@@ -118,6 +118,8 @@ Entry:
 
 
 	!INTRO_TRANSITION:
+		lda #$00
+		sta TITLECARD.IsBonus
 		jsr TITLECARD.TransitionIn
 
 			!INTRO:
@@ -211,7 +213,7 @@ Entry:
 		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 		bne !NormalLoop+
 	!:
-		jmp !NotNormalLoop+
+		jmp !EndLevelTransition+
 
 
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
@@ -241,10 +243,31 @@ Entry:
 		
 		/////////////////////////////////
 		!EndLevelTransition:
-			jsr TRANSITION.Update
-			jsr $1003
-			jmp !Loop- 
-		// !NotEndLevelTransition:
+				jsr BONUS.InitialiseTransition
+				lda #$01
+				sta TITLECARD.IsBonus
+				jsr TITLECARD.TransitionIn
+
+				jsr BONUS.Start
+				
+			!EndLevelLoop:
+				lda TITLECARD.UpdateReady
+				beq !EndLevelLoop-
+				lda #$00
+				sta TITLECARD.UpdateReady
+
+					jsr BONUS.Update
+					jsr $1003
+				clc
+				bcc !EndLevelLoop-
+
+				// jsr TITLE_SCREEN.Destroy
+
+				jsr TITLECARD.TransitionOut
+
+				jmp !GAME_ENTRY-
+
+
 
 
 		/////////////////////////////////
@@ -254,8 +277,7 @@ Entry:
 			// lda #$00
 			// sta TITLECARD.UpdateReady
 			//UPDATE BONUS
-			jsr BONUS.Update
-			jsr $1003
+
 			jmp !Loop- 
 			
 		/////////////////////////////////

@@ -38,7 +38,7 @@ MAPDATA: {
 		SwitchSpawnLoc:
 			.byte $0a,$10
 
-		.label NUMBER_OF_ENEMIES = 2
+		.label NUMBER_OF_ENEMIES = 0
 		NumberEnemies:
 			.byte NUMBER_OF_ENEMIES //__EnemyList - EnemyList - Countof255
 
@@ -52,7 +52,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,255,2,255
+			// .byte 1,255,2,255
 		__EnemyList:
 			.byte 0
 

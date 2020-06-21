@@ -7,18 +7,20 @@ BONUS: {
 		.byte $00
 
 	BonusRamp:
-		.byte $01,$0f,$0f,$0c,$0c,$0b,$0b,$00
-		.byte $0b,$0b,$0c,$0c,$0f,$0f,$01,$01
+		.byte 1,1,1,1,1,1,1,1
+		.byte 1,1,1,1,1,1,1,1
+		// .byte $01,$0f,$0f,$0c,$0c,$0b,$0b,$00
+		// .byte $0b,$0b,$0c,$0c,$0f,$0f,$01,$01
 	
 	BonusRampIndex:
 		.byte $00
 
 	BonusCounters:	//x1000 + x250 + 15000
-		.byte $10,$50,$01
+		.byte $10,$50,$01  //Maximum combined totals
 	BonusPlayer1Counters:
-		.byte $10,$50
+		.byte $08,$28	//Player 1+ player 2 should NOT exceed totals
 	BonusPlayer2Counters:
-		.byte $00,$00
+		.byte $08,$28
 	BonusCountersOriginal:	//copied from BonusCounters at start
 		.byte $00,$00,$00
 
@@ -30,12 +32,19 @@ BONUS: {
 			
 			rts
 	}
+	
+	InitialiseTransition: {
+			sei
+			lda #$0e
+			sta $d021
+			lda #$05
+			sta $d022
+
+			jsr TITLECARD.BlackOutHUD
+			rts
+	}
 
 	Start: {
-			jsr TITLECARD.TransitionIn
-
-
-
 			lda #$01
 			sta BonusActive
 
@@ -51,32 +60,19 @@ BONUS: {
 			lda #$00
 			sta BonusCountersOriginal + 02
 		!:
-			sei
-			lda #<BonusIRQ   
-			ldx #>BonusIRQ
-			sta IRQ_LSB   // 0314
-			stx IRQ_MSB	// 0315 
-			cli
+			// sei
+			// lda #<BonusIRQ   
+			// ldx #>BonusIRQ
+			// sta IRQ_LSB   // 0314
+			// stx IRQ_MSB	// 0315 
+			// cli
 
 			lda #%00001110
 			sta $d018
 
 			
-			ldx #$00
-		!:
-			lda #$00
-			sta SCREEN_RAM ,x
-			sta SCREEN_RAM + $100 ,x
-			sta SCREEN_RAM + $200 ,x
-			sta SCREEN_RAM + $300 ,x
-			lda #$01
-			sta VIC.COLOR_RAM ,x
-			sta VIC.COLOR_RAM + $100 ,x
-			sta VIC.COLOR_RAM + $200 ,x
-			sta VIC.COLOR_RAM + $300 ,x
-			dex
-			bne !-
 
+			// jsr TITLECARD.ClearTitleCardScreen
 
 			//Setup inital screen
 			//Bonus Label
@@ -88,6 +84,7 @@ BONUS: {
 			sta SCREEN_RAM + $02 * $28 + $0f, x
 			dex
 			bpl !-
+
 
 			//Player Data
 			lda PLAYER.PlayersActive
@@ -110,13 +107,13 @@ BONUS: {
 
 
 	PlayerBarX:
-		.byte 7,27
+		.byte 11,31
 	PlayerTextX:
-		.byte 6,26
+		.byte 10,30
 	PlayerBar1Colors:
 		.byte $02,$05
 	PlayerBar2Colors:
-		.byte $0a,$0d
+		.byte $02,$05
 	PlayerBarHeight:
 		.byte $00,$00
 
@@ -126,12 +123,12 @@ BONUS: {
 
 	DrawPlayerBars: {
 			//1b 2f   y=4-18   x=7 or 27  offset Right = 5  
-			lda #<SCREEN_RAM + $03 *$28
+			lda #<SCREEN_RAM + $06 *$28
 			sta BONUS_VECTOR1 + 0
 			sta BONUS_VECTOR2 + 0
-			lda #>SCREEN_RAM + $03 *$28
+			lda #>SCREEN_RAM + $06 *$28
 			sta BONUS_VECTOR1 + 1
-			lda #>VIC.COLOR_RAM + $03 *$28
+			lda #>VIC.COLOR_RAM + $06 *$28
 			sta BONUS_VECTOR2 + 1
 
 			txa
@@ -203,11 +200,11 @@ BONUS: {
 			ldy #$00
 		!:
 			lda PlayerText,y
-			sta SCREEN_RAM + $14 * $28, x
+			sta SCREEN_RAM + $16 * $28, x
 			lda BONUS_COLOR
-			sta VIC.COLOR_RAM + $14 * $28, x
+			sta VIC.COLOR_RAM + $16 * $28, x
 			lda #$30
-			sta SCREEN_RAM + $16 * $28 + $01, x
+			sta SCREEN_RAM + $17 * $28 + $01, x
 			inx
 			iny
 			cpy #$06
@@ -224,9 +221,9 @@ BONUS: {
 			adc #$07
 			tax
 			pla
-			sta SCREEN_RAM + $14 * $28, x
+			sta SCREEN_RAM + $16 * $28, x
 			lda BONUS_COLOR
-			sta VIC.COLOR_RAM + $14 * $28, x
+			sta VIC.COLOR_RAM + $16 * $28, x
 
 
 			ldx #$00
@@ -248,8 +245,8 @@ BONUS: {
 		.text "BONUS"
 	CrownTextLine3:
 		.text ";1:25"
-	CrownTextPosition:
-		.byte $02, $21
+	CrownTextPosition: 
+		.byte $02, $02
 
 
 	DrawCrownBonus: {
@@ -364,15 +361,15 @@ BONUS: {
 	BonusStageStrings:
 		.encoding "screencode_upper"
 		.text "ENEMIES@KILLED"
-		.word SCREEN_RAM + $06 * $28 + $0d
+		.word SCREEN_RAM + $09 * $28 + $11
 		.text "@@@@@@;1000@@@"
 	.align $20
 		.text "@TAGGED@AREAS@"
-		.word SCREEN_RAM + $0a * $28 + $0d
+		.word SCREEN_RAM + $0d * $28 + $11
 		.text "@@@@@@;250@@@@"
 	.align $20
 		.text "@P@@WINS@RACE@"
-		.word SCREEN_RAM + $0e * $28 + $0d
+		.word SCREEN_RAM + $11 * $28 + $11
 		.text "@@@@@@<15000@@"
 
 	DoBonusStage: {
@@ -671,9 +668,9 @@ BONUS: {
 			lda PlayerBarX, x
 			clc
 			adc #$01
-			adc #<SCREEN_RAM + $12 * $28
+			adc #<SCREEN_RAM + $15 * $28
 			sta BONUS_VECTOR1 + 0
-			lda #>SCREEN_RAM + $12 * $28
+			lda #>SCREEN_RAM + $15 * $28
 			adc #$00
 			sta BONUS_VECTOR1 + 1
 
@@ -723,9 +720,9 @@ BONUS: {
 			lda PlayerBarX, x
 			clc
 			adc #$01
-			adc #<SCREEN_RAM + $03 * $28
+			adc #<SCREEN_RAM + $06 * $28
 			sta BONUS_VECTOR1 + 0
-			lda #>SCREEN_RAM + $03 * $28
+			lda #>SCREEN_RAM + $06 * $28
 			adc #$00
 			sta BONUS_VECTOR1 + 1
 
@@ -759,7 +756,7 @@ BONUS: {
 
 	////////// TEXTS
 	BonusLabelLine1:
-			.byte $80,$81,$82,$83,$84,$85,$86,$87,$88,$89
+			.byte 66,110,79,123,78,122,85,129,83,127
 	BonusLabelLine2:
-			.byte $90,$91,$92,$93,$94,$95,$96,$97,$98,$99
+			.byte 154,198,167,211,166,210,173,217,171,215
 }

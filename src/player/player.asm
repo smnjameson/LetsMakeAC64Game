@@ -1172,6 +1172,9 @@ PLAYER: {
 
 
 	SetPlayerSize: {
+			lda #$02
+			sta Player_Size, x
+			rts
 		//KEEP X - DOnt BASH!
 		//Set the correct playersize
 			txa //Player number 0or1

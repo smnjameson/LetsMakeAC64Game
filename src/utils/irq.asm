@@ -7,24 +7,16 @@ IRQ: {
 		.byte $00
 
 	ScreenShakeValues:
-		.byte 3,3,4,3,5,3,6,3,7
-
+		// .byte 3,3,4,3,5,3,6,3,6
+		// .byte 4,4,4,4,5,4,6,4,6
+		.byte 3,3,3,3,3,3,3,3
+		
 	Setup: {
 		sei
 
 		lda #$7f	//Disable CIA IRQ's to prevent crash because 
 		sta $dc0d
 		sta $dd0d
-
-		// lda $d01a
-		// ora #%00000001	
-		// sta $d01a
-
-		// lda #<MainIRQ    
-		// ldx #>MainIRQ
-		// sta IRQ_LSB   // 0314
-		// stx IRQ_MSB	// 0315
-
 
 		lda #<IRQ_Indirect
 		sta $fffe
@@ -80,6 +72,7 @@ IRQ: {
 			lda #$00	//Hide sprites
 			sta $d00c
 			sta $d00e 
+
 
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000

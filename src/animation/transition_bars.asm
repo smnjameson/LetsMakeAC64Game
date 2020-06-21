@@ -83,7 +83,7 @@ TRANSITION_BARS: {
 			sta $d01d
 			sta $d017
 
-
+	
 		!Exit:
 			rts
 	}

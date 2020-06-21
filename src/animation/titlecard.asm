@@ -7,6 +7,9 @@ TITLECARD: {
 		.word $0000
 	TransitionDirection:
 		.byte $01
+	IsBonus:
+		.byte $00
+
 	SideSpriteIndex:
 		.byte $00
 
@@ -130,6 +133,14 @@ TITLECARD: {
 			lda #$01
 			sta TITLECARD.TransitionDirection
 			jsr TITLECARD.Initialise
+			lda $d011
+			pha
+			lda #$5b
+			sta $d011
+			jsr TITLECARD.ClearTitleCardScreen
+			pla
+			sta $d011
+
 		!:
 			lda TITLECARD.isComplete
 			beq !-
@@ -174,25 +185,9 @@ TITLECARD: {
 					//TODO Draw the correct stuff behind the transition sprites
 					jsr MAPLOADER.DrawMap
 
-					ldx #$00
-				!:	
-					.for(var i=0 ;i<4; i++) {
-						lda $c000 + i * $fa, x
-						sta $c400 + i * $fa, x
-					}
-					inx
-					cpx #$fa
-					bne !-
+					jsr CopyTitleCardScreen
 
-					ldx #$77
-				!:
-					lda #$90
-					sta SCREEN_RAM + $16 * $28, x 
-					sta SCREEN_RAM + $0400 + $16 * $28, x 
-					lda #$08
-					sta $d800 + $16 * $28, x 
-					dex
-					bpl !-
+					jsr BlackOutHUD
 
 		!:
 			lda TRANSITION_BARS.ChangeDirection
@@ -216,7 +211,47 @@ TITLECARD: {
 			rts
 	}
 
+	CopyTitleCardScreen: {
+			ldx #$00
+		!:	
+			.for(var i=0 ;i<4; i++) {
+				lda $c000 + i * $fa, x
+				sta $c400 + i * $fa, x
+			}
+			inx
+			cpx #$fa
+			bne !-
+			rts
+	}
 
+	ClearTitleCardScreen: {
+			ldx #$00
+
+		!:	
+			.for(var i=0 ;i<4; i++) {
+				lda #$00
+				sta $c000 + i * $fa, x
+				lda #$04
+				sta $d800 + i * $fa, x
+			}
+			inx
+			cpx #$fa
+			bne !-
+			rts
+	}
+
+	BlackOutHUD: {
+				ldx #$77
+			!:
+				lda #$90
+				sta SCREEN_RAM + $16 * $28, x 
+				sta SCREEN_RAM + $0400 + $16 * $28, x 
+				lda #$08
+				sta $d800 + $16 * $28, x 
+				dex
+				bpl !-
+				rts
+	}
 	TransitionIRQ_1: {
 		sta RestoreAcc + 1
 		stx RestoreX + 1
@@ -268,6 +303,7 @@ TITLECARD: {
 
 
 			//Positional based stuff
+			//SPRITE LINE 0
 			lda SideSpriteIndex
 			cmp #$00
 			bne !+		
@@ -278,12 +314,28 @@ TITLECARD: {
 			lda #$ff
 			sta $d01b
 
+			lda TransitionTopIndex
+			cmp #$46
+			bne !noBGChange+
+			lda #$02
+			sta $d021
+		!noBGChange:
+
+
+
 			lda ZP_COUNTER
 			and #$01
 			bne !skip+
 			jsr AnimateTopTrim
 		!skip:
 			jmp !MCFinished+
+
+			//SPRITE LINE 1
+		!:	
+			cmp #$02
+			bne !+	
+			lda #$07
+			sta $d021
 
 
 		!:
@@ -298,8 +350,11 @@ TITLECARD: {
 			jmp !MCFinished+			
 
 		!:	
-			cmp #$08
-			bne !+	
+			cmp #$08	
+			bne !+
+
+			lda IsBonus
+			bne !IsInBonus+
 			lda $d016
 			and #%11101000
 			ora TITLE_SCREEN.ScrollerFineIndex + 1
@@ -307,7 +362,7 @@ TITLECARD: {
 
 			lda #$00
 			sta $d01b
-
+		!IsInBonus:
 			jmp !MCFinished+			
 		!:	
 

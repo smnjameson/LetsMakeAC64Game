@@ -12,6 +12,7 @@ TRANSITION: {
 		.byte $00
 
 
+
 	Random: { 
 	        lda seed
 	        beq doEor
