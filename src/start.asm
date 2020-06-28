@@ -15,6 +15,7 @@ BasicUpstart2(Entry)
 .var music = LoadSid("../assets/sound/cuteplatform.sid")
 * = $1000 "Music"
 	.fill music.size, music.getData(i)
+	.fill $2400-*, 0
 
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
@@ -76,7 +77,7 @@ Entry:
 		lda #$00
 		sta VIC.BORDER_COLOR
 
-		lda #$05
+		lda #$0a
 		sta VIC.EXTENDED_BG_COLOR_1
 		lda #$00
 		sta VIC.EXTENDED_BG_COLOR_2
@@ -155,9 +156,11 @@ Entry:
 		// cli
 
 		//Generate all sprites
-		lda #$10
+		lda #$2b
 		jsr SPRITEWARP.generate
-		lda #$10
+		lda #$13
+		jsr SPRITEWARP.generate
+		lda #$22
 		jsr SPRITEWARP.generate
 
 

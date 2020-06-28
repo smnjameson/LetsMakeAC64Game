@@ -1,5 +1,7 @@
 *=$02 "Temp vars zero page" virtual
 
+COLOR_RESTORE:	.word $00
+
 TEMP1:		.byte $00
 TEMP2:		.byte $00
 TEMP3:		.byte $00
@@ -41,6 +43,8 @@ VECTOR5: 	.word $00
 VECTOR6: 	.word $00
 VECTOR7: 	.word $00
 VECTOR8: 	.word $00
+
+
 
 IRQ_TEMP1: 	.byte $00
 

@@ -4,11 +4,13 @@ BEHAVIOURS: {
 		.byte <PowerUp
 		.byte <Enemy_001
 		.byte <Enemy_002
+		.byte <Enemy_003
 
 	EnemyMSB:
 		.byte >PowerUp
 		.byte >Enemy_001
 		.byte >Enemy_002
+		.byte >Enemy_003
 
 
 	.label BEHAVIOUR_SPAWN = 0;
@@ -17,6 +19,15 @@ BEHAVIOURS: {
 
 
 	//Powerup behaviour
+	PowerUpColorsA:
+			.byte 1,7,3,4,5,6
+	PowerUpColorsB:
+			.byte 1,7,3,8,5,6
+
+	PowerUpFrames:
+			.byte $3b,$3c,$3d,$3c
+	__PowerUpFrames:
+			
 	PowerUp: {
 			jmp !OnSpawn+ 
 			jmp !OnUpdate+ 
@@ -24,23 +35,49 @@ BEHAVIOURS: {
 
 			.label POWERUP_TYPE = $00
 			.label BOUNCE = $01
+			.label FRAME = $02
 
 		!OnSpawn:
 				jsr Random
 				and #$03
-				lda #$02
 				:setStaticMemory(POWERUP_TYPE, null)
-
 				:setStaticMemory(BOUNCE, $00)
-
-				:getStaticMemory(POWERUP_TYPE)
-				clc
-				adc #$38
-				:setEnemyFrame(null)
+				:setStaticMemory(FRAME, $00)
+				lda PowerUpFrames
+				:setEnemyFrame(0)
 				rts
 
 		!OnUpdate:
-				:setEnemyColor(1, 1)
+				:getStaticMemory(POWERUP_TYPE)
+				tay
+				lda ZP_COUNTER
+				and #$01
+				beq !Col2+
+			!Col1:		
+				lda PowerUpColorsA, y 
+				bne !Apply+
+			!Col2:
+				lda PowerUpColorsB, y 
+			!Apply:
+				sta ENEMIES.EnemyColor, x
+
+
+				:getStaticMemory(FRAME)
+				tay
+				lda ZP_COUNTER
+				and #$07
+				bne !+
+				iny
+				cpy #[__PowerUpFrames - PowerUpFrames]
+				bne !+
+				ldy #$00
+			!:
+				tya 
+				:setStaticMemory(FRAME, null)
+				lda PowerUpFrames, y
+				sta ENEMIES.EnemyFrame, x
+			!skip:
+
 
 				:getStaticMemory(BOUNCE)
 				beq !Fall+
@@ -51,7 +88,7 @@ BEHAVIOURS: {
 				jmp !Finish+
 
 			!Fall:
-				:doFall(12, 12)
+				:doFall(12, 22)
 				bcs !Finish+
 				:setStaticMemory(BOUNCE, $10)
 				
@@ -69,7 +106,7 @@ BEHAVIOURS: {
 
 	}
 
-	//Flying candy monster bounces of scenery
+	//BOILED SWEET FLYER = Flying candy monster bounces of scenery
 	Enemy_001: {
 			jmp !OnSpawn+ 
 			jmp !OnUpdate+ 
@@ -80,10 +117,11 @@ BEHAVIOURS: {
 			.label DY = $02
 
 		FlyAnimation:
-			.byte 16,17,18,19,20
+			.byte $2b,$2c,$2d,$2c
 		__FlyAnimation:
 
-		!OnSpawn:		
+		!OnSpawn:	
+				:setStaticMemory(ANIM_FRAME, $00)	
 				jsr Random
 				and #$01
 				asl
@@ -98,7 +136,8 @@ BEHAVIOURS: {
 				adc #$ff
 				:setStaticMemory(DY, null)
 
-				:setEnemyFrame(16)
+				lda FlyAnimation
+				:setEnemyFrame(0)
 				rts
 
 		CollisionPointsY:
@@ -108,7 +147,26 @@ BEHAVIOURS: {
 
 		!OnUpdate:	
 				:exitIfStunned()
-				:setEnemyColor(7, 13)
+
+
+				:getStaticMemory(ANIM_FRAME)
+				tay
+				lda ZP_COUNTER
+				and #$03
+				bne !+
+				iny
+				cpy #[__FlyAnimation - FlyAnimation]
+				bne !+
+				ldy #$00
+			!:
+				tya 
+				:setStaticMemory(ANIM_FRAME, null)
+				lda FlyAnimation, y
+				sta ENEMIES.EnemyFrame, x
+			!skip:
+
+
+				:setEnemyColor(7, null)
 				:hasHitProjectile()
 				:getStaticMemory(DY)
 				tay
@@ -177,6 +235,8 @@ BEHAVIOURS: {
 			!NoXBounce:	
 			!ExitBounce:
 
+
+
 				:PositionEnemy()
 				rts
 
@@ -185,7 +245,7 @@ BEHAVIOURS: {
 	}
 
 
-	//Enemy walks back and forth on platforms
+	//JELLY BEAN - Enemy walks back and forth on platforms
 	Enemy_002: {
 			jmp !OnSpawn+ 
 			jmp !OnUpdate+ 
@@ -194,16 +254,17 @@ BEHAVIOURS: {
 			.label WALK_FRAME = $00
 
 		WalkLeft:
-			.byte 16,17,18,19,20
+			.byte $13,$14,$15
 		__WalkLeft:
 		WalkRight:
-			.byte 21,22,23,24,25
+			.byte $10,$11,$12
 		__WalkRight:
 
 		!OnSpawn:
 				//Set pointer
-				:setEnemyFrame(16)
-				:setEnemyColor(7, null)
+				lda WalkLeft
+				:setEnemyFrame(0)
+				:setEnemyColor(2, null)
 				lda ENEMIES.EnemyState, x
 				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
 				sta ENEMIES.EnemyState, x
@@ -212,7 +273,7 @@ BEHAVIOURS: {
 
 		!OnUpdate:
 				:exitIfStunned()
-				:setEnemyColor(5, 14)
+				:setEnemyColor(2, null)
 
 				:hasHitProjectile()
 				//Should I fall??
@@ -224,7 +285,7 @@ BEHAVIOURS: {
 				bne !Skip+
 				//Do walk animation
 				lda ZP_COUNTER
-				and #$03
+				and #$07
 				bne !Skip+
 				:getStaticMemory(WALK_FRAME)
 				clc
@@ -237,7 +298,7 @@ BEHAVIOURS: {
 			!Skip:
 
 				//Snap enemy to floor
-				:snapEnemyToFloor()
+				jsr snapEnemyToFloor
 
 			!CheckLeft:
 				lda ENEMIES.EnemyState, x
@@ -305,6 +366,142 @@ BEHAVIOURS: {
 		!OnDeath:
 				rts
 	}
+
+
+	//COLA BOTTLE - Enemy walks back and forth on platforms
+	Enemy_003: {
+			jmp !OnSpawn+ 
+			jmp !OnUpdate+ 
+			jmp !OnDeath+
+
+			.label WALK_FRAME = $00
+
+		WalkLeft:
+			.byte $22,$23,$24
+		__WalkLeft:
+		WalkRight:
+			.byte $1f,$20,$21
+		__WalkRight:
+
+		!OnSpawn:
+				//Set pointer
+				lda WalkLeft
+				:setEnemyFrame(0)
+				:setEnemyColor(2, null)
+				lda ENEMIES.EnemyState, x
+				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
+				sta ENEMIES.EnemyState, x
+				:setStaticMemory(WALK_FRAME, 0)
+				rts
+
+		!OnUpdate:
+				:exitIfStunned()
+				:setEnemyColor(2, null)
+
+				:hasHitProjectile()
+				//Should I fall??
+				:doFall(12, 21) //Check below enemy and fall if needed
+				bcc !+
+				jmp !Done+
+			!:
+				lda PLAYER.Player_Freeze_Active
+				bne !Skip+
+				//Do walk animation
+				lda ZP_COUNTER
+				and #$07
+				bne !Skip+
+				:getStaticMemory(WALK_FRAME)
+				clc
+				adc #1
+				cmp #[__WalkRight - WalkRight]
+				bne !+
+				lda #$00
+			!:
+				:setStaticMemory(WALK_FRAME, null)
+			!Skip:
+
+				//Snap enemy to floor
+				jsr snapEnemyToFloor
+
+			!CheckLeft:
+				lda ENEMIES.EnemyState, x
+				bit TABLES.Plus + ENEMIES.STATE_WALK_LEFT
+
+				beq !CheckRight+
+
+				//Do walk left
+				:getEnemyCollisions(0, 21)
+				tay
+				lda CHAR_COLORS, y
+				and #UTILS.COLLISION_COLORABLE
+				beq !ChangeDir+
+			!WalkLeft:
+				:UpdatePosition(-$080, $000)
+
+				:getStaticMemory(WALK_FRAME)
+				tay
+				lda WalkLeft, y
+				:setEnemyFrame(null)
+
+				jmp !Done+
+
+			!ChangeDir:
+				:setEnemyFrame(21)
+				lda ENEMIES.EnemyState, x
+				and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
+				ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
+				sta ENEMIES.EnemyState, x
+				jmp !Done+
+				
+
+			!CheckRight:
+				bit TABLES.Plus + ENEMIES.STATE_WALK_RIGHT
+				beq !+
+				//Do Walk right
+				:getEnemyCollisions(24, 21)
+				tay
+				lda CHAR_COLORS, y
+				and #UTILS.COLLISION_COLORABLE
+				beq !ChangeDir+
+			!WalkRight:
+				:UpdatePosition($080, $000)
+
+				:getStaticMemory(WALK_FRAME)
+				tay
+				lda WalkRight, y
+				:setEnemyFrame(null)
+
+				jmp !Done+
+
+			!ChangeDir:
+				:setEnemyFrame(16)
+				lda ENEMIES.EnemyState, x
+				and #[255 -[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]]
+				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
+				sta ENEMIES.EnemyState, x
+				// jmp !Done+
+			!:
+
+			!Done:
+				:PositionEnemy()
+				rts
+
+		!OnDeath:
+				rts
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

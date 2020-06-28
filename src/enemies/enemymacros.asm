@@ -1,4 +1,8 @@
 .macro PositionEnemy() {
+		jsr PositionEnemySR
+}
+
+PositionEnemySR: {
 		.label INDEX = TEMP8
 		.label STOREY = TEMP7
 
@@ -43,6 +47,7 @@
 		lda PLAYER.FreezeColor
 		sta VIC.SPRITE_COLOR_0, x
 	!:
+		rts
 }
 
 
@@ -186,6 +191,10 @@
 
 .macro doFall(xcheck, ycheck) {
 		:getEnemyCollisions(xcheck, ycheck)
+		jsr doFallSR
+}
+
+doFallSR: {
 		tay
 		lda CHAR_COLORS, y
 		and #UTILS.COLLISION_COLORABLE
@@ -222,15 +231,17 @@
 		sec 
 
 	!NoFall:
+		rts
 }
 
-.macro snapEnemyToFloor() {
+snapEnemyToFloor: {
 		lda ENEMIES.EnemyPosition_Y1, x
 		sec
-		sbc #$06
+		sbc #$05
 		and #$f8
-		ora #$06
+		ora #$07
 		sta ENEMIES.EnemyPosition_Y1, x
+		rts
 }
 
 .macro hasHitProjectile() {
@@ -238,15 +249,22 @@
 }
 
 .macro exitIfStunned() {
+		jsr exitIfStunnedSR
+}
+
+exitIfStunnedSR: {
 		lda ENEMIES.EnemyState, x 
 		and #ENEMIES.STATE_STUNNED
 		beq !Exit+
+		pla
+		pla
 		lda ENEMIES.EnemyEatenBy, x
 		beq !+
 		jmp BEHAVIOURS.AbsorbBehaviour.update
 	!:
 		jmp CheckVsPlayerEat
 	!Exit:
+		rts
 }
 
 CheckVsPlayerEat: {

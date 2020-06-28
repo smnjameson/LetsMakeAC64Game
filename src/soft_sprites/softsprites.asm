@@ -367,6 +367,8 @@ SOFTSPRITES: {
 
 
 
+	ColorableByte:
+			.byte UTILS.COLLISION_COLORABLE
 
 	ClearSprite: {
 			.label SCREEN_ROW = VECTOR1
@@ -385,32 +387,66 @@ SOFTSPRITES: {
 				sec
 				sbc #>[SCREEN_RAM- MAPLOADER.BUFFER]
 				sta BUFFER + 1
+				lda SCREEN_ROW + 1
+				clc
+				adc #[$d8 - [>SCREEN_RAM]]
+				sta COLOR_RESTORE + 1 
+
 
 				lda SpriteData_CLEAR_LSB, x
-				sta SCREEN_ROW
-				sta BUFFER
+				sta SCREEN_ROW + 0
+				sta BUFFER + 0 
+				sta COLOR_RESTORE + 0
+
+			
+				stx restoreX + 1
 
 				//0,0
 				ldy #$00
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-	
+				tax 
+				lda CHAR_COLORS, x
+				bit ColorableByte
+				bne !+
+				sta (COLOR_RESTORE), y
+			!:
 
 				//1,0
 				ldy #$01
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-	
+				tax 
+				lda CHAR_COLORS, x
+				bit ColorableByte
+				bne !+				
+				sta (COLOR_RESTORE), y
+			!:
+
 				//0,1
 				ldy #$28
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
-	
+				tax 
+				lda CHAR_COLORS, x
+				bit ColorableByte
+				bne !+				
+				sta (COLOR_RESTORE), y
+			!:
 
 				//1,1
 				ldy #$29
 				lda (BUFFER), y
 				sta (SCREEN_ROW), y
+				tax 
+				lda CHAR_COLORS, x
+				bit ColorableByte
+				bne !+
+				sta (COLOR_RESTORE), y
+			!:
+			
+			restoreX:
+				ldx #$BEEF 
 			rts	
 	}
 
@@ -437,6 +473,7 @@ SOFTSPRITES: {
 			sta VECTOR5 + 1
 			rts
 	}
+
 	BLIT_DATA_LSB:
 		.byte <BLIT_TABLE_START
 	BLIT_DATA_MSB:

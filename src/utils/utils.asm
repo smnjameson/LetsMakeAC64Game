@@ -6,7 +6,6 @@ UTILS: {
 	GetCharacterAt: {
 		//x register = x char position
 		//y register = y char position
-
 		.label COLLISION_LOOKUP = TEMP1
 
 		lda TABLES.BufferLSB ,y

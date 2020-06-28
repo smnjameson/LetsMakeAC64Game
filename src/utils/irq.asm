@@ -141,13 +141,14 @@ IRQ: {
 			jmp HudFLDIRQSetup
 		!:
 			//Reset Values set by IRQ	
-			lda #LIGHT_BLUE
+			*=*"BG Color"
+			lda #$04
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000
 			ora #%00000011 
 			sta VIC.SCREEN_CONTROL_1
-			lda #$05
+			lda #$0a
 			sta VIC.EXTENDED_BG_COLOR_1
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000

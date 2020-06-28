@@ -226,7 +226,7 @@ PLAYER: {
 
 			lda #$0a
 			sta VIC.SPRITE_MULTICOLOR_1
-			lda #$0b
+			lda #$09
 			sta VIC.SPRITE_MULTICOLOR_2
 
 			//Reset screen/sprite attributes from intro
@@ -1172,9 +1172,6 @@ PLAYER: {
 
 
 	SetPlayerSize: {
-			lda #$02
-			sta Player_Size, x
-			rts
 		//KEEP X - DOnt BASH!
 		//Set the correct playersize
 			txa //Player number 0or1
@@ -1673,9 +1670,9 @@ PLAYER: {
 			beq !+
 			lda (PlayerY), y
 			sec
-			sbc #$06
+			sbc #$05
 			and #$f8
-			ora #$06
+			ora #$07
 			sta (PlayerY), y
 		!:
 
