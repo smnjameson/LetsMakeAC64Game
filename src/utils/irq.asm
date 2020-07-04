@@ -142,13 +142,13 @@ IRQ: {
 		!:
 			//Reset Values set by IRQ	
 			*=*"BG Color"
-			lda #$04
+			lda #$06
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000
 			ora #%00000011 
 			sta VIC.SCREEN_CONTROL_1
-			lda #$0a
+			lda #$04
 			sta VIC.EXTENDED_BG_COLOR_1
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000

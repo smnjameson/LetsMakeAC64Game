@@ -115,7 +115,7 @@ TRANSITION_BARS: {
 			beq !Loop-
 
 
-			inc $d021 
+			// inc $d021 
 
 		!Exit:
 			rts

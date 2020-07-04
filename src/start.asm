@@ -2,7 +2,7 @@
 
 BasicUpstart2(Entry)
 
-
+ 
 #import "../libs/tables.asm"  
 #import "../libs/vic.asm"
 #import "../libs/macros.asm"
@@ -77,7 +77,7 @@ Entry:
 		lda #$00
 		sta VIC.BORDER_COLOR
 
-		lda #$0a
+		lda #$04
 		sta VIC.EXTENDED_BG_COLOR_1
 		lda #$00
 		sta VIC.EXTENDED_BG_COLOR_2

@@ -64,7 +64,7 @@ SPRITEWARP: {
 			lda #$00
 			sta SPRITE_TARGET + 0
 		GenTargetMSB:
-			lda #$60
+			lda #$6c	//Start location for sprite warps
 			sta SPRITE_TARGET + 1
 			jsr copySprite
 			
@@ -83,11 +83,10 @@ SPRITEWARP: {
 			adc #$08
 			sta TEMP
 			tay
-			cpy #$40
+			cpy #$20 //8 bytes per warped sprite
 			bcs !+
 			jmp !Loop-
 		!:
-
 
 
 			//Copy last 8 sprites flipped
@@ -97,7 +96,7 @@ SPRITEWARP: {
 			lda GenTargetMSB + 1
 			sta SPRITE_TARGET + 1
 			sec
-			sbc #$02
+			sbc #$01
 			sta SPRITE_SOURCE + 1
 
 			
@@ -119,12 +118,12 @@ SPRITEWARP: {
 		!:
 			ldy TEMP
 			iny
-			cpy #$08
+			cpy #$04	//Number of mirrored sprites
 			bne !Loop-
 
 			lda GenTargetMSB + 1
 			clc
-			adc #$02
+			adc #$01
 			sta GenTargetMSB + 1
 			rts
 	}

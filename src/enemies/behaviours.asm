@@ -544,7 +544,7 @@ BEHAVIOURS: {
 
 
 	AbsorbBehaviour: {
-		.label TimeBetweenEatFrames = $02
+		.label TimeBetweenEatFrames = $04
 
 		setup: {
 			txa
@@ -553,21 +553,20 @@ BEHAVIOURS: {
 			:setEnemyFrame(null)
 
 			//Determine the start of the eat absorb animation
-			// Type * $0400 + (EnemyIsFacingRight * $0200) + $5c00
+			// Type * $0200 + (EnemyIsFacingRight * $0100) + $6a00
 			lda #$00
 			sta ENEMIES.EnemyEatPointerLSB, x
 			lda ENEMIES.EnemyType, x
-			asl
 			asl
 			sta ENEMIES.EnemyEatPointerMSB, x
 
 			lda ENEMIES.EnemyEatOffsetX, x
 			bmi !+
-			lda #$5e //MSB of $5c00 + $0200
+			lda #$6b //MSB of $6a00 + $0100
 			
 			jmp !DoAdd+
 		!:
-			lda #$5c
+			lda #$6a
 
 		!DoAdd:
 			adc ENEMIES.EnemyEatPointerMSB, x
@@ -604,7 +603,7 @@ BEHAVIOURS: {
 
 			
 
-			lda #$08 //Number of frames in eat animation
+			lda #$04 //Number of frames in eat animation
 			sta ENEMIES.EnemyEatenIndex, x
 			lda #$01 //Frame timer
 			sta ENEMIES.EnemyEatenCounter, x
