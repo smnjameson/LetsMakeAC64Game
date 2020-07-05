@@ -13,6 +13,8 @@ ENEMIES: {
 
 	EnemyTotalCount:
 		.byte $00
+	PowerUpTotalCount:
+		.byte $00
 
 	EnemyType: 
 		.fill MAX_ENEMIES, 0
@@ -359,9 +361,13 @@ ENEMIES: {
 			pla
 			sta EnemyType, x
 
-			bmi !+
+			//TODO: Investigate possible crash
+			// bmi !+
 			inc EnemyTotalCount
-		!:
+			// jmp !skip+
+		// !:	
+			// inc PowerUpTotalCount
+		// !skip:	
 
 			//Call on spawn
 			ldy #BEHAVIOURS.BEHAVIOUR_SPAWN

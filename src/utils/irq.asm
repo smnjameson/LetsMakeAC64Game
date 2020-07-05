@@ -18,6 +18,11 @@ IRQ: {
 		sta $dc0d
 		sta $dd0d
 
+		lda #<NMI
+		sta $fffa
+		lda #>NMI
+		sta $fffb
+
 		lda #<IRQ_Indirect
 		sta $fffe
 		lda #>IRQ_Indirect
@@ -32,6 +37,8 @@ IRQ: {
 		asl $d019
 		cli
 		rts
+	NMI:
+		rti
 	}
 
 	InitGameIRQ: {

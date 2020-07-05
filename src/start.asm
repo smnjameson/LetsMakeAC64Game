@@ -15,7 +15,7 @@ BasicUpstart2(Entry)
 .var music = LoadSid("../assets/sound/cuteplatform.sid")
 * = $1000 "Music"
 	.fill music.size, music.getData(i)
-	.fill $2400-*, 0
+	.fill $2800-*, 0
 
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
@@ -48,7 +48,7 @@ Random: {
     doEor:    
         eor #$1d
         eor $dc04
-        eor $dd04	
+        // eor $dd04	
     noEor:  
         sta seed
         rts
@@ -70,6 +70,8 @@ Random: {
         sta $dd0e
         rts
 }
+		
+
 		
 Entry:
 		lda #$00
@@ -154,15 +156,16 @@ Entry:
 		// sta $d011	
 
 		// cli
-
-		//Generate all sprites
-		lda #$2b
+// 
+		//Generate all sprites 
+		lda #$2b	//Flying boiled sweet
 		jsr SPRITEWARP.generate
-		lda #$13
+		lda #$13	//Jelly bean
 		jsr SPRITEWARP.generate
-		lda #$22
+		lda #$22	//Cola bottle	
 		jsr SPRITEWARP.generate
-
+		lda #$1c	//Flying saucer
+		jsr SPRITEWARP.generate
 
 		lda #$01	//Initialize current song
 		jsr $1000

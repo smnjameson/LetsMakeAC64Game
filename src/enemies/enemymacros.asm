@@ -51,15 +51,7 @@ PositionEnemySR: {
 }
 
 
-.macro UpdatePosition(xpos, ypos) {
-		pha
-		lda PLAYER.Player_Freeze_Active
-		beq !+
-		pla
-		jmp !EndMacro+
-	!:
-		pla
-	.if(xpos == null && ypos == null) {
+UpdatePositionSR01: {
 		sty TEMP10
 
 		cmp #$80
@@ -79,57 +71,104 @@ PositionEnemySR: {
 		clc
 		adc ENEMIES.EnemyPosition_Y1, x
 		sta ENEMIES.EnemyPosition_Y1, x 
+		rts
+}
+UpdatePositionSR02: {
+		clc
+		lda ENEMIES.EnemyPosition_X0, x
+		adc UPDATE_POSITION_TEMP + 0
+		sta ENEMIES.EnemyPosition_X0, x 
+		lda ENEMIES.EnemyPosition_X1, x
+		adc UPDATE_POSITION_TEMP + 1
+		sta ENEMIES.EnemyPosition_X1, x 
+		lda ENEMIES.EnemyPosition_X2, x
+		adc #$00
+		sta ENEMIES.EnemyPosition_X2, x 
+		rts
+}
+UpdatePositionSR03: {
+		sec
+		lda ENEMIES.EnemyPosition_X0, x
+		sbc UPDATE_POSITION_TEMP + 0
+		sta ENEMIES.EnemyPosition_X0, x 
+		lda ENEMIES.EnemyPosition_X1, x
+		sbc UPDATE_POSITION_TEMP + 1
+		sta ENEMIES.EnemyPosition_X1, x 
+		lda ENEMIES.EnemyPosition_X2, x
+		sbc #$00
+		sta ENEMIES.EnemyPosition_X2, x	
+		rts
+}
+UpdatePositionSR04: {
+		clc
+		lda ENEMIES.EnemyPosition_Y0, x
+		adc UPDATE_POSITION_TEMP + 0
+		sta ENEMIES.EnemyPosition_Y0, x 
+		lda ENEMIES.EnemyPosition_Y1, x
+		adc UPDATE_POSITION_TEMP + 1
+		sta ENEMIES.EnemyPosition_Y1, x 
+		rts
+}
+UpdatePositionSR05: {
+		sec
+		lda ENEMIES.EnemyPosition_Y0, x
+		sbc UPDATE_POSITION_TEMP + 0
+		sta ENEMIES.EnemyPosition_Y0, x 
+		lda ENEMIES.EnemyPosition_Y1, x
+		sbc UPDATE_POSITION_TEMP + 1
+		sta ENEMIES.EnemyPosition_Y1, x	
+		rts
+}
 
+.macro UpdatePosition(xpos, ypos) {
+		pha
+		lda PLAYER.Player_Freeze_Active
+		beq !+
+		pla
+		jmp !EndMacro+
+	!:
+		pla
+	.if(xpos == null && ypos == null) {
+		jsr UpdatePositionSR01
 	} else { 
 
 		.if(xpos > 0) {
-			clc
-			lda ENEMIES.EnemyPosition_X0, x
-			adc #<xpos
-			sta ENEMIES.EnemyPosition_X0, x 
-			lda ENEMIES.EnemyPosition_X1, x
-			adc #>xpos
-			sta ENEMIES.EnemyPosition_X1, x 
-			lda ENEMIES.EnemyPosition_X2, x
-			adc #$00
-			sta ENEMIES.EnemyPosition_X2, x 
+			lda #<xpos
+			sta UPDATE_POSITION_TEMP + 0
+			lda #>xpos
+			sta UPDATE_POSITION_TEMP + 1
+			jsr UpdatePositionSR02
 		}
 		.if(xpos < 0) {
 			.eval xpos = xpos * -1
-			sec
-			lda ENEMIES.EnemyPosition_X0, x
-			sbc #<xpos
-			sta ENEMIES.EnemyPosition_X0, x 
-			lda ENEMIES.EnemyPosition_X1, x
-			sbc #>xpos
-			sta ENEMIES.EnemyPosition_X1, x 
-			lda ENEMIES.EnemyPosition_X2, x
-			sbc #$00
-			sta ENEMIES.EnemyPosition_X2, x 
+			lda #<xpos
+			sta UPDATE_POSITION_TEMP + 0
+			lda #>xpos
+			sta UPDATE_POSITION_TEMP + 1			 
+			jsr UpdatePositionSR03
 		}	
 
 		.if(ypos > 0) {
-			clc
-			lda ENEMIES.EnemyPosition_Y0, x
-			adc #<ypos
-			sta ENEMIES.EnemyPosition_Y0, x 
-			lda ENEMIES.EnemyPosition_Y1, x
-			adc #>ypos
-			sta ENEMIES.EnemyPosition_Y1, x 
+			lda #<ypos
+			sta UPDATE_POSITION_TEMP + 0
+			lda #>ypos
+			sta UPDATE_POSITION_TEMP + 1
+			jsr UpdatePositionSR04
 		} 
 		.if(ypos < 0) {
 			.eval ypos = ypos * -1
-			sec
-			lda ENEMIES.EnemyPosition_Y0, x
-			sbc #<ypos
-			sta ENEMIES.EnemyPosition_Y0, x 
-			lda ENEMIES.EnemyPosition_Y1, x
-			sbc #>ypos
-			sta ENEMIES.EnemyPosition_Y1, x 
+			lda #<ypos
+			sta UPDATE_POSITION_TEMP + 0
+			lda #>ypos
+			sta UPDATE_POSITION_TEMP + 1
+
+			jsr UpdatePositionSR05
 		}	
 	}
 	!EndMacro:
 }
+
+
 
 .macro setEnemyFrame(frame) {
 	.if(frame != 0 && frame != null) {
@@ -174,11 +213,16 @@ PositionEnemySR: {
 
 
 .macro getEnemyCollisions(xoffset, yoffset) {
-		.label TEMP = TEMP8
 		.if(xoffset != null) {
 			lda #xoffset
 			ldy #yoffset
-		}
+		}	
+		jsr getEnemyCollisionsSR
+}
+
+getEnemyCollisionsSR: {
+		.label TEMP = TEMP8
+
 		jsr ENEMIES.GetCollisionPoint
 
  		stx TEMP
@@ -187,7 +231,9 @@ PositionEnemySR: {
 
 	!End:
 		ldx TEMP
+		rts
 }
+
 
 .macro doFall(xcheck, ycheck) {
 		:getEnemyCollisions(xcheck, ycheck)

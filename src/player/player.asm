@@ -295,7 +295,8 @@ PLAYER: {
 			sta Player2_PowerupTimer
 			sta Player_Freeze_Active
 			sta ColorSwitchActive
-
+			sta ENEMIES.PowerUpTotalCount
+			sta ENEMIES.EnemyTotalCount
 			rts
 	}
 

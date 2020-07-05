@@ -38,7 +38,7 @@ MAPDATA: {
 		SwitchSpawnLoc:
 			.byte $0a,$10
 
-		.label NUMBER_OF_ENEMIES = 6
+		.label NUMBER_OF_ENEMIES = 4
 		NumberEnemies:
 			.byte NUMBER_OF_ENEMIES //__EnemyList - EnemyList - Countof255
 
@@ -46,14 +46,14 @@ MAPDATA: {
 			.byte max(1, round(56/NUMBER_OF_ENEMIES))
 
 		NumberOfPowerups:
-			.byte 0
+			.byte 2
 			
 		//Additional static values go here, above order msut stay intact
 
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,2,2,3,3,3
+			.byte 1,255,2,255,4,3
 		__EnemyList:
 			.byte 0
 
