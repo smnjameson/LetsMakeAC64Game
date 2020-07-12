@@ -18,7 +18,7 @@ TITLECARD: {
 
 	TransitionTopIndex:
 		.byte $27
-	* = * "TransitionSideIndex"	
+
 	TransitionSideIndex:
 		.byte $48
 

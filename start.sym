@@ -1,0 +1,1119 @@
+.label COLLISION_POINT_POSITION=$23
+.label CROWN_X=$6d
+.label PerformFrameCodeFlag=$5eed
+.label HUD_LIVES_TEMP2=$65
+.label HUD_LIVES_TEMP1=$64
+.label getEnemyCollisionsSR=$4e9f {
+  .label TEMP=$b
+}
+.label UPDATE_POSITION_TEMP=$98
+.label IRQ_LSB=$fff1
+.label SPRITE_SCREEN_X=$54
+.label CheckVsPlayerEat=$4f0e {
+  .label PLAYER_X=$32
+  .label Y_THRESHOLD=$18
+  .label X_THRESHOLD=$30
+  .label XY_DIFF=$30
+}
+.label PIPE_LENGTH=$74
+.label TITLESCREEN_TEMP1=$95
+.label TEMP1=$4
+.label COLLISION_TEMP=$23
+.label TEMP2=$5
+.label ENEMIES=$45ab {
+  .label STATIC_MEMORY_SIZE=$10
+  .label EnemyScore=$45cb
+  .label STATE_FACE_LEFT=$10
+  .label EnemyEatenCounter=$45f3
+  .label EnemyXCopy=$479b
+  .label STATE_WALK_LEFT=$4
+  .label EnemyEatPointerLSB=$4602
+  .label EnemyEatPointerMSB=$4607
+  .label EnemyPosition_Y1=$45c6
+  .label CallBehaviour=$47ed {
+    .label BEHAVIOUR_OFFSET=$5
+    .label SelfMod=$4809
+    .label INDEX=$6
+  }
+  .label MAX_ENEMIES=$5
+  .label EnemyPosition_Y0=$45c1
+  .label EnemyYCopy=$479e
+  .label EnemyJumpFallIndex=$45da
+  .label EnemyState=$45e4
+  .label PowerUpTotalCount=$45ac
+  .label EnemyType=$45ad
+  .label EnemyStunTimer=$45df
+  .label STATE_FALL=$2
+  .label SpawnEnemy=$479f {
+    .label SPRITE_X=$4
+  }
+  .label STATE_FACE_RIGHT=$20
+  .label EnemyTotalCount=$45ab
+  .label STATE_STUNNED=$40
+  .label CheckPlayerCollision=$4690 {
+    .label Sprite1_XOFF=$1f
+    .label Sprite1_YOFF=$21
+    .label Sprite2_XOFF=$20
+    .label Sprite2_YOFF=$22
+    .label Sprite1_W=$1b
+    .label Sprite1_X=$13
+    .label Sprite2_W=$1c
+    .label Sprite1_H=$1d
+    .label Sprite1_Y=$17
+    .label Sprite2_X=$15
+    .label Sprite2_H=$1e
+    .label Sprite2_Y=$19
+  }
+  .label EnemyEatenBy=$45e9
+  .label STATE_WALK_RIGHT=$8
+  .label EnemyStaticMemory=$460c
+  .label Initialise=$465c {
+  }
+  .label STATE_JUMP=$1
+  .label STATE_DYING=$80
+  .label GetCollisionPoint=$480d {
+    .label X_PIXEL_OFFSET=$a
+    .label Y_PIXEL_OFFSET=$b
+    .label ENEMY_X1=$8
+    .label X_BORDER_OFFSET=$18
+    .label ENEMY_X2=$9
+    .label Y_BORDER_OFFSET=$32
+  }
+  .label EnemyPosition_X0=$45b2
+  .label EnemyColor=$45d5
+  .label EnemyPosition_X1=$45b7
+  .label EnemyEatOffsetX=$45f8
+  .label EnemyPosition_X2=$45bc
+  .label EnemyEatenIndex=$45ee
+  .label EnemyEatOffsetY=$45fd
+  .label UpdateEnemies=$465d {
+    .label TEMP=$e
+    .label ENEMY_BEHAVIOUR=$28
+  }
+  .label EnemyFrame=$45d0
+}
+.label TEMP3=$6
+.label TEMP4=$7
+.label TEMP5=$8
+.label TEMP6=$9
+.label TEMP7=$a
+.label TEMP8=$b
+.label TEMP9=$c
+.label SPRITE_SCREEN_ROW=$44
+.label CheckVsProjectiles=$4fdf {
+  .label SelfModRestore=$5057
+}
+.label COLOR_RESTORE=$2
+.label PLAYER=$2d49 {
+  .label Player1_FireHeld=$2d8d
+  .label POWERUP_SCORE=$6
+  .label STATE_THROWING=$40
+  .label LEFT_SCREEN_EDGE=$14
+  .label Player1_ExitIndex=$2db3
+  .label Player1_FloorCollision=$2d8f
+  .label JumpColor=$2d64
+  .label STATE_WALK_LEFT=$4
+  .label Player2_WalkSpeed=$2da3
+  .label Player_Size=$2daf
+  .label SpeedColorRamp=$2d51
+  .label PLAYER_LEFT_COLLISON_BOX=$5
+  .label FreezeColorRamp=$2d49
+  .label PLAYER_SIZE_TIME=$40
+  .label Player_IsDying=$2d89
+  .label Player1_EatIndex=$2d9b
+  .label Player_ThrowIndex=$2d9d
+  .label Player2_ExitIndex=$2db4
+  .label DoColorSwitch=$370f {
+    .label COLOR_SMOD=$3739
+    .label COLOR_SMOD2=$3742
+    .label SCREEN_SMOD=$372f
+  }
+  .label Player1_IsDying=$2d89
+  .label STATE_WALK_RIGHT=$8
+  .label Player1_LeftCollision=$2d95
+  .label Player2_WalkIndex=$2d9a
+  .label Player_PowerupType=$2db5
+  .label STATE_JUMP=$1
+  .label Player_Lives=$2d7b
+  .label Player1_Lives=$2d7b
+  .label Player_PowerupTimer=$2db7
+  .label Player1_Size_Timer=$2db1
+  .label Player2_X=$2d84
+  .label Player1_FloorANDCollision=$2d91
+  .label Player2_Y=$2d88
+  .label Player1_Size=$2daf
+  .label JOY_LT=$4
+  .label POWERUP_JUMP=$4
+  .label JOY_DN=$2
+  .label ColorSwitchActive=$2dba
+  .label STATE_EATING=$80
+  .label UpdatePlayerPowerup=$327b {
+  }
+  .label Player2_Invuln=$2d7e
+  .label RIGHT_SCREEN_EDGE=$44
+  .label Player2_EatIndex=$2d9c
+  .label Player2_LeftCollision=$2d96
+  .label FIRE_HELD_THRESHOLD=$f
+  .label Player1_Weight=$2d7f
+  .label Player2_Weight=$2d80
+  .label Player2_FloorCollision=$2d90
+  .label POWERUP_COLOR=$3
+  .label Player2_State=$2da0
+  .label FreezeColorIndex=$2d61
+  .label Player2_IsDying=$2d8a
+  .label JOY_RT=$8
+  .label Player_WalkIndex=$2d99
+  .label Player2_PowerupTimer=$2db8
+  .label Player2_EatCount=$2dac
+  .label Initialise=$2dbc {
+  }
+  .label DefaultFrame=$2dad
+  .label PlayerControl=$33d2 {
+  }
+  .label SpawnPlayer=$2e51 {
+  }
+  .label JumpColorRamp=$2d59
+  .label Player2_Size=$2db0
+  .label Player1_RightCollision=$2d93
+  .label Player_WalkSpeed=$2da1
+  .label FOOT_COLLISION_OFFSET=$3
+  .label Player2_Lives=$2d7c
+  .label Player1_EatCount=$2dab
+  .label ColorSwitchRow=$2dbb
+  .label SpeedColor=$2d63
+  .label PlayerControlFunc=$3411 {
+    .label JOY_PORT_2=$dc00
+  }
+  .label Player_Invuln=$2d7d
+  .label SetPlayerSize=$3366 {
+  }
+  .label Player1_JumpIndex=$2d97
+  .label Player_ExitIndex=$2db3
+  .label GetCollisions=$2eda {
+  }
+  .label POWERUP_FREEZE=$5
+  .label DrawPlayer=$3066 {
+    .label CURRENT_FRAME=$6
+    .label TEMP=$7
+    .label PlayerState=$28
+    .label PlayerY=$2e
+    .label PlayerWalkIndex=$2a
+    .label CURRENT_PLAYER=$5
+    .label PlayerX=$2c
+  }
+  .label PlayerWalkSpeeds_LSB=$2da5
+  .label PLAYER_RIGHT_COLLISON_BOX=$13
+  .label STATE_FALL=$2
+  .label STATE_FACE_RIGHT=$20
+  .label KillPlayer=$2ed1 {
+  }
+  .label Player2_Size_Timer=$2db2
+  .label PlayersActive=$2d7a
+  .label Player_Size_Timer=$2db1
+  .label SizeSinus=$3346
+  .label DefaultLeftRightFrames=$2d78
+  .label Player2_ThrowIndex=$2d9e
+  .label Player_Weight=$2d7f
+  .label Player1_State=$2d9f
+  .label Player1_ThrowIndex=$2d9d
+  .label Player_Freeze_Active=$2db9
+  .label Player2_FloorANDCollision=$2d92
+  .label Player1_Invuln=$2d7d
+  .label STATE_FACE_LEFT=$10
+  .label ColorSwitchTable=$3759
+  .label Player2_PowerupType=$2db6
+  .label JOY_UP=$1
+  .label Player1_PowerupType=$2db5
+  .label PlayerInvulnRamp=$2d68
+  .label Player1_WalkSpeed=$2da1
+  .label Player1_WalkIndex=$2d99
+  .label POWERUP_SPEED=$1
+  .label PlayerWalkSpeeds_MSB=$2da8
+  .label POWERUP_INVULN=$2
+  .label Player2_FirePressed=$2d8c
+  .label Player2_FireHeld=$2d8e
+  .label Player1_FirePressed=$2d8b
+  .label PlayerSizeAnimation=$32d0 {
+    .label CURRENT_PLAYER=$5
+  }
+  .label JumpAndFall=$35e7 {
+    .label PlayerState=$28
+    .label PlayerY=$2e
+    .label CURRENT_PLAYER=$4
+    .label PlayerFloorCollision=$2a
+    .label PlayerJumpIndex=$2c
+    .label PlayerSize=$30
+  }
+  .label Player_State=$2d9f
+  .label FreezeColor=$2d62
+  .label Player2_JumpIndex=$2d98
+  .label CurrentLevel=$2d65
+  .label Player1_PowerupTimer=$2db7
+  .label GetCollisionPoint=$3037 {
+    .label PLAYER_Y=$17
+    .label PLAYER_X=$13
+    .label X_PIXEL_OFFSET=$1f
+    .label Y_PIXEL_OFFSET=$21
+    .label PLAYER_POSITION=$23
+  }
+  .label Player2_RightCollision=$2d94
+  .label Player1_X=$2d81
+  .label Player1_Y=$2d87
+  .label PLAYER_1=$1
+  .label PLAYER_2=$2
+  .label PlayerColors=$2d66
+  .label JOY_FR=$10
+}
+.label UpdatePositionSR01=$4e22 {
+}
+.label MAP_TILES=$8000
+.label UpdatePositionSR02=$4e47 {
+}
+.label UpdatePositionSR05=$4e8d {
+}
+.label TITLESCREEN_SCROLLER_INDEX=$96
+.label exitIfStunnedSR=$4ef9 {
+}
+.label UpdatePositionSR03=$4e61 {
+}
+.label UpdatePositionSR04=$4e7b {
+}
+.label BONUS_PLAYER_BAR_COLOR2=$90
+.label BONUS=$5465 {
+  .label BonusStageStrings=$5640
+  .label BonusActive=$5465
+  .label Start=$5497 {
+  }
+  .label InitialiseTransition=$5488 {
+  }
+  .label PlayerBar1Colors=$54ea
+  .label Update=$55e2 {
+  }
+  .label PlayerBarHeight=$54ee
+  .label ClearBar=$586a {
+  }
+  .label BonusRampIndex=$5477
+  .label DrawPlayerBars=$54f6 {
+  }
+  .label BonusIRQ=$55cf {
+  }
+  .label SetBar=$580e {
+  }
+  .label StageIncTimer=$5624
+  .label BonusCounters=$5478
+  .label PlayerToggle=$5620
+  .label StageIncrement=$5621
+  .label DoBonusStage=$569e {
+  }
+  .label BonusPlayer2Counters=$547d
+  .label BonusStage=$5466
+  .label BonusRamp=$5467
+  .label CrownTextLine2=$5592
+  .label CrownTextLine3=$5597
+  .label Initialise=$5482 {
+  }
+  .label DrawCrownBonus=$559e {
+  }
+  .label CrownTextLine1=$558d
+  .label BonusLabelLine2=$58a6
+  .label BonusLabelLine1=$589c
+  .label BonusPlayer1Counters=$547b
+  .label PlayerBarX=$54e6
+  .label PlayerText=$54f0
+  .label PlayerTextX=$54e8
+  .label BonusCountersOriginal=$547f
+  .label PlayerBar2Colors=$54ec
+  .label CrownTextPosition=$559c
+}
+.label HUD_DATA=$8198
+.label BONUS_PLAYER_BAR_COLOR1=$8f
+.label SCOREVECTOR1=$11
+.label COLLISION_Y_DIFF=$27
+.label CROWN_THROW_OFFSET_X=$6b
+.label COLLISION_WIDTH1=$1c
+.label COLLISION_X1=$39
+.label COLLISION_X2=$3a
+.label PIPE_CHARS=$75
+.label CHAR_COLORS=$8098
+.label PLATFORM_CHAR_LOOKUP=$7e
+.label SPRITE_SOURCE=$40
+.label CROWN=$3bd8 {
+  .label DropCrown=$3d22 {
+  }
+  .label DrawCrown=$3bdf {
+    .label CrownPosTableX=$3d16
+    .label CrownPosTableY=$3d1c
+  }
+  .label PickUp=$3dc1 {
+    .label Sprite1_XOFF=$1f
+    .label Sprite1_YOFF=$21
+    .label Sprite2_XOFF=$20
+    .label Sprite2_YOFF=$22
+    .label Sprite1_W=$1b
+    .label Sprite1_X=$13
+    .label Sprite2_W=$1c
+    .label Sprite1_H=$1d
+    .label Sprite1_Y=$17
+    .label Sprite2_X=$15
+    .label Sprite2_H=$1e
+    .label Sprite2_Y=$19
+  }
+  .label CrownFallIndex=$3bdd
+  .label Initialise=$3bde {
+  }
+  .label Fall=$3d74 {
+  }
+  .label PlayerHasCrown=$3bd8
+  .label Crown_Y=$3bdc
+  .label Crown_X=$3bd9
+}
+.label BEHAVIOURS=$4860 {
+  .label Enemy_004=$4bd1 {
+    .label CollisionPointsY=$4bf6
+    .label FlyAnimation=$4bda
+    .label DX=$1
+    .label CollisionPointsX=$4bf8
+    .label ANIM_FRAME=$0
+    .label __FlyAnimation=$4bde
+  }
+  .label Enemy_003=$4adb {
+    .label WalkRight=$4ae7
+    .label WalkLeft=$4ae4
+    .label WALK_FRAME=$0
+    .label __WalkLeft=$4ae7
+    .label __WalkRight=$4aea
+  }
+  .label EnemyLSB=$4860
+  .label EnemyMSB=$4865
+  .label BEHAVIOUR_UPDATE=$3
+  .label PowerUpFrames=$4876
+  .label Enemy_002=$49e5 {
+    .label WalkRight=$49f1
+    .label WalkLeft=$49ee
+    .label WALK_FRAME=$0
+    .label __WalkLeft=$49f1
+    .label __WalkRight=$49f4
+  }
+  .label Enemy_001=$490e {
+    .label CollisionPointsY=$493f
+    .label FlyAnimation=$4917
+    .label DX=$1
+    .label DY=$2
+    .label CollisionPointsX=$4941
+    .label ANIM_FRAME=$0
+    .label __FlyAnimation=$491b
+  }
+  .label StunnedBehaviour=$4c72 {
+    .label update=$4c72 {
+    }
+  }
+  .label EatData=$4dd0
+  .label PowerUp=$487a {
+    .label BOUNCE=$1
+    .label FRAME=$2
+    .label POWERUP_TYPE=$0
+  }
+  .label BEHAVIOUR_DEATH=$6
+  .label __PowerUpFrames=$487a
+  .label PowerUpColorsB=$4870
+  .label BEHAVIOUR_SPAWN=$0
+  .label PowerUpColorsA=$486a
+  .label AbsorbBehaviour=$4cb4 {
+    .label setup=$4cb4 {
+    }
+    .label update=$4d0b {
+      .label SpriteTo=$36
+      .label SpriteFrom=$34
+    }
+    .label TimeBetweenEatFrames=$4
+  }
+}
+.label doFallSR=$4eab {
+}
+.label UTILS=$b00 {
+  .label COLLISION_COLORABLE=$20
+  .label GetCharacterAt=$b00 {
+    .label COLLISION_LOOKUP=$4
+  }
+  .label GetSpriteCollision=$b51 {
+    .label Sprite1_XOFF=$1f
+    .label Sprite1_YOFF=$21
+    .label Sprite2_XOFF=$20
+    .label Sprite2_YOFF=$22
+    .label Sprite1_W=$1b
+    .label Sprite1_X=$13
+    .label Sprite2_W=$1c
+    .label Sprite1_H=$1d
+    .label Sprite1_Y=$17
+    .label Sprite2_X=$15
+    .label Sprite2_H=$1e
+    .label Sprite2_Y=$19
+  }
+  .label COLLISION_SWITCH=$40
+  .label GetCollisionPoint=$b0f {
+    .label X_BORDER_OFFSET=$18
+    .label Y_BORDER_OFFSET=$32
+  }
+  .label COLLISION_SOLID=$10
+}
+.label CosTableY=$5ff0
+.label PLATFORMS=$28e4 {
+  .label COLOR_ORIGIN_MSB=$28f4
+  .label AddNewColorOrigin=$2925 {
+  }
+  .label UpdateColorOrigins=$2963 {
+  }
+  .label COLOR_ORIGIN_LSB=$28e4
+  .label ORIGINAL_COLOR=$2904
+  .label FillPlatform=$2982 {
+  }
+  .label FillPlatformToggle=$2981
+  .label NEW_COLOR=$2914
+  .label NEXT_COLOR_INDEX=$2924
+  .label MAX_PLATFORMS=$10
+}
+.label IRQ=$bad {
+  .label ScreenShakeTimer=$bad
+  .label SecondIRQ=$c8c {
+  }
+  .label ScreenShakeValues=$bae
+  .label HudFLDIRQSetup=$ce5 {
+  }
+  .label HudTransitionIRQ=$d05 {
+  }
+  .label InitGameIRQ=$be6 {
+  }
+  .label RampIndex=$c13
+  .label Setup=$bb6 {
+    .label NMI=$be5
+  }
+  .label ColorRamp1=$c03
+  .label MainIRQ=$c14 {
+  }
+}
+.label snapEnemyToFloor=$4eeb {
+}
+.label Entry=$5dc9
+.label BONUS_BAR_TEMP=$91
+.label MAPDATA=$8210 {
+  .label EnemyWeightData=$100
+  .label PipeSpawnData=$e2
+  .label MAP_2=$8322 {
+    .label NumberOfPowerups=$8423
+    .label PipeLengthAndDirection=$8418
+    .label BarUnits=$8429
+    .label EnemyList=$8424
+    .label PipeSpawnX=$8404
+    .label __EnemyList=$8428
+    .label PipeSpawnY=$8409
+    .label PipeStartX=$840e
+    .label PipeStartY=$8413
+    .label NumberEnemies=$8421
+    .label Level=$8322
+    .label SwitchSpawnLoc=$841f
+    .label EnemyWeight=$8422
+    .label PlayerSpawns=$83fe
+    .label DoorSpawnLoc=$841d
+  }
+  .label EnemyListData=$102
+  .label MAP_1=$8214 {
+    .label NumberOfPowerups=$8315
+    .label PipeLengthAndDirection=$830a
+    .label NUMBER_OF_ENEMIES=$4
+    .label BarUnits=$831d
+    .label EnemyList=$8316
+    .label PipeSpawnX=$82f6
+    .label __EnemyList=$831c
+    .label PipeSpawnY=$82fb
+    .label PipeStartX=$8300
+    .label PipeStartY=$8305
+    .label NumberEnemies=$8313
+    .label Level=$8214
+    .label SwitchSpawnLoc=$8311
+    .label EnemyWeight=$8314
+    .label PlayerSpawns=$82f0
+    .label DoorSpawnLoc=$830f
+  }
+  .label DoorSpawnData=$fb
+  .label PlayerSpawnData=$dc
+  .label NumberEnemiesData=$ff
+  .label MAP_POINTERS=$8210
+  .label SwitchSpawnData=$fd
+}
+.label COLLISION_X_DIFF=$25
+.label BONUS_VECTOR1=$89
+.label BONUS_VECTOR2=$8b
+.label COLLISION_POINT_X_OFFSET=$1f
+.label COLLISION_Y2=$3c
+.label COLLISION_Y1=$3b
+.label INTROTEXT=$d1d {
+}
+.label PLAYER_DYING=$63
+.label INTRO_CHAR_SET=$f800
+.label PLAYER_Y_POINTER=$68
+.label MAX_SPRITES=$8
+.label DOOR_VECTOR2=$83
+.label DOOR_VECTOR1=$81
+.label PIPE_TEMP=$72
+.label TABLES=$80e {
+  .label PlayerEatRight=$8b6
+  .label __PlayerEatLeft=$8b6
+  .label TileScreenLocations2x2=$80e
+  .label __PlayerThrowLeft=$8c7
+  .label SWAP1=$2
+  .label PlayerSizeCrownOffset=$8b0
+  .label PlayerCrownBob=$88e
+  .label _PlayerThrowCrownY=$8b0
+  .label PlayerWalkLeft=$886
+  .label ColorSwapTable=$a00
+  .label PlayerEatLeft=$8b3
+  .label Plus=$8f1
+  .label _PlayerThrowCrownX=$8a1
+  .label BufferMSB=$85d
+  .label __PlayerCrownBob=$892
+  .label __PlayerExitAnimation=$8e1
+  .label PowerOfTwo=$8e1
+  .label __PlayerSizeCrownOffset=$8b3
+  .label __PlayerWalkLeft=$88a
+  .label BufferLSB=$844
+  .label PlayerThrowRight=$8c7
+  .label __PlayerWalkRight=$88e
+  .label __PlayerThrowRight=$8d5
+  .label ScreenRowMSB=$82b
+  .label ScreenRowLSB=$812
+  .label JumpAndFallTable=$876
+  .label InvPowerOfTwo=$8e9
+  .label PlayerExitAnimation=$8d5
+  .label PlayerThrowLeft=$8b9
+  .label PlayerThrowCrownY=$8a1
+  .label PlayerThrowCrownX=$892
+  .label __PlayerEatRight=$8b9
+  .label __JumpAndFallTable=$886
+  .label PlayerWalkRight=$88a
+}
+.label TRANSITION=$5255 {
+  .label Init=$526b {
+  }
+  .label TransitionHUDIndex=$5259
+  .label TransitionComplete=$5256
+  .label Random=$525a {
+    .label seed=$526a
+    .label noEor=$5266
+    .label doEor=$5264
+  }
+  .label UpdateHUDTransition=$52c9 {
+  }
+  .label TransitionIndex=$5258
+  .label TransitionActive=$5255
+  .label TransitionHUDActive=$5257
+  .label Update=$527f {
+  }
+}
+.label COLLISION_POINT_Y1_OFFSET=$22
+.label ZP_COUNTER=$3d
+.label SinTableX=$5ef0
+.label PositionEnemySR=$4dda {
+  .label INDEX=$b
+  .label STOREY=$a
+}
+.label TITLECARD_TEMP1=$93
+.label IRQ_TEMP1=$38
+.label COLLISION_POINT_Y1=$19
+.label CHAR_ANIMATIONS=$3e68 {
+  .label FlickerTimer=$3e90
+  .label FlickerLights=$3e91 {
+    .label CHAR1=$f058
+    .label CHAR2=$f070
+  }
+  .label AnimateWater=$3e68 {
+    .label CHAR=$f060
+    .label CHAR2=$f068
+  }
+}
+.label COLLISION_POINT_X=$13
+.label COLLISION_POINT_Y=$17
+.label ENEMY_COLLISION_TEMP1=$60
+.label SPRITEWARP=$4264 {
+  .label WarpTable=$434a
+  .label init=$4264 {
+  }
+  .label BitMasks=$447f
+  .label InvBitMasks=$448b
+  .label TopOffset=$4497
+  .label copySpriteFlipped=$4394 {
+  }
+  .label ByteOffsets=$4473
+  .label copySprite=$438a {
+  }
+  .label shiftLeft=$43bc {
+  }
+  .label dissolve=$43d8 {
+    .label TARGET=$5
+    .label TEMP=$8
+    .label SQUEEZE_COUNT=$7
+    .label SOURCE=$6
+  }
+  .label BottomOffset=$44a1
+  .label generate=$4265 {
+    .label TEMP=$4
+    .label GenTargetMSB=$42eb
+    .label GenTargetLSB=$42e7
+    .label LSB=$9
+  }
+}
+.label DOOR=$2a0a {
+  .label DoorDataMSB=$2cc9
+  .label DoorDataLSB=$2c49
+  .label Player1Exiting=$2af9
+  .label Initialise=$2a16 {
+  }
+  .label Update=$2b79 {
+    .label UpdatePos=$2c3a
+  }
+  .label __SwitchRamp=$2a16
+  .label Player2Exiting=$2afa
+  .label FONT_DATA=$f000
+  .label DoorSpawned=$2a0a
+  .label PlayerSizeAnimIndexStart=$2b76
+  .label DoorAnimRow=$2a0b
+  .label ExitUpdate=$2afb {
+    .label DOOR_WIDTH=$10
+    .label DOOR_HEIGHT=$20
+  }
+  .label SwitchUpdate=$2a22 {
+  }
+  .label SwitchPressed=$2a0c
+  .label SwitchColorTimer=$2a0d
+  .label SwitchRamp=$2a0e
+  .label DOOR_FONT_DATA=$f400
+}
+.label COLLISION_WIDTH=$1b
+.label PIPE_DRAW=$70
+.label SPRITE_TARGET=$42
+.label MAPLOADER=$2800 {
+  .label BufferMap=$28c4 {
+  }
+  .label DrawMap=$2800 {
+    .label Col=$5
+    .label Scr=$285c
+    .label TileLookup=$2856
+    .label Color=$2866
+    .label Tile=$2833
+    .label Row=$4
+  }
+  .label BUFFER=$bc00
+}
+.label Counter=$5eee
+.label CHAR_SET=$f000
+.label Random=$5d9a {
+  .label init=$5dae
+  .label seed=$5dad
+  .label noEor=$5da9
+  .label doEor=$5da4
+}
+.label TITLECARD=$58b0 {
+  .label TopTransitionOut=$5ce5 {
+  }
+  .label DrawTopTrim=$5d0e {
+    .label ScreenMod=$5d4e
+    .label ColorMod=$5d53
+    .label ScreenMod2=$5d71
+    .label ColorMod2=$5d76
+  }
+  .label SideSpritePositions=$58b6
+  .label UpdateReady=$58ba
+  .label __TopTransitionIn=$5ce5
+  .label __TopTransitionOut=$5d0e
+  .label TransitionIRQ_2=$5ac6 {
+    .label RestoreY=$5b7c
+    .label RestoreX=$5b7a
+    .label RestoreAcc=$5b78
+    .label Exit=$5b72
+  }
+  .label IsBonus=$58b4
+  .label TransitionIRQ_1=$5a92 {
+    .label RestoreY=$5ac3
+    .label RestoreX=$5ac1
+    .label RestoreAcc=$5abf
+  }
+  .label SideTransitionIn=$5c2e {
+  }
+  .label CheckComplete=$5b7f {
+  }
+  .label __SideTransitionOut=$5c9e
+  .label SideTransitionOut=$5c75 {
+  }
+  .label AnimateTopTrim=$5bb3 {
+  }
+  .label TransitionTopIndex=$58b8
+  .label TransitionIn=$5958 {
+  }
+  .label TransitionOut=$59b5 {
+  }
+  .label ClearTitleCardScreen=$5a4f {
+  }
+  .label CompleteCallback=$58b1
+  .label Initialise=$58bb {
+  }
+  .label BlackOutHUD=$5a7f {
+  }
+  .label AnimateSideSprites=$5bd5 {
+  }
+  .label TopTransitionIn=$5c9e {
+  }
+  .label SideSpriteIndex=$58b5
+  .label TransitionSideIndex=$58b9
+  .label SetSideSprites=$5beb {
+  }
+  .label __SideTransitionIn=$5c75
+  .label CopyTitleCardScreen=$5a2f {
+  }
+  .label TransitionDirection=$58b3
+  .label isComplete=$58b0
+}
+.label BONUS_PLAYER=$8e
+.label COLLISION_POINT_X1=$15
+.label COLLISION_HEIGHT=$1d
+.label VECTOR2=$2a
+.label PLAYER_X_POINTER=$66
+.label VECTOR1=$28
+.label PLATFORM_COMPLETE=$80
+.label PLATFORM_LOOKUP=$7c
+.label SPRITE_POINTERS=$c3f8
+.label ENEMY_COUNT_TEMP=$6c
+.label CROWN_POS_X=$5c
+.label CROWN_POS_Y=$5e
+.label DROP_CROWN_TEMP=$6a
+.label PLATFORM_TEMP=$7b
+.label TEMP11=$e
+.label TEMP10=$d
+.label DOOR_TEMP1=$85
+.label DOOR_TEMP2=$86
+.label SCREEN_RAM=$c000
+.label COLLISION_POINT_X1_OFFSET=$20
+.label VECTOR8=$36
+.label VECTOR7=$34
+.label VECTOR4=$2e
+.label VECTOR3=$2c
+.label VECTOR6=$32
+.label VECTOR5=$30
+.label TRANSITION_BARS=$b600 {
+  .label PositionSpriteLookup=$b71a
+  .label Update=$b66b {
+  }
+  .label BandSpriteOffsets=$b855
+  .label BandSpriteOffsetsFrac=$b85f
+  .label Init=$b600 {
+  }
+  .label BandColors=$b7e2
+  .label BankTable=$b6d2
+  .label UpdateDirection=$b886
+  .label SpriteSplitIRQ=$b960 {
+  }
+  .label NextXPosition=$b8b6
+  .label ChangeDirection=$b885
+  .label SetXpositionAndD010=$ba41 {
+  }
+  .label IrqIndex=$b6e0
+  .label SpriteY_Values=$b6db
+  .label NextD010=$b8b7
+  .label BandPointers=$b80d
+  .label __IrqLineTable=$b8b5
+  .label SplitIndex=$b6e1
+  .label BandColorsRampNumbers=$b7eb
+  .label POT=$b6e3
+  .label BANK1=$c
+  .label BANK2=$1c
+  .label FinishedCount=$b889
+  .label IrqTable=$b88b
+  .label BandIndex=$b6e2
+  .label SpriteOffset=$b6eb
+  .label SpriteUpdateIRQ=$b97c {
+    .label XPOS_MOD2=$b9af
+  }
+  .label NextRaster=$ba7e {
+  }
+  .label DummyStore=$b8b8
+  .label HoldAnimation=$b884
+  .label AnimateBars=$b6ec {
+  }
+  .label PREVIOUS_INDEX=$b88a
+  .label UpdateOffsetsLeft=$b900 {
+  }
+  .label SetBankPointers=$b9c7 {
+  }
+  .label UpdateOffsetsRight=$b930 {
+  }
+  .label BandSpriteOffsetsSpeedMSB=$b871
+  .label BandColorRamps=$b7f5
+  .label NextColor=$b8b5
+  .label InitSprites=$b69a {
+  }
+  .label BandSpriteOffsetsSpeed=$b868
+  .label FrameTimer=$b883
+  .label SPRITE_POINTERS2=$c7f8
+  .label SPRITE_POINTERS1=$c3f8
+  .label Timer=$b8ba
+  .label SpriteX_Defaults=$b6d4
+  .label DirectionOffset=$b887
+  .label XposTemp=$b8b9
+  .label BandSpriteOffsetsSpeedRightMSB=$b87a
+  .label __BandColors=$b7eb
+  .label IrqLineTable=$b8a7
+}
+.label SCREEN_SHAKE_VAL=$6f
+.label CROWN_OFFSET_TEMP2=$62
+.label CROWN_OFFSET_TEMP1=$61
+.label PROJECTILES=$3769 {
+  .label CheckPlayer1CanShoot=$37a1 {
+  }
+  .label Player1_Proj_Type=$3775
+  .label Player1_Proj_Direction=$379d
+  .label Player_Projectile_Color=$376f
+  .label Player2_Proj_X2=$3783
+  .label Player2_Proj_X1=$377f
+  .label Player2_Proj_X0=$377b
+  .label CheckPlayer2CanShoot=$37b3 {
+  }
+  .label Player_Proj_Speed_X=$3769
+  .label Player1_Proj_Y1=$3789
+  .label Player2_Proj_Speed_X0=$378f
+  .label Player_Proj_Speed_Y=$376b
+  .label Player1_Proj_Y0=$3785
+  .label Player2_Proj_Speed_X1=$3793
+  .label Player1_Proj_Speed_Y0=$3795
+  .label Player1_Proj_Speed_Y1=$3799
+  .label UpdateProjectiles=$37c5 {
+  }
+  .label CheckProjectileCollision=$3876 {
+    .label COLLISION_DATA=$4
+    .label TEMP=$5
+    .label COLOR_LOOKUP=$28
+    .label SCREEN_LOOKUP=$28
+  }
+  .label Player1_Projectile_Color=$376f
+  .label Player2_Proj_Y0=$3787
+  .label Player_Projectile_XOffset=$3773
+  .label Player2_Proj_Y1=$378b
+  .label Player1_Proj_Speed_X1=$3791
+  .label Player1_Proj_X2=$3781
+  .label Player1_Proj_X1=$377d
+  .label Player2_Proj_Speed_Y0=$3797
+  .label Player1_Proj_X0=$3779
+  .label Player2_Proj_Speed_Y1=$379b
+  .label SpawnProjectile=$38cd {
+    .label PLAYER_NUM=$9
+    .label TEMP=$8
+  }
+  .label Player2_Projectile_Color=$3771
+  .label Player1_Proj_Speed_X0=$378d
+  .label Player2_Proj_Direction=$379f
+  .label Player_Proj_Gravity=$376d
+  .label Player2_Proj_Type=$3777
+}
+.label IRQ_MSB=$fff2
+.label IRQ_Indirect=$fff0
+.label HUD=$3969 {
+  .label Player1Row1=$39b0
+  .label DrawLives=$3ba8 {
+    .label PlayerMod=$3bc7
+  }
+  .label PlayerRow2=$39c0
+  .label Initialise=$396a {
+  }
+  .label PlayerActiveColors=$39da
+  .label Update=$3a2c {
+  }
+  .label UpdateEatMeter=$3b31 {
+    .label SelfMod=$3b68
+  }
+  .label AddScore=$3af3 {
+    .label SCORE=$11
+    .label SCORETOADD=$f
+    .label TEMP=$10
+  }
+  .label LivesLocations=$3ba0
+  .label PressFireRow2=$39d0
+  .label PreviousPlayersActive=$3969
+  .label PressFireRow1=$39c8
+  .label FlashInsertCoin=$39dc {
+  }
+  .label Player2Row1=$39b8
+  .label PlayerColors=$39d8
+}
+.label TITLE_SCREEN=$52fd {
+  .label AnimateDitherSprite=$53a5 {
+  }
+  .label CharMap=$5425
+  .label CheckJoystick=$5387 {
+  }
+  .label Destroy=$5350 {
+  }
+  .label ShiftScroller=$53cb {
+  }
+  .label PressFire=$52fd
+  .label Initialise=$5309 {
+  }
+  .label Update=$5364 {
+  }
+  .label ScrollerFineIndex=$5307
+}
+.label BONUS_COLOR=$8d
+.label SCORETEMP1=$f
+.label COLLISION_POINT_Y_OFFSET=$21
+.label DOOR_POSITION_X=$87
+.label DOOR_POSITION_Y=$88
+.label PIPE_DIR=$73
+.label JOY_ZP1=$3e
+.label SCORETEMP2=$10
+.label JOY_ZP2=$3f
+.label COLLISION_HEIGHT1=$1e
+.label MAP_LOOKUP_VECTOR=$79
+.label POWERUP_PLAYER_NUM=$92
+.label TITLECARD_EASE_INDEX=$94
+.label PIPES=$505a {
+  .label NumberOfPowerups=$5084
+  .label ClearBulge=$5155 {
+  }
+  .label PipeEnemyType=$5060
+  .label __MAPDATA_COPY=$5082
+  .label PIPE_UPDATE_TIME=$20
+  .label Initialise=$5086 {
+    .label SelfMod=$50c9
+  }
+  .label DrawBulge=$51a3 {
+  }
+  .label NumberOfEnemies=$5082
+  .label Update=$50d5 {
+    .label EnemyList=$50f8
+  }
+  .label SpawnDelayTimer=$505a
+  .label MAPDATA_COPY=$5065 {
+    .label PipeSpawnX=$5065
+    .label PipeSpawnY=$506a
+    .label PipeStartX=$506f
+    .label PipeStartY=$5074
+    .label SwitchSpawnLoc=$5080
+    .label PipeLengthAndDirection=$5079
+    .label DoorSpawnLoc=$507e
+  }
+  .label MAX_ENEMIES_ON_SCREEN=$5
+  .label SpawnEnemyFromPipe=$523d {
+    .label EnemyList=$5242
+  }
+  .label NextEnemyIndex=$5085
+  .label PipesActive=$505b
+  .label EnemyWeight=$5083
+  .label UpdatePipeBulges=$5129 {
+  }
+}
+.label VIC=$b00 {
+  .label SPRITE_MULTICOLOR_2=$d026
+  .label SPRITE_MULTICOLOR_1=$d025
+  .label BORDER_COLOR=$d020
+  .label SPRITE_0_X=$d000
+  .label SPRITE_COLOR_5=$d02c
+  .label SPRITE_COLOR_4=$d02b
+  .label SPRITE_COLOR_3=$d02a
+  .label SPRITE_COLOR_2=$d029
+  .label SPRITE_MULTICOLOR=$d01c
+  .label SPRITE_COLOR_1=$d028
+  .label SPRITE_COLOR_0=$d027
+  .label SPRITE_ENABLE=$d015
+  .label SPRITE_0_Y=$d001
+  .label SPRITE_1_X=$d002
+  .label SPRITE_2_X=$d004
+  .label SPRITE_1_Y=$d003
+  .label SPRITE_3_Y=$d007
+  .label SPRITE_4_X=$d008
+  .label SPRITE_2_Y=$d005
+  .label SPRITE_3_X=$d006
+  .label SPRITE_5_Y=$d00b
+  .label SPRITE_6_X=$d00c
+  .label SPRITE_4_Y=$d009
+  .label SPRITE_5_X=$d00a
+  .label SPRITE_7_Y=$d00f
+  .label MEMORY_SETUP=$d018
+  .label SPRITE_6_Y=$d00d
+  .label SPRITE_7_X=$d00e
+  .label RASTER_Y=$d012
+  .label EXTENDED_BG_COLOR_1=$d022
+  .label EXTENDED_BG_COLOR_2=$d023
+  .label SPRITE_MSB=$d010
+  .label BACKGROUND_COLOR=$d021
+  .label INTERRUPT_CONTROL=$d01a
+  .label SCREEN_CONTROL_2=$d016
+  .label SCREEN_CONTROL_1=$d011
+  .label SPRITE_COLOR_7=$d02e
+  .label SPRITE_COLOR_6=$d02d
+  .label SPRITE_Y_EXPAND=$d017
+  .label SPRITE_X_EXPAND=$d01d
+  .label COLOR_RAM=$d800
+}
+.label SOFTSPRITES=$3eb6 {
+  .label SpriteData_TARGET_Y=$3f31
+  .label BlitLookupCount=$3f69
+  .label DrawSprites=$40a2 {
+    .label COLOR_ROW=$32
+    .label TEMP=$b
+    .label SCREEN_ROW=$2e
+  }
+  .label BLIT_DATA_LSB=$41a7
+  .label BLIT_DATA_MSB=$41a8
+  .label SpriteData_CLEAR_LSB=$3f11
+  .label SpriteData_CharStart_LSB=$3f59
+  .label ColorableByte=$4123
+  .label SpriteData_CharStart_MSB=$3f61
+  .label SpriteData_CharStart=$3f51
+  .label SpriteData_CLEAR_MSB=$3f19
+  .label BlitLookup_MSB=$3f6e
+  .label MAX_SPRITES_PER_FRAME=$4
+  .label BlitLookup_LSB=$3f6a
+  .label SPRITE_FONT_START=$bb
+  .label SPRITE_FONT_DATA_START=$f5d8
+  .label SpriteColor=$3f09
+  .label SpriteData_TARGET_X_LSB=$3f29
+  .label GetFontLookup=$4188 {
+  }
+  .label SpriteData_TARGET_X_MSB=$3f21
+  .label UpdateSprites=$3fc3 {
+    .label UPDATE_INDEX=$a
+    .label COLOR_ROW=$32
+    .label UPDATE_COUNTER=$9
+    .label CHAR_DATA_LEFT=$4071
+    .label SCREEN_X=$8
+    .label SCREEN_ROW=$2e
+    .label BLIT_LOOKUP=$406e
+  }
+  .label BLIT_TABLE_START=$b000
+  .label MAX_UNIQUE_CHARS=$4
+  .label AddSprite=$3f93 {
+  }
+  .label ClearSprite=$4124 {
+    .label restoreX=$4185
+    .label SCREEN_ROW=$28
+    .label BUFFER=$2a
+  }
+  .label SpriteData_Y=$3f49
+  .label SpriteData_ID=$3f01
+  .label Initialise=$3f7a {
+  }
+  .label Times16=$3f72
+  .label SpriteUpdateIndex=$3fc2
+  .label CurrentSpriteIndex=$3f00
+  .label CreateSpriteBlitTable=$41a9 {
+    .label SHIFT_TEMP=$6
+    .label CURR_CHAR=$8
+    .label BLIT_DATA=$28
+    .label FRAME_COUNT=$7
+    .label FONT_DATA_LOOKUP=$30
+    .label SelfModLookup=$4203
+    .label OFFSET_X=$4
+    .label OFFSET_Y=$5
+    .label BLIT_DATA_RIGHT=$2a
+    .label CURR_FRAME=$9
+  }
+  .label SpriteData_X_LSB=$3f41
+  .label SpriteData_X_MSB=$3f39
+}
+.label IntroCallback=$5e19

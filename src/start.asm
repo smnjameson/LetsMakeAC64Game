@@ -12,7 +12,7 @@ BasicUpstart2(Entry)
 
 #import "intro/introtext.asm"
 
-.var music = LoadSid("../assets/sound/cuteplatform.sid")
+.var music = LoadSid("../assets/sound/phaze101/piknmix.sid")
 * = $1000 "Music"
 	.fill music.size, music.getData(i)
 	.fill $2800-*, 0
@@ -38,6 +38,7 @@ BasicUpstart2(Entry)
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
 #import "animation/titlecard.asm"
+#import "sound/sound.asm"
 
 Random: { 
         lda seed
@@ -121,6 +122,9 @@ Entry:
 
 
 	!INTRO_TRANSITION:
+		lda #$00	//Initialize current song
+		jsr $1000
+
 		lda #$00
 		sta TITLECARD.IsBonus
 		jsr TITLECARD.TransitionIn
@@ -133,6 +137,7 @@ Entry:
 				beq !IntroLoop-
 				lda #$00
 				sta TITLECARD.UpdateReady
+				jsr $1003
 				jsr TITLE_SCREEN.Update
 				bcc !IntroLoop-
 				jsr TITLE_SCREEN.Destroy
@@ -141,22 +146,10 @@ Entry:
 		jsr TITLECARD.TransitionOut
 
 
+		jsr SOUND.ClearSoundRegisters
 
 	!GAME_ENTRY:
-		// sei
-		// lda #<IRQ.MainIRQ    
-		// ldx #>IRQ.MainIRQ
-		// sta IRQ_LSB   // 0314
-		// stx IRQ_MSB	// 0315
-		
-		// lda #$e2
-		// sta $d012
-		// lda $d011
-		// and #%01111111
-		// sta $d011	
 
-		// cli
-// 
 		//Generate all sprites 
 		lda #$2b	//Flying boiled sweet
 		jsr SPRITEWARP.generate
@@ -167,7 +160,7 @@ Entry:
 		lda #$1c	//Flying saucer
 		jsr SPRITEWARP.generate
 
-		lda #$01	//Initialize current song
+		lda #$03	//Initialize current song
 		jsr $1000
 		
 
@@ -239,6 +232,7 @@ Entry:
 			jsr PIPES.Update
 			jsr HUD.DrawLives
 			jsr HUD.Update
+			jsr SOUND.UpdateTrackDisplay
 			jsr PLATFORMS.UpdateColorOrigins
 			jsr DOOR.Update
 			jsr $1003

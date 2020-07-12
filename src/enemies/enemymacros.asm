@@ -372,7 +372,9 @@ CheckVsPlayerEat: {
 		//Is enemy in range on X
 		lda XY_DIFF
 		cmp #X_THRESHOLD
-		bcs !End+
+		bcc !Skip1+
+		jmp !End+
+	!Skip1:
 
 		//Check if player is in Y range
 		ldy TEMP10
@@ -395,6 +397,7 @@ CheckVsPlayerEat: {
 		lda TEMP9
 		sta ENEMIES.EnemyEatOffsetY, x //Store offset for moving enemy to player
 		jsr BEHAVIOURS.AbsorbBehaviour.setup
+		
 		jmp BEHAVIOURS.AbsorbBehaviour.update
 
 
@@ -510,6 +513,8 @@ CheckVsProjectiles: {
 		jmp !+
 
 	!Collide:
+		:playSFX(SOUND.PlayerShoot)
+		
 		lda ENEMIES.EnemyState, x
 		and #%01111100
 		ora #%01000000

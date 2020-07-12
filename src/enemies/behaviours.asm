@@ -717,6 +717,8 @@ BEHAVIOURS: {
 			lda #$01 //Frame timer
 			sta ENEMIES.EnemyEatenCounter, x
 
+			:playSFX(SOUND.PlayerEat)
+			
 			rts
 		}
 

@@ -821,6 +821,8 @@ PLAYER: {
 				lda TEMP //Player 1 = 00
 				ldy #$01 //Projectile Type
 				jsr PROJECTILES.SpawnProjectile
+				:playSFX(SOUND.PlayerHit)
+
 			!:
 				jmp !SetFrame+
 
@@ -1652,6 +1654,7 @@ PLAYER: {
 			beq !NotFalling+
 			lda #$08
 			sta IRQ.ScreenShakeTimer
+			:playSFX(SOUND.PlayerGroundShake)
 			jmp !NotFalling+
 
 		!Falling:

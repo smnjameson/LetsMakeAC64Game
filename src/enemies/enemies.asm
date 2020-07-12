@@ -221,13 +221,15 @@ ENEMIES: {
 			jsr UTILS.GetSpriteCollision
 			ldy ENEMY_COLLISION_TEMP1
 
-			bcc !Next+	
-
+			bcs !+
+			jmp !Next+	
+		!:
 			//Player has hit the enemy
 				lda EnemyType, y
 				bpl !+
 
 			//We've hit a powerup!
+				:playSFX(SOUND.PlayerBonus)
 				stx POWERUP_PLAYER_NUM
 				pha
 				tya 
@@ -281,6 +283,8 @@ ENEMIES: {
 			!:
 
 				//Initiate a jump for death anim
+				:playSFX(SOUND.PlayerDeath)
+
 				lda PLAYER.Player1_State, x
 				and #[255 - (STATE_FALL + STATE_JUMP)]
 				ora #STATE_JUMP

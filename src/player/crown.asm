@@ -379,6 +379,7 @@ CROWN: {
 			.label Sprite1_YOFF = COLLISION_POINT_Y_OFFSET
 			.label Sprite2_YOFF = COLLISION_POINT_Y1_OFFSET
 
+			
 
 			//Define crown dimenisons
 			lda #<Crown_X
@@ -437,6 +438,7 @@ CROWN: {
 			bcc !+
 			lda #$01
 			sta PlayerHasCrown
+			:playSFX(SOUND.PlayerCrown)
 			jmp !Exit+
 		!:
 
@@ -477,6 +479,7 @@ CROWN: {
 			bcc !+
 			lda #$02
 			sta PlayerHasCrown
+			:playSFX(SOUND.PlayerCrown)
 			jmp !Exit+
 		!:
 

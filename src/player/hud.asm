@@ -24,6 +24,21 @@ HUD: {
 
 
 
+			jsr ColorTheMeter
+
+			jsr UpdateEatMeter
+
+			lda #$00
+			sta PreviousPlayersActive
+
+			jsr Update
+			rts
+
+
+	}
+
+
+	ColorTheMeter: {
 			//Color the meter
 			ldx #$0e
 			lda #$0e
@@ -38,20 +53,8 @@ HUD: {
 			sta VIC.COLOR_RAM + 24 * 40 + 12
 			sta VIC.COLOR_RAM + 23 * 40 + 27
 			sta VIC.COLOR_RAM + 24 * 40 + 27
-
-			jsr UpdateEatMeter
-
-			lda #$00
-			sta PreviousPlayersActive
-
-			jsr Update
 			rts
-
-
 	}
-
-
-
 
 
 		.encoding "screencode_upper"
@@ -320,7 +323,10 @@ HUD: {
 	}
 
 	UpdateEatMeter: {
-			
+			lda SOUND.TrackDisplayState
+			beq !+
+			rts
+		!:
 			clc
 			lda PLAYER.Player1_EatCount
 			adc PLAYER.Player2_EatCount
