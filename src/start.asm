@@ -48,7 +48,7 @@ Random: {
         bcc noEor
     doEor:    
         eor #$1d
-        eor $dc04
+        // eor $dc04
         // eor $dd04	
     noEor:  
         sta seed
@@ -58,8 +58,9 @@ Random: {
 
 
     init: 
-        lda #$ff
+        lda #$13
         sta $dc05
+        lda #$ff
         sta $dd05
         lda #$7f
         sta $dc04
@@ -113,6 +114,7 @@ Entry:
 		sta VIC.MEMORY_SETUP
 		jsr Random.init
 
+
 		//Setup generated tables
 		lda #180
 		ldx #$04
@@ -138,15 +140,17 @@ Entry:
 				lda #$00
 				sta TITLECARD.UpdateReady
 				jsr $1003
+				jsr Random
 				jsr TITLE_SCREEN.Update
 				bcc !IntroLoop-
 				jsr TITLE_SCREEN.Destroy
 
-
+		jsr SOUND.ClearSoundRegisters
 		jsr TITLECARD.TransitionOut
 
 
-		jsr SOUND.ClearSoundRegisters
+		
+		
 
 	!GAME_ENTRY:
 
@@ -160,9 +164,7 @@ Entry:
 		lda #$1c	//Flying saucer
 		jsr SPRITEWARP.generate
 
-		lda #$03	//Initialize current song
-		jsr $1000
-		
+		jsr SOUND.SelectRandomGameTrack
 
 		// jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise

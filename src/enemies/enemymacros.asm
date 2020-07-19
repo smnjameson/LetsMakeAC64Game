@@ -285,7 +285,7 @@ snapEnemyToFloor: {
 		sec
 		sbc #$05
 		and #$f8
-		ora #$07
+		ora #$05
 		sta ENEMIES.EnemyPosition_Y1, x
 		rts
 }
@@ -294,24 +294,36 @@ snapEnemyToFloor: {
 		jsr CheckVsProjectiles
 }
 
-.macro exitIfStunned() {
-		jsr exitIfStunnedSR
-}
+// .macro exitIfStunned() {
+// 		jsr exitIfStunnedSR
+// }
 
-exitIfStunnedSR: {
+.macro exitIfStunned() {
 		lda ENEMIES.EnemyState, x 
 		and #ENEMIES.STATE_STUNNED
 		beq !Exit+
-		pla
-		pla
 		lda ENEMIES.EnemyEatenBy, x
 		beq !+
 		jmp BEHAVIOURS.AbsorbBehaviour.update
 	!:
 		jmp CheckVsPlayerEat
 	!Exit:
-		rts
 }
+
+// exitIfStunnedSR: {
+// 		lda ENEMIES.EnemyState, x 
+// 		and #ENEMIES.STATE_STUNNED
+// 		beq !Exit+
+// 		pla
+// 		pla
+// 		lda ENEMIES.EnemyEatenBy, x
+// 		beq !+
+// 		jmp BEHAVIOURS.AbsorbBehaviour.update
+// 	!:
+// 		jmp CheckVsPlayerEat
+// 	!Exit:
+// 		rts
+// }
 
 CheckVsPlayerEat: {
 		.label X_THRESHOLD = $30
@@ -513,7 +525,7 @@ CheckVsProjectiles: {
 		jmp !+
 
 	!Collide:
-		:playSFX(SOUND.PlayerShoot)
+		:playSFX(SOUND.PlayerHit)
 		
 		lda ENEMIES.EnemyState, x
 		and #%01111100

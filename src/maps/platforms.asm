@@ -70,6 +70,7 @@ PLATFORMS: {
 			bne !+
 			beq !Skip+
 		!:
+
 			jsr FillPlatform
 
 		!Skip:
@@ -133,6 +134,8 @@ PLATFORMS: {
 			ldy #$00
 			lda NEW_COLOR,x
 			sta (PLATFORM_LOOKUP), y
+			:playSFX(SOUND.FloorColorChange)
+			
 			jmp !DoneLeft+
 		!LeftComplete:
 			inc PLATFORM_COMPLETE
@@ -168,6 +171,7 @@ PLATFORMS: {
 
 			lda NEW_COLOR,x
 			sta (PLATFORM_LOOKUP), y
+			:playSFX(SOUND.FloorColorChange)
 			jmp !DoneRight+
 		!RightComplete:
 			inc PLATFORM_COMPLETE

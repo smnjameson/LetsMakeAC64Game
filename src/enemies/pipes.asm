@@ -156,6 +156,10 @@ PIPES: {
 			sta PipeEnemyType, x
 			inc NextEnemyIndex
 
+
+			:playSFX(SOUND.EnemyPipeStart)
+			
+
 		!SpawnCheckComplete:
 
 			dec SpawnDelayTimer
@@ -378,6 +382,8 @@ PIPES: {
 
 			jsr ENEMIES.SpawnEnemy
 
+			:playSFX(SOUND.EnemyPipeSpawn)
+			
 			pla
 			tax
 			rts

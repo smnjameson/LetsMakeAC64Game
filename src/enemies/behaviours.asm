@@ -1,4 +1,6 @@
 BEHAVIOURS: {
+	NumberOfEnemyBehaviours:
+		.byte (EnemyMSB-EnemyLSB / 2)
 
 	EnemyLSB:
 		.byte <PowerUp

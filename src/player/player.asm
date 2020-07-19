@@ -184,9 +184,9 @@ PLAYER: {
 
 	Player_Size:
 	Player1_Size:
-			.byte $00
+			.byte $01
 	Player2_Size:
-			.byte $00
+			.byte $02
 
 	.label PLAYER_SIZE_TIME = $40
 	Player_Size_Timer:
@@ -821,7 +821,10 @@ PLAYER: {
 				lda TEMP //Player 1 = 00
 				ldy #$01 //Projectile Type
 				jsr PROJECTILES.SpawnProjectile
-				:playSFX(SOUND.PlayerHit)
+
+
+				:playSFX(SOUND.PlayerShoot)
+				
 
 			!:
 				jmp !SetFrame+
@@ -1676,7 +1679,7 @@ PLAYER: {
 			sec
 			sbc #$05
 			and #$f8
-			ora #$07
+			ora #$06
 			sta (PlayerY), y
 		!:
 

@@ -53,7 +53,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,255,2,255,4,3
+			.byte 1,255,2,255,3,4
 		__EnemyList:
 			.byte 0
 

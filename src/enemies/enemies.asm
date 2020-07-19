@@ -409,6 +409,11 @@ ENEMIES: {
 
 				
 			ldx INDEX
+			cpx BEHAVIOURS.NumberOfEnemyBehaviours
+			bcc !+
+				// .break //Should only happen if crash!
+			rts
+		!:	
 		SelfMod: //TODO : Investigate re: CPU JAM
 					//seems to be incorrect x index
 					//CPU JAM #1 addr was set to $771e

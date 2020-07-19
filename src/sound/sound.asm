@@ -1,6 +1,6 @@
 SOUND: {
 	CurrentGameTrack:
-		.byte $00
+		.byte $ff
 
 	TrackDisplayState:
 		.byte $01
@@ -28,12 +28,16 @@ SOUND: {
 			sta $d404
 			sta $d40b
 			sta $d412
+			lda #$00
+			sta $d418
 			rts
 	}
 
 	SelectRandomGameTrack: {
 		!:
 			jsr Random
+			lsr
+			lsr
 			and #$0f
 			cmp #$09
 			bcs !-

@@ -7,9 +7,10 @@ IRQ: {
 		.byte $00
 
 	ScreenShakeValues:
-		// .byte 3,3,4,3,5,3,6,3,6
+		.byte 3,4,3,5,3,6,3,6,3
+		// .byte 1,1,1,1,1,1,1,1,1
 		// .byte 4,4,4,4,5,4,6,4,6
-		.byte 3,3,3,3,3,3,3,3
+		// .byte 3,3,3,3,3,3,3,3
 		
 	Setup: {
 		sei
@@ -72,9 +73,16 @@ IRQ: {
 		!:
 			dex
 			bne !-
-
+			
 			ldx #BLACK
 			stx VIC.BACKGROUND_COLOR
+
+			ldx $d012
+			inx
+			cpx $d012
+			bne *-3
+
+
 
 			lda #$00	//Hide sprites
 			sta $d00c
@@ -120,6 +128,7 @@ IRQ: {
 			sta SCREEN_SHAKE_VAL
 
 
+
 			lda #<SecondIRQ    
 			ldx #>SecondIRQ
 			sta IRQ_LSB   // 0314
@@ -143,12 +152,13 @@ IRQ: {
 	SecondIRQ: {
 		:StoreState()
 
-			lda TRANSITION.TransitionHUDActive
-			beq !+
-			jmp HudFLDIRQSetup
-		!:
+		// 	lda TRANSITION.TransitionHUDActive
+		// 	beq !+
+		// 	jmp HudFLDIRQSetup
+		// !:
 			//Reset Values set by IRQ	
 			*=*"BG Color"
+
 			lda #$06
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_1
@@ -165,9 +175,10 @@ IRQ: {
 			//Now shake the screen
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000
+			// ora #$00
 			ora SCREEN_SHAKE_VAL
 			clc
-			adc #$03
+			// adc #$03
 			sta VIC.SCREEN_CONTROL_1	
 
 			
@@ -178,7 +189,7 @@ IRQ: {
 			sta IRQ_LSB   // 0314
 			stx IRQ_MSB	// 0315
 
-			lda #$e2 //Adjust for screen Vscroll
+			lda #$df //Adjust for screen Vscroll
 			clc
 			adc SCREEN_SHAKE_VAL
 			sta $d012

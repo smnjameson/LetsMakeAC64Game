@@ -278,6 +278,9 @@ PROJECTILES: {
 			lda COLOR_LOOKUP + 0
 			ldy COLOR_LOOKUP + 1
 			jsr PLATFORMS.AddNewColorOrigin
+
+			
+			
 		// !b1:
 		// 	jmp !b1-
 

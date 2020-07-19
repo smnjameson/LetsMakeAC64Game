@@ -115,6 +115,12 @@ DOOR: {
 
 		!FullyActivateSwitch:
 			ldy #$00
+			lda (DOOR_VECTOR1), y
+			cmp #$44
+			beq !+
+			// :playSFX(SOUND.PressSwitchFull)
+			:playSFX(SOUND.DoorAppear)
+		!:			
 			lda #$44
 			sta (DOOR_VECTOR1), y
 			iny
@@ -130,6 +136,11 @@ DOOR: {
 
 		!SwitchOnAndPartialActive:
 			ldy #$00
+			lda (DOOR_VECTOR1), y
+			cmp #$40
+			beq !+
+			:playSFX(SOUND.PressSwitchLite)
+		!:
 			lda #$40
 			sta (DOOR_VECTOR1), y
 			iny
@@ -141,6 +152,9 @@ DOOR: {
 			iny
 			lda #$43
 			sta (DOOR_VECTOR1), y
+
+		
+
 			jmp !Exit+
 
 
@@ -256,7 +270,7 @@ DOOR: {
 			ldy PLAYER.Player_Size, x
 			lda PlayerSizeAnimIndexStart, y
 			sta PLAYER.Player_ExitIndex, x
-
+			:playSFX(SOUND.DoorExit)
 		!Skip:
 			dex
 			bpl !Loop-
