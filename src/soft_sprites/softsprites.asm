@@ -374,6 +374,11 @@ SOFTSPRITES: {
 			.label SCREEN_ROW = VECTOR1
 			.label BUFFER = VECTOR2
 
+				lda SpriteData_CLEAR_MSB, x
+				ora SpriteData_CLEAR_LSB, x
+				bne !+
+				rts
+			!:
 				/*
 					 OPtimisation is to not restore color
 					 however this recudes the variance in BG graphics
@@ -390,7 +395,7 @@ SOFTSPRITES: {
 				lda SCREEN_ROW + 1
 				clc
 				adc #[$d8 - [>SCREEN_RAM]]
-				sta COLOR_RESTORE + 1 
+				sta COLOR_RESTORE + 1  
 
 
 				lda SpriteData_CLEAR_LSB, x

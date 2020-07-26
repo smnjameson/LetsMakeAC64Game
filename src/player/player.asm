@@ -184,9 +184,9 @@ PLAYER: {
 
 	Player_Size:
 	Player1_Size:
-			.byte $01
+			.byte $00
 	Player2_Size:
-			.byte $02
+			.byte $00
 
 	.label PLAYER_SIZE_TIME = $40
 	Player_Size_Timer:

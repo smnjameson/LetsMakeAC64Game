@@ -73,6 +73,77 @@ UpdatePositionSR01: {
 		sta ENEMIES.EnemyPosition_Y1, x 
 		rts
 }
+
+CheckScreenEdges: {
+	
+	!CheckLeft:
+		lda ENEMIES.EnemyState, x
+		and #ENEMIES.STATE_WALK_LEFT
+		beq !CheckRight+
+
+		:getEnemyCollisions(8, 15)
+		tay
+		lda CHAR_COLORS, y
+		and #UTILS.COLLISION_SOLID
+		bne !Change+
+
+		lda ENEMIES.EnemyPosition_X2, x
+		bne !Done+
+		lda ENEMIES.EnemyPosition_X1, x
+		cmp #$18
+		bcs !Done+
+
+
+	!Change:
+		//ChangeDir
+		lda ENEMIES.EnemyState, x
+		and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
+		ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
+		sta ENEMIES.EnemyState, x
+
+		lda #$00
+		rts
+
+	!CheckRight:
+		lda ENEMIES.EnemyState, x
+		and #ENEMIES.STATE_WALK_RIGHT
+		beq !Done+
+
+		:getEnemyCollisions(16, 15)
+		tay
+		lda CHAR_COLORS, y
+		and #UTILS.COLLISION_SOLID
+		bne !Change+
+
+		lda ENEMIES.EnemyPosition_X2, x
+		beq !Done+
+		lda ENEMIES.EnemyPosition_X1, x
+		cmp #$40
+		bcc !Done+
+
+	!Change:
+		//ChangeDir
+		lda ENEMIES.EnemyState, x
+		and #[255 -[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]]
+		ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
+		sta ENEMIES.EnemyState, x
+
+		lda #$00
+		rts
+
+	!Done:
+		lda #$01
+		rts
+}
+ChangeDirToRight: {
+	lda ENEMIES.EnemyState, x
+	and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
+	ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
+	sta ENEMIES.EnemyState, x
+	rts
+}
+
+
 UpdatePositionSR02: {
 		clc
 		lda ENEMIES.EnemyPosition_X0, x

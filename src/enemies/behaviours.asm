@@ -8,6 +8,7 @@ BEHAVIOURS: {
 		.byte <Enemy_002
 		.byte <Enemy_003
 		.byte <Enemy_004
+		.byte <Enemy_005
 
 	EnemyMSB:
 		.byte >PowerUp
@@ -15,6 +16,7 @@ BEHAVIOURS: {
 		.byte >Enemy_002
 		.byte >Enemy_003
 		.byte >Enemy_004
+		.byte >Enemy_005
 
 
 	.label BEHAVIOUR_SPAWN = 0;
@@ -435,10 +437,7 @@ BEHAVIOURS: {
 				beq !CheckRight+
 
 				//Do walk left
-				:getEnemyCollisions(0, 21)
-				tay
-				lda CHAR_COLORS, y
-				and #UTILS.COLLISION_COLORABLE
+				jsr CheckScreenEdges
 				beq !ChangeDir+
 			!WalkLeft:
 				:UpdatePosition(-$080, $000)
@@ -451,22 +450,16 @@ BEHAVIOURS: {
 				jmp !Done+
 
 			!ChangeDir:
-				:setEnemyFrame(21)
-				lda ENEMIES.EnemyState, x
-				and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
-				ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
-				sta ENEMIES.EnemyState, x
+				:setEnemyFrame(31)
 				jmp !Done+
 				
 
 			!CheckRight:
 				bit TABLES.Plus + ENEMIES.STATE_WALK_RIGHT
 				beq !+
+
 				//Do Walk right
-				:getEnemyCollisions(24, 21)
-				tay
-				lda CHAR_COLORS, y
-				and #UTILS.COLLISION_COLORABLE
+				jsr CheckScreenEdges
 				beq !ChangeDir+
 			!WalkRight:
 				:UpdatePosition($080, $000)
@@ -479,11 +472,7 @@ BEHAVIOURS: {
 				jmp !Done+
 
 			!ChangeDir:
-				:setEnemyFrame(16)
-				lda ENEMIES.EnemyState, x
-				and #[255 -[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]]
-				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
-				sta ENEMIES.EnemyState, x
+				:setEnemyFrame(36)
 				// jmp !Done+
 			!:
 
@@ -602,7 +591,126 @@ BEHAVIOURS: {
 	}
 
 
+	//CANDY CANE - Enemy walks back and forth on platforms
+	//				but jumps at the edges
+	Enemy_005: {
+			jmp !OnSpawn+ 
+			jmp !OnUpdate+ 
+			jmp !OnDeath+
 
+			.label WALK_FRAME = $00
+			.label JUMP_TIMER = $01
+			.label JUMP_INDEX = $02
+
+		JumpLeft:
+			.byte $28,$29,$2a
+		__JumpLeft:
+		JumpRight:
+			.byte $25,$26,$27
+		__JumpRight:
+
+		!OnSpawn:
+				//Set pointer
+				lda JumpLeft
+				:setEnemyFrame(0)
+				:setEnemyColor(1, null)
+
+				jsr Random
+				bmi !faceRight+
+
+			!faceLeft:
+				lda ENEMIES.EnemyState, x
+				ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
+				sta ENEMIES.EnemyState, x
+				lda JumpLeft
+				bne !faceDone+
+
+			!faceRight:
+				lda ENEMIES.EnemyState, x
+				ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
+				sta ENEMIES.EnemyState, x
+				lda JumpRight
+
+			!faceDone:
+				:setEnemyFrame(0)
+				// :setStaticMemory(WALK_FRAME, 0)
+
+				jsr Random
+				and #$7f
+				clc
+				adc #$32
+				:setStaticMemory(JUMP_TIMER, null)
+
+				:setStaticMemory(JUMP_INDEX, $ff)				
+				rts
+
+		!OnUpdate:
+				:exitIfStunned()
+				:setEnemyColor(1, null)
+
+				:hasHitProjectile()
+			
+				lda PLAYER.Player_Freeze_Active
+				bne !Skip+
+
+				//Check if enemy is already in a jump anmimation
+				:getStaticMemory(JUMP_INDEX)
+				bpl !DoJumpRoutine+
+
+				//Should I fall??				
+				:doFall(12, 21) //Check below enemy and fall if needed
+				bcc !+
+				jmp !Done+
+			!:
+
+				//Snap enemy to floor
+				jsr snapEnemyToFloor
+
+				:getStaticMemory(JUMP_TIMER)
+				tay
+				dey
+				tya
+				:setStaticMemory(JUMP_TIMER, 0) 
+				bne !Done+
+				:setStaticMemory(JUMP_INDEX, 0)	
+
+				//Now do jump routine
+			!DoJumpRoutine:
+				:getStaticMemory(JUMP_INDEX)
+				tay 
+
+				lda TABLES.JumpAndFallTable, y
+				sta BEHAVIOUR_TEMP1
+				lda ENEMIES.EnemyPosition_Y1, x
+				sec
+				sbc BEHAVIOUR_TEMP1
+				sta ENEMIES.EnemyPosition_Y1, x
+				// dec ENEMIES.EnemyPosition_Y1, x
+				iny
+				cpy #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable - 1]
+				bne !+
+				
+				//Reset jump timer
+				jsr Random
+				and #$7f
+				clc
+				adc #$32
+				:setStaticMemory(JUMP_TIMER, null)
+
+				ldy #$ff
+			!:
+				tya
+				:setStaticMemory(JUMP_INDEX, null)
+
+			!Done:	
+			!Skip:
+			
+				:PositionEnemy()
+				rts
+
+		!OnDeath:
+				rts
+	}
 
 
 

@@ -94,6 +94,8 @@ DOOR: {
 
 			//Check player 1 first
 		!Player1:
+			lda PLAYER.PlayersActive + 0
+			beq !DonePlayerChecks+
 			lda PLAYER.Player1_FloorANDCollision
 			and #$40
 			beq !Player2+
@@ -102,6 +104,8 @@ DOOR: {
 			jmp !SwitchOnAndPartialActive+
 
 		!Player2:
+			lda PLAYER.PlayersActive + 1
+			beq !DonePlayerChecks+
 			lda PLAYER.Player2_FloorANDCollision
 			and #$40
 			beq !DonePlayerChecks+
@@ -118,9 +122,9 @@ DOOR: {
 			lda (DOOR_VECTOR1), y
 			cmp #$44
 			beq !+
-			// :playSFX(SOUND.PressSwitchFull)
-			:playSFX(SOUND.DoorAppear)
-		!:			
+			:playSFX(SOUND.PressSwitchFull)
+			// :playSFX(SOUND.DoorAppear)
+		!:		
 			lda #$44
 			sta (DOOR_VECTOR1), y
 			iny
@@ -135,12 +139,14 @@ DOOR: {
 			jmp !Exit+
 
 		!SwitchOnAndPartialActive:
+
 			ldy #$00
 			lda (DOOR_VECTOR1), y
 			cmp #$40
 			beq !+
 			:playSFX(SOUND.PressSwitchLite)
 		!:
+
 			lda #$40
 			sta (DOOR_VECTOR1), y
 			iny

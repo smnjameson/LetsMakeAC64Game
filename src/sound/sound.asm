@@ -183,35 +183,47 @@ SOUND: {
 			rts
 	}
 
-
+/*
+sfx 01. player fires shot
+sfx 02. player hits enemy with shot
+sfx 08. player shoots floor (color change)
+sfx 07. player makes ground shake (fat)
+sfx 06. player eats
+sfx 11. switch lightly pressed
+sfx 09. enemy begins moving through pipe
+sfx 10. enemy appears out of pipe
+sfx 03. player collects bonus
+sfx 04. player collects crown
+sfx 12. switch fully pressed & door appears
+sfx 14. player exits through door
+sfx 05. player death
+*/
 	PlayerShoot:
 		.import binary "../../assets/sound/phaze101/sfx_1.bin"
 	PlayerHit:
 		.import binary "../../assets/sound/phaze101/sfx_2.bin"
-	PlayerBonus:
-		.import binary "../../assets/sound/phaze101/sfx_3.bin"
-	PlayerCrown:
-		.import binary "../../assets/sound/phaze101/sfx_4.bin"
-	PlayerDeath:
-		.import binary "../../assets/sound/phaze101/sfx_5.bin"
-	PlayerEat:
-		.import binary "../../assets/sound/phaze101/sfx_6.bin"
-	PlayerGroundShake:
-		.import binary "../../assets/sound/phaze101/sfx_7.bin"
 	FloorColorChange:
 		.import binary "../../assets/sound/phaze101/sfx_8.bin"
+	PlayerGroundShake:
+		.import binary "../../assets/sound/phaze101/sfx_7.bin"
+	PlayerEat:
+		.import binary "../../assets/sound/phaze101/sfx_6.bin"
+	PressSwitchLite:
+		.import binary "../../assets/sound/phaze101/sfx_11.bin"
 	EnemyPipeStart:
 		.import binary "../../assets/sound/phaze101/sfx_9.bin"
 	EnemyPipeSpawn:
 		.import binary "../../assets/sound/phaze101/sfx_10.bin"
-	PressSwitchLite:
-		.import binary "../../assets/sound/phaze101/sfx_11.bin"
+	PlayerBonus:
+		.import binary "../../assets/sound/phaze101/sfx_3.bin"
+	PlayerCrown:
+		.import binary "../../assets/sound/phaze101/sfx_4.bin"
 	PressSwitchFull:
 		.import binary "../../assets/sound/phaze101/sfx_12.bin"
-	DoorAppear:
-		.import binary "../../assets/sound/phaze101/sfx_13.bin"
 	DoorExit:
 		.import binary "../../assets/sound/phaze101/sfx_14.bin"
+	PlayerDeath:
+		.import binary "../../assets/sound/phaze101/sfx_5.bin"
 
 }
 

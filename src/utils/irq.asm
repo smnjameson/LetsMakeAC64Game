@@ -69,7 +69,7 @@ IRQ: {
 
 	MainIRQ: {		
 		:StoreState()
-			ldx #$03
+			ldx #$06
 		!:
 			dex
 			bne !-
@@ -189,7 +189,7 @@ IRQ: {
 			sta IRQ_LSB   // 0314
 			stx IRQ_MSB	// 0315
 
-			lda #$df //Adjust for screen Vscroll
+			lda #$de //Adjust for screen Vscroll
 			clc
 			adc SCREEN_SHAKE_VAL
 			sta $d012
