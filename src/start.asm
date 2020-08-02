@@ -26,7 +26,7 @@ BasicUpstart2(Entry)
 #import "player/crown.asm"
 #import "animation/charanimations.asm"
 #import "soft_sprites/softsprites.asm"
-#import "animation/spritewarp.asm"
+// #import "animation/spritewarp.asm"
 
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
@@ -49,7 +49,7 @@ Random: {
     doEor:    
         eor #$1d
         // eor $dc04
-        // eor $dd04	
+        // eor $dd04
     noEor:  
         sta seed
         rts
@@ -153,26 +153,13 @@ Entry:
 		
 
 	!GAME_ENTRY:
-
-		//Generate all sprites 
-		lda #$2b	//Flying boiled sweet
-		jsr SPRITEWARP.generate
-		lda #$13	//Jelly bean
-		jsr SPRITEWARP.generate
-		lda #$22	//Cola bottle	
-		jsr SPRITEWARP.generate
-		lda #$1c	//Flying saucer
-		jsr SPRITEWARP.generate
-
 		jsr SOUND.SelectRandomGameTrack
-
-		// jsr MAPLOADER.DrawMap
  		jsr PLAYER.Initialise
 		jsr HUD.Initialise
 		jsr IRQ.InitGameIRQ
 
 		jsr SOFTSPRITES.Initialise
-		jsr SPRITEWARP.init
+		// jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
 		jsr CROWN.Initialise
 		jsr DOOR.Initialise

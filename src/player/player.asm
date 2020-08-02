@@ -1547,6 +1547,7 @@ PLAYER: {
 			.label PlayerY = VECTOR4
 			.label PlayerSize = VECTOR5
 
+
 			.label CURRENT_PLAYER = TEMP1
 
 		lda #$02
@@ -1655,6 +1656,10 @@ PLAYER: {
 			lda (PlayerState), y
 			and #STATE_FALL
 			beq !NotFalling+
+
+			lda (PlayerJumpIndex), y
+			cmp #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable - 5]
+			bcs !NotFalling+			
 			lda #$08
 			sta IRQ.ScreenShakeTimer
 			:playSFX(SOUND.PlayerGroundShake)

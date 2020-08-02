@@ -10,8 +10,8 @@
 .label SPRITE_POINTERS = SCREEN_RAM + $3f8
 
 
-* = $6c00 "Generated warped sprites"
-	.fill 80 * 64, 0
+* = $7e00 "Absorb animation sprites"
+	.import binary "../../assets/sprites/absorb_anim.bin"
 
 
 * = $c400 "Enemy Sprites" //Start at frame #16/$10

@@ -75,7 +75,21 @@ UpdatePositionSR01: {
 }
 
 CheckScreenEdges: {
-	
+		//First check both directions
+		//and dont change if both are blocked
+		:getEnemyCollisions(8, 15)
+		tay
+		lda CHAR_COLORS, y
+		and #UTILS.COLLISION_SOLID
+		sta BEHAVIOUR_TEMP1
+		:getEnemyCollisions(16, 15)
+		tay
+		lda CHAR_COLORS, y
+		and #UTILS.COLLISION_SOLID
+		and BEHAVIOUR_TEMP1
+		beq !CheckLeft+
+		jmp !Done+
+		
 	!CheckLeft:
 		lda ENEMIES.EnemyState, x
 		and #ENEMIES.STATE_WALK_LEFT
