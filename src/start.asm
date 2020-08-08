@@ -25,6 +25,7 @@ BasicUpstart2(Entry)
 #import "player/hud.asm"
 #import "player/crown.asm"
 #import "animation/charanimations.asm"
+#import "animation/messages.asm"
 #import "soft_sprites/softsprites.asm"
 // #import "animation/spritewarp.asm"
 
@@ -164,6 +165,7 @@ Entry:
 		jsr CROWN.Initialise
 		jsr DOOR.Initialise
 		jsr BONUS.Initialise
+		jsr MESSAGES.Initialise
 
 
 			// inc $d020

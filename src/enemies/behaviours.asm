@@ -191,6 +191,7 @@ BEHAVIOURS: {
 		!Finished:
 			lda #$00
 			sta ENEMIES.EnemyType, x
+			// jsr MESSAGES.AddMessage
 			rts	//No need to continue	
 
 		!NotFinished:

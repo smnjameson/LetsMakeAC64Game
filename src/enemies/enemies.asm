@@ -69,6 +69,12 @@ ENEMIES: {
 
 
 	Initialise: {
+			ldx #$09
+			lda #$00
+		!:
+			sta $d000, x
+			dex
+			bpl !-
 			rts
 	}
 
@@ -82,9 +88,9 @@ ENEMIES: {
 			lda EnemyType, y
 			bne !Active+
 		//EnemyIsNotActive
-			lda VIC.SPRITE_ENABLE
-			and TABLES.InvPowerOfTwo, y
-			sta VIC.SPRITE_ENABLE	
+			// lda VIC.SPRITE_ENABLE
+			// ora TABLES.InvPowerOfTwo, y
+			// sta VIC.SPRITE_ENABLE	
 			jmp !Skip+
 
 		!Active:
@@ -234,6 +240,12 @@ ENEMIES: {
 				pha
 				tya 
 				tax 
+				//Hide sprite
+				// asl 
+				// tay 
+				// lda #$00
+				// sta $d001, y
+
 				pla
 				ldy #$06
 				jsr CallBehaviour
@@ -361,9 +373,16 @@ ENEMIES: {
 			sta EnemyEatenIndex, x
 			sta EnemyEatenCounter, x
 
+			//Set multicolor mode
+			lda $d01c
+			ora TABLES.PowerOfTwo, x
+			sta $d01c
+
 			//Type
 			pla
 			sta EnemyType, x
+
+
 
 			//TODO: Investigate possible crash
 			// bmi !+
