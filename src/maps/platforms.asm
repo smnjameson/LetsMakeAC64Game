@@ -19,7 +19,13 @@ PLATFORMS: {
 			// .break
 			stx PLATFORM_TEMP //X = DO NOT BASH
 			pha
-			lda PROJECTILES.Player_Projectile_Color, x
+			txa 
+			lsr
+			tax 
+			lda PLAYER.PlayerColors, x
+			clc
+			adc #$08
+			// lda PROJECTILES.Player_Projectile_Color, x
 
 			ldx NEXT_COLOR_INDEX
 			sta NEW_COLOR, x 

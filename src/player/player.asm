@@ -57,10 +57,11 @@ PLAYER: {
 			.byte $00
 
 	PlayerColors:
-			.byte $02, $05
+			.byte $02, $03
+
 	PlayerInvulnRamp:
 		.byte $01,$0a,$08,$0b,$02,$0b,$08,$0a
-		.byte $01,$0d,$0d,$0b,$05,$0b,$0d,$0d
+		.byte $01,$0e,$0e,$0b,$03,$0b,$0e,$0e
 			// .byte $07,$0f,$06,$0e,$06,$0f,$07,$01
 
 	DefaultLeftRightFrames:
@@ -211,6 +212,13 @@ PLAYER: {
 			.byte $00
 	Player2_PowerupTimer:
 			.byte $00
+	PlayerFloorColor:
+	Player1FloorColor:
+			.byte $00
+	Player2FloorColor:
+			.byte $00
+	PlayerAbsorbingCount:
+			.byte $00,$00
 
 	Player_Freeze_Active:
 			.byte $00
@@ -411,7 +419,8 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		sta Player1_FloorCollision
 		sta Player1_FloorANDCollision
-
+		jsr UTILS.GetColorAt
+		sta Player1FloorColor
 		
 		lda #$00
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
@@ -426,6 +435,12 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		and Player1_FloorANDCollision
 		sta Player1_FloorANDCollision
+		jsr UTILS.GetColorAt
+		cmp Player1FloorColor
+		beq !+
+		lda #$01
+	!:
+		sta Player1FloorColor
 
 
 
@@ -503,14 +518,15 @@ PLAYER: {
 		ldy #20
 		jsr PLAYER.GetCollisionPoint
 
-		
-
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta Player2_FloorCollision
 		sta Player2_FloorANDCollision
-		
+		jsr UTILS.GetColorAt
+		sta Player2FloorColor
+
+
 		lda #$01
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
 		ldy #20
@@ -524,6 +540,13 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		and Player2_FloorANDCollision
 		sta Player2_FloorANDCollision
+		jsr UTILS.GetColorAt
+		cmp Player2FloorColor
+		beq !+
+		lda #$01
+	!:
+		sta Player2FloorColor
+
 
 		//Get Left Collision
 		lda #$00
@@ -1279,6 +1302,10 @@ PLAYER: {
 	}
 
 	PlayerControlFunc: {
+			lda PlayerAbsorbingCount, y
+			beq !+
+			rts
+		!:
 			.label JOY_PORT_2 = $dc00
 			lda JOY_PORT_2, y
 			sta JOY_ZP1, y
@@ -1645,6 +1672,7 @@ PLAYER: {
 			jmp !SkipEntireIteration+
 
 		!CheckCol:
+			
 			lda (PlayerFloorCollision),y
 			and #UTILS.COLLISION_SOLID
 			beq !Falling+
@@ -1821,9 +1849,13 @@ PLAYER: {
 			rts
 	}
 
+
+
+
+
 	ColorSwitchTable:
 			.byte $00,$01,$02,$03,$04,$05,$06,$07
-			.byte $08,$09,$0f,$0b,$0c,$0d,$0e,$0a
+			.byte $08,$09,$0b,$0a,$0c,$0d,$0e,$0f
 }
 
 

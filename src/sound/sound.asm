@@ -88,7 +88,7 @@ SOUND: {
 		!:
 			inc TrackDisplayState
 			bne !+
-			jsr HUD.Initialise
+			jsr HUD.InitialiseEatMeter
 			jsr HUD.UpdateEatMeter
 			rts
 		!:

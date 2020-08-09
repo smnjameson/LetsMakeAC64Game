@@ -190,7 +190,7 @@ BONUS: {
 			pla
 			tax
 
-			lda HUD.PlayerColors, x
+			lda PLAYER.PlayerColors, x
 			sta BONUS_COLOR
 
 			

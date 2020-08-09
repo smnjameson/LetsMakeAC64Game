@@ -168,8 +168,6 @@ Entry:
 		jsr MESSAGES.Initialise
 
 
-			// inc $d020
-			// jmp *-3
 
 
 	//Inf loop
@@ -226,6 +224,7 @@ Entry:
 			jsr SOUND.UpdateTrackDisplay
 			jsr PLATFORMS.UpdateColorOrigins
 			jsr DOOR.Update
+			jsr MESSAGES.Update
 			jsr $1003
 			jmp !Loop- 
 		!NotNormalLoop:

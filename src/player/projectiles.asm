@@ -15,11 +15,11 @@ PROJECTILES: {
 	Player_Proj_Gravity:
 			.byte $18, $00
 
-	Player_Projectile_Color:
-	Player1_Projectile_Color:
-			.byte $0a, $0a
-	Player2_Projectile_Color:
-			.byte $0f, $0f
+	// Player_Projectile_Color:
+	// Player1_Projectile_Color:
+	// 		.byte $0a, $0a
+	// Player2_Projectile_Color:
+	// 		.byte $0f, $0f
 
 	Player_Projectile_XOffset: //Horizontal spawn offset based on player direction
 			.byte $10, $08
@@ -402,9 +402,12 @@ PROJECTILES: {
 			lda #$0f //TODO : Look up the color in a type table
 
 			lda PLAYER_NUM
-			asl
+			// asl
 			tay
-			lda Player_Projectile_Color, y
+			// lda Player_Projectile_Color, y
+			lda PLAYER.PlayerColors, y
+			clc
+			adc #$08
 			sta SOFTSPRITES.SpriteColor, X
 
 			rts

@@ -50,6 +50,8 @@ ENEMIES: {
 
 	EnemyEatenBy:
 		.fill MAX_ENEMIES, 0
+	EnemyScoreType:
+		.fill MAX_ENEMIES, 0
 	EnemyEatenIndex:
 		.fill MAX_ENEMIES, 0
 	EnemyEatenCounter:
@@ -241,10 +243,11 @@ ENEMIES: {
 				tya 
 				tax 
 				//Hide sprite
-				// asl 
-				// tay 
-				// lda #$00
-				// sta $d001, y
+				asl 
+				tay 
+				lda #$00
+				sta $d001, y
+				dec ENEMIES.EnemyTotalCount
 
 				pla
 				ldy #$06

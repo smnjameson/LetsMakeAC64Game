@@ -20,6 +20,30 @@ UTILS: {
 	}
 
 
+	GetColorAt: {
+			.label PlayerFloorCollision = TEMP1
+			// .break
+			lda (PlayerFloorCollision),y
+			tax
+			lda CHAR_COLORS, x
+			and #UTILS.COLLISION_COLORABLE
+			bne !+
+			lda #$00
+			rts
+		!:
+			lda PlayerFloorCollision + 0
+			sta FLOOR_COLOR_LOOKUP + 0
+			lda PlayerFloorCollision + 1
+			clc
+			adc #>[$d800 - MAPLOADER.BUFFER]
+			sta FLOOR_COLOR_LOOKUP + 1
+			lda (FLOOR_COLOR_LOOKUP), y
+			and #$0f
+			sec
+			sbc #$08
+			rts
+	}
+
 
 	GetCollisionPoint: {
 			.label X_BORDER_OFFSET = $18

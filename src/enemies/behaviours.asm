@@ -100,13 +100,56 @@ BEHAVIOURS: {
 
 			pha //Stack = EnemyNum
 
+			lda PLAYER.PlayerAbsorbingCount, y
+			clc
+			adc #$01
+			sta PLAYER.PlayerAbsorbingCount, y
+
 			lda ENEMIES.EnemyEatenBy, x
 			pha	//Stack = EnemyNum, PlayerNum
 			tay
 			dey
-			lda #$35
+
+			lda PLAYER.PlayerFloorColor, y
+			cmp PLAYER.PlayerColors, y
+			beq !Positive+
+			cmp #$02
+			bcc !Neutral+
+		!Negative:
+			lda #$02
+			sta ENEMIES.EnemyScoreType, x
+
+			//Add 100 to other player
+			sty SCORE_NEGATIVE_TEMP
+			ldy SCORE_NEGATIVE_TEMP
+			tya 
+			eor #$01
+			tay
+			asl 
+			and PLAYER.PlayersActive
+			beq !OpponentNotActive+
+			lda #$10
 			ldx #$01
 			jsr HUD.AddScore
+		!OpponentNotActive:
+			ldy SCORE_NEGATIVE_TEMP
+
+
+			lda #$25 //Negative
+			bne !ScoreDecided+
+		!Neutral:
+			lda #$00
+			sta ENEMIES.EnemyScoreType, x
+			lda #$35 //Neutral
+			bne !ScoreDecided+
+		!Positive:
+			lda #$01
+			sta ENEMIES.EnemyScoreType, x
+			lda #$45 //Positive
+		!ScoreDecided:
+			ldx #$01
+			jsr HUD.AddScore
+
 
 			dec ENEMIES.EnemyTotalCount
 			//Increment eat meter for player
@@ -191,7 +234,16 @@ BEHAVIOURS: {
 		!Finished:
 			lda #$00
 			sta ENEMIES.EnemyType, x
-			// jsr MESSAGES.AddMessage
+			lda ENEMIES.EnemyScoreType, x
+			jsr MESSAGES.AddMessage
+
+			ldy ENEMIES.EnemyEatenBy, x
+			dey
+			lda PLAYER.PlayerAbsorbingCount, y
+			sec
+			sbc #$01
+			sta PLAYER.PlayerAbsorbingCount, y
+
 			rts	//No need to continue	
 
 		!NotFinished:

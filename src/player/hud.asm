@@ -22,19 +22,48 @@ HUD: {
 			dex
 			bpl !Loop-
 
-
-
 			jsr ColorTheMeter
-
 			jsr UpdateEatMeter
 
 			lda #$00
 			sta PreviousPlayersActive
-
 			jsr Update
 			rts
+	}
 
 
+	InitialiseEatMeter: {
+			ldx #12
+		!Loop:
+			lda HUD_DATA + 40, x
+			sta SCREEN_RAM + 23 * 40, x
+			lda HUD_DATA + 80, x
+			sta SCREEN_RAM + 24 * 40, x
+			inx
+			cpx #28
+			bne !Loop-
+
+
+			ldx #39
+		!Loop:
+			lda #$00
+			sta VIC.COLOR_RAM + 22 * 40, x
+			dex
+			bpl !Loop-
+
+			ldx #$1b
+		!Loop:
+			lda #$01
+			sta VIC.COLOR_RAM + 23 * 40, x
+			sta VIC.COLOR_RAM + 24 * 40, x
+			dex
+			cpx #$0b
+			bne !Loop-
+
+			jsr ColorTheMeter
+			jsr UpdateEatMeter
+			jsr Update
+			rts
 	}
 
 
@@ -71,8 +100,8 @@ HUD: {
 		.text " INSERT "
 	PressFireRow2:	
 		.text "  COIN  "
-	PlayerColors: 
-		.byte $02,$05
+	// PlayerColors: 
+	// 	.byte $02,$05
 	PlayerActiveColors:
 		.byte $00,$00
 
@@ -92,15 +121,15 @@ HUD: {
 			sta PlayerActiveColors + 1
 			jmp !Done+
 		!On:
-			lda PlayerColors + 0
+			lda PLAYER.PlayerColors + 0
 			sta PlayerActiveColors + 0
-			lda PlayerColors + 1
+			lda PLAYER.PlayerColors + 1
 			sta PlayerActiveColors + 1
 		!Done:
 
 
 
-
+		ColorPlayerNames:
 			lda PLAYER.PlayersActive
 			and #$01
 			bne !Player2+
@@ -140,9 +169,10 @@ HUD: {
 			rts
 
 		!:
-			lda PLAYER.PlayersActive
-			sta PreviousPlayersActive
 
+			lda PreviousPlayersActive
+			and #$01
+			bne !Player1Done+
 			lda PLAYER.PlayersActive 
 			and #$01
 			beq !Player1Inactive+
@@ -158,7 +188,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 0, x
-			lda #$02
+			lda PLAYER.PlayerColors + 0
 			sta VIC.COLOR_RAM + 23 * 40 + 0, x
 			lda #$dc
 			sta SCREEN_RAM + 24 * 40 + 0, x
@@ -166,8 +196,8 @@ HUD: {
 			sta VIC.COLOR_RAM + 24 * 40 + 0, x
 			dex
 			bpl !loop-
-
 			jmp !Player1Done+
+
 
 		!Player1Inactive:
 			ldx #$07
@@ -180,7 +210,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 0, x
-			lda #$02
+			lda PLAYER.PlayerColors + 0
 			sta VIC.COLOR_RAM + 23 * 40 + 0, x
 
 
@@ -192,14 +222,16 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 24 * 40 + 0, x
-			lda #$02
+			lda PLAYER.PlayerColors + 0
 			sta VIC.COLOR_RAM + 24 * 40 + 0, x			
 			dex
 			bpl !loop-
 		!Player1Done:
 
 
-
+			lda PreviousPlayersActive
+			and #$02
+			bne !Player2Done+
 			lda PLAYER.PlayersActive 
 			and #$02
 			beq !Player2Inactive+
@@ -215,7 +247,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 +32, x
-			lda #$05
+			lda PLAYER.PlayerColors + 1
 			sta VIC.COLOR_RAM + 23 * 40 + 32, x
 			lda #$dc
 			sta SCREEN_RAM + 24 * 40 + 32, x
@@ -236,7 +268,7 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 23 * 40 + 32, x
-			lda #$05
+			lda PLAYER.PlayerColors + 1
 			sta VIC.COLOR_RAM + 23 * 40 + 32, x
 
 
@@ -248,14 +280,15 @@ HUD: {
 			lda #$00
 		!:
 			sta SCREEN_RAM + 24 * 40 + 32, x
-			lda #$05
+			lda PLAYER.PlayerColors + 1
 			sta VIC.COLOR_RAM + 24 * 40 + 32, x			
 			dex
 			bpl !loop-
 		!Player2Done:
 
 
-
+			lda PLAYER.PlayersActive
+			sta PreviousPlayersActive
 
 			rts
 	}

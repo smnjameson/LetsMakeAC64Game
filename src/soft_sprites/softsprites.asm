@@ -98,6 +98,10 @@ SOFTSPRITES: {
 		!:
 			stx CurrentSpriteIndex
 
+			lda #$00
+			sta SpriteData_CLEAR_MSB, x
+			sta SpriteData_CLEAR_LSB, x
+
 			lda TEMP1
 			rts
 	}
