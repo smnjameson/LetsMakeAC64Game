@@ -13,7 +13,7 @@ MAPDATA: {
 
 	MAP_1: {
 		Level:	//Level ALWAYS first data in map data
-			.import binary "../../assets/maps/map_1.bin"
+			.import binary "../../assets/maps/map_2.bin"
 
 		PlayerSpawns:
 			.byte $98,$00,$b8	//Player1  X,XMSB, Y
@@ -53,7 +53,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 1,255,2,255,3,4,5,255,6,7,8
+			.byte 4,255,4,255,4,4,4,255,4,4,4
 		__EnemyList:
 			.byte 0
 

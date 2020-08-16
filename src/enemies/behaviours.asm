@@ -11,7 +11,7 @@ BEHAVIOURS: {
 		.byte <Enemy_005 //candy cane
 		.byte <Enemy_006 //Mallow
 		.byte <Enemy_007 //Gumball
-		.byte <Enemy_008 //Gumball
+		.byte <Enemy_008 //gummibear
 
 	EnemyMSB:
 		.byte >PowerUp

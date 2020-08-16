@@ -167,7 +167,7 @@ TITLECARD: {
 			jsr TRANSITION_BARS.Init
 
 
-			lda #$06
+			lda #$08
 			sta $d021
 			lda #$00
 			sta $d023

@@ -8,6 +8,7 @@ Enemy_007: {
 
 		.label WALK_FRAME = $00
 		.label JUMP_INDEX = $01
+		.label FALLING_SPAWN = $02
 
 	WalkLeft:
 		.byte $35,$36,$37
@@ -17,15 +18,33 @@ Enemy_007: {
 	__WalkRight:
 
 	!OnSpawn:
-			//Set pointer
 			lda WalkLeft
 			:setEnemyFrame(0)
 			:setEnemyColor(14, null)
+
+			jsr Random
+			bmi !faceRight+
+
+		!faceLeft:
 			lda ENEMIES.EnemyState, x
 			ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
 			sta ENEMIES.EnemyState, x
+			lda WalkLeft
+			bne !faceDone+
+
+		!faceRight:
+			lda ENEMIES.EnemyState, x
+			ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
+			sta ENEMIES.EnemyState, x
+			lda WalkRight
+
+		!faceDone:
+			:setEnemyFrame(0)
+
+			//Set pointers
 			:setStaticMemory(WALK_FRAME, 0)
 			:setStaticMemory(JUMP_INDEX, $ff)	
+			:setStaticMemory(FALLING_SPAWN, $01)	
 			rts
 
 
@@ -48,9 +67,13 @@ Enemy_007: {
 			//Should I fall??				
 			:doFall(12, 21) //Check below enemy and fall if needed
 			bcc !+
+			:getStaticMemory(FALLING_SPAWN)
+			beq !noFallSpawn+
+			jmp !Done+
+		!noFallSpawn:
 			jmp !LateralMove+
 		!:
-
+			:setStaticMemory(FALLING_SPAWN, $00)
 		
 			//TODO: Optimise
 			//Do walk animation

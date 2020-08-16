@@ -82,7 +82,8 @@ Entry:
 		lda #$00
 		sta VIC.BORDER_COLOR
 
-		lda #$04
+
+		lda #$0f
 		sta VIC.EXTENDED_BG_COLOR_1
 		lda #$00
 		sta VIC.EXTENDED_BG_COLOR_2
@@ -206,6 +207,7 @@ Entry:
 
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
 		!NormalLoop:
+		// inc $d020
 			jsr SOFTSPRITES.UpdateSprites
 			
 			jsr PLAYER.PlayerControl
@@ -214,7 +216,6 @@ Entry:
 			jsr PLAYER.DrawPlayer
 		 	jsr CROWN.DrawCrown
 			
-
 			jsr PROJECTILES.UpdateProjectiles
 
 			jsr ENEMIES.UpdateEnemies
@@ -226,6 +227,7 @@ Entry:
 			jsr DOOR.Update
 			jsr MESSAGES.Update
 			jsr $1003
+		// dec $d020
 			jmp !Loop- 
 		!NotNormalLoop:
 		/////////////////////////////////

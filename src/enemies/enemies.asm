@@ -299,6 +299,8 @@ ENEMIES: {
 
 				//Initiate a jump for death anim
 				:playSFX(SOUND.PlayerDeath)
+				lda #$18
+				sta IRQ.ScreenShakeTimer
 
 				lda PLAYER.Player1_State, x
 				and #[255 - (STATE_FALL + STATE_JUMP)]

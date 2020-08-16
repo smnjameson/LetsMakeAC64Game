@@ -8,6 +8,8 @@ IRQ: {
 
 	ScreenShakeValues:
 		.byte 3,4,3,5,3,6,3,6,3
+		.byte 3,4,3,5,3,6,3,6,3
+		.byte 3,4,3,5,3,6,3,6,3
 		// .byte 1,1,1,1,1,1,1,1,1
 		// .byte 4,4,4,4,5,4,6,4,6
 		// .byte 3,3,3,3,3,3,3,3
@@ -157,15 +159,14 @@ IRQ: {
 		// 	jmp HudFLDIRQSetup
 		// !:
 			//Reset Values set by IRQ	
-			*=*"BG Color"
-
-			lda #$06
+	
+			lda #$08
 			sta VIC.BACKGROUND_COLOR
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000
 			ora #%00000011 
 			sta VIC.SCREEN_CONTROL_1
-			lda #$04
+			lda #$0f
 			sta VIC.EXTENDED_BG_COLOR_1
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000

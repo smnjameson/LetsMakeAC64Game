@@ -175,6 +175,8 @@ PLAYER: {
 			.byte $80,$40,$00
 	PlayerWalkSpeeds_MSB:
 			.byte $01,$01,$01
+	Player_BoostSpeed:
+			.byte $80, $00
 
 	Player1_EatCount:
 			.byte $00
@@ -251,6 +253,7 @@ PLAYER: {
 			and #%11110000
 			ora #%00001000
 			sta $d016
+
 			lda #$00
 			sta $d023
 
@@ -393,6 +396,7 @@ PLAYER: {
 			tya 
 			tax
 			dec Player_Lives, x
+
 			jsr SpawnPlayer
 			rts
 	}
@@ -1245,11 +1249,12 @@ PLAYER: {
 			bne !+
 			
 			//SPEED POWERUP - Now double the speed
+			clc
 			lda Player_WalkSpeed + 0, y
-			asl 
+			adc Player_BoostSpeed + 0 
 			lda Player_WalkSpeed + 0, y
 			lda Player_WalkSpeed + 1, y
-			rol 
+			adc Player_BoostSpeed + 1  
 			sta Player_WalkSpeed + 1, y
 
 		!:

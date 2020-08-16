@@ -65,6 +65,8 @@ SOFTSPRITES: {
 			sta SpriteData_ID, x
 			sta SpriteData_X_MSB, x
 			sta SpriteData_X_LSB, x
+			sta SpriteData_CLEAR_MSB, x
+			sta SpriteData_CLEAR_LSB, x
 			sta SpriteData_Y, x
 			inx
 			cpx #MAX_SPRITES
@@ -98,9 +100,6 @@ SOFTSPRITES: {
 		!:
 			stx CurrentSpriteIndex
 
-			lda #$00
-			sta SpriteData_CLEAR_MSB, x
-			sta SpriteData_CLEAR_LSB, x
 
 			lda TEMP1
 			rts

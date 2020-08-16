@@ -6,13 +6,22 @@ Enemy_004: {
 
 		.label ANIM_FRAME = $00
 		.label DX = $01
+		.label WAVE_INDEX = $02
 
 	FlyAnimation:
 		.byte $1c,$1d,$1e,$1d
 	__FlyAnimation:
 
+	WaveOffsets:
+		.byte 0,0,0,1,1,1,1,2,2,2,3,3,4
+		.byte 3,3,2,2,2,1,1,1,1
+		.byte 0,0,0,-1,-1,-1,-1,-2,-2,-2,-3,-3,-4
+		.byte -3,-3,-2,-2,-2,-1,-1,-1,-1
+	__WaveOffsets:
+
 	!OnSpawn:	
 			:setStaticMemory(ANIM_FRAME, $00)	
+			:setStaticMemory(WAVE_INDEX, $00)	
 			jsr Random
 			and #$01
 			asl
@@ -28,42 +37,93 @@ Enemy_004: {
 			.byte 0, 20
 	CollisionPointsX:
 			.byte 0, 23
-
+	CollisionValues:
+			.byte 0, 0
 	!OnUpdate:	
 			:exitIfStunned()
 
-			//Set the enmy frame
-			:getStaticMemory(ANIM_FRAME)
-			//TODO: Optimise
+			//Increment wave index
+			:getStaticMemory(WAVE_INDEX)
 			tay
-			lda ZP_COUNTER
-			and #$03
-			bne !+
-			iny
-			cpy #[__FlyAnimation - FlyAnimation]
-			bne !+
-			ldy #$00
+			jsr Random
+			cmp #$02
+			bcs !normal+
+		!random:
+			tya
+			clc
+			adc  #[[__WaveOffsets - WaveOffsets]/2]
+			jmp !done+		
+		!normal:
+			tya
+			clc
+			adc #$01
+		!done:
+			cmp #[__WaveOffsets - WaveOffsets]		
+			bcc !+
+			sbc #[__WaveOffsets - WaveOffsets]
 		!:
-			tya 
-			:setStaticMemory(ANIM_FRAME, null)
-			lda FlyAnimation, y
-			sta ENEMIES.EnemyFrame, x
+			:setStaticMemory(WAVE_INDEX, null)
+
+
+	
 		!skip:
 
+			//Check collision on top and bottom
+			ldy CollisionPointsY + 0
+			lda #$0c
+			:getEnemyCollisions(null, null)
+			tay
+			lda CHAR_COLORS, y
+			and #UTILS.COLLISION_SOLID	
+			sta CollisionValues + 0
 
+			ldy CollisionPointsY + 1
+			lda #$0c
+			:getEnemyCollisions(null, null)
+			tay
+			lda CHAR_COLORS, y
+			and #UTILS.COLLISION_SOLID	
+			sta CollisionValues + 1
+
+			lda FlyAnimation + 1
+			sta ENEMIES.EnemyFrame, x
 			:setEnemyColor(8, null)
 			:hasHitProjectile()
-			:getStaticMemory(DX)
+			:getStaticMemory(WAVE_INDEX)
+			tay
+			lda WaveOffsets, y
+			tay
+			beq !ApplyMovement+
+			bmi !neg+
+		!pos:
+			lda FlyAnimation + 2
+			sta ENEMIES.EnemyFrame, x
+			lda CollisionValues + 1	
+			cmp #UTILS.COLLISION_SOLID
+			bne !ApplyMovement+
+			jmp !CancelMovement+
+		!neg:
+			lda FlyAnimation + 0
+			sta ENEMIES.EnemyFrame, x
+			lda CollisionValues + 0
+			cmp #UTILS.COLLISION_SOLID
+			bne !ApplyMovement+
+
+		!CancelMovement:
 			ldy #$00
+		!ApplyMovement:
+			:getStaticMemory(DX)
 			:UpdatePosition(null, null)				
+
+			// jsr CheckScreenEdges
+
 
 
 
 		!XBounce:
 			jsr Random
-			cmp #$04
+			cmp #$02
 			bcc !DoXBounce+ 
-
 
 			lda ENEMIES.EnemyPosition_X2, x
 			lsr
@@ -86,6 +146,8 @@ Enemy_004: {
 			tay
 			lda CHAR_COLORS, y
 			and #UTILS.COLLISION_SOLID	
+
+			// lda CollisionValues, y
 			beq !NoXBounce+
 		!DoXBounce:
 			:getStaticMemory(DX)
