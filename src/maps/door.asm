@@ -43,7 +43,7 @@ DOOR: {
 			lda PLAYER.Player1_EatCount
 			clc
 			adc PLAYER.Player2_EatCount 
-			cmp PIPES.NumberOfEnemies
+			cmp PIPES.MAPDATA_COPY.NumberOfEnemies
 			bne !Player1+
 
 				//cycle the switch colors
@@ -323,7 +323,7 @@ DOOR: {
 		!Loop:
 			sta (DOOR_VECTOR1), y
 			sta DOOR_TEMP2
-			lda #$0c
+			lda MAPDATA.MAP_1.DoorColor
 			sta (DOOR_VECTOR2), y
 			lda DOOR_TEMP2
 			clc

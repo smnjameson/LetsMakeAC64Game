@@ -46,16 +46,28 @@ IRQ: {
 
 	InitGameIRQ: {
 		sei
-		lda #<MainIRQ    
-		ldx #>MainIRQ
-		sta IRQ_LSB   // 0314
-		stx IRQ_MSB	// 0315
+		// lda #<MainIRQ    
+		// ldx #>MainIRQ
+		// sta IRQ_LSB   // 0314
+		// stx IRQ_MSB	// 0315
 
-		lda #$e2
-		sta $d012
-		lda $d011
-		and #%01111111
-		sta $d011	
+		// lda #$e2
+		// sta $d012
+		// lda $d011
+		// and #%01111111
+		// sta $d011	
+
+			lda #<SecondIRQ    
+			ldx #>SecondIRQ
+			sta IRQ_LSB   // 0314
+			stx IRQ_MSB	// 0315
+
+			lda #$01
+			sta $d012
+			lda $d011
+			and #%01111111
+			sta $d011
+
 
 		asl $d019
 		
@@ -71,13 +83,21 @@ IRQ: {
 
 	MainIRQ: {		
 		:StoreState()
-			ldx #$06
+			ldx #$03
 		!:
 			dex
 			bne !-
 			
-			ldx #BLACK
+			lda $d011
+			and #%01111000
+			ora #%00000011 //TODO DEBUG
+			sta $d011
+
+			//HUD Color
+			ldx #$00
 			stx VIC.BACKGROUND_COLOR
+
+
 
 			ldx $d012
 			inx
@@ -91,10 +111,6 @@ IRQ: {
 			sta $d00e 
 
 
-			lda VIC.SCREEN_CONTROL_1
-			and #%01111000
-			ora #%00000011
-			sta VIC.SCREEN_CONTROL_1
 
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000
@@ -160,13 +176,15 @@ IRQ: {
 		// !:
 			//Reset Values set by IRQ	
 	
-			lda #$08
+			lda PIPES.MAPDATA_COPY.TransparentColor
 			sta VIC.BACKGROUND_COLOR
+
 			lda VIC.SCREEN_CONTROL_1
 			and #%01111000
-			ora #%00000011 
+			ora #%00000000 
 			sta VIC.SCREEN_CONTROL_1
-			lda #$0f
+
+			lda PIPES.MAPDATA_COPY.MultiColor
 			sta VIC.EXTENDED_BG_COLOR_1
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000

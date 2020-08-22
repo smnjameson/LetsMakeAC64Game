@@ -35,7 +35,7 @@ BONUS: {
 	
 	InitialiseTransition: {
 			sei
-			lda #$08
+			lda #$00
 			sta $d021
 			lda #$05
 			sta $d022

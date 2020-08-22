@@ -4,7 +4,7 @@ BasicUpstart2(Entry)
 
  
 #import "../libs/tables.asm"  
-#import "../libs/vic.asm"
+#import "../libs/vic.asm" 
 #import "../libs/macros.asm"
 
 #import "utils/utils.asm"
@@ -27,14 +27,12 @@ BasicUpstart2(Entry)
 #import "animation/charanimations.asm"
 #import "animation/messages.asm"
 #import "soft_sprites/softsprites.asm"
-// #import "animation/spritewarp.asm"
 
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
 #import "enemies/enemymacros.asm"
 #import "enemies/pipes.asm"
 
-#import "animation/transition.asm"
 
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
@@ -155,19 +153,25 @@ Entry:
 		
 
 	!GAME_ENTRY:
+		sei
 		jsr SOUND.SelectRandomGameTrack
  		jsr PLAYER.Initialise
-		jsr HUD.Initialise
-		jsr IRQ.InitGameIRQ
+		
 
 		jsr SOFTSPRITES.Initialise
-		// jsr SPRITEWARP.init
 		jsr ENEMIES.Initialise
 		jsr CROWN.Initialise
 		jsr DOOR.Initialise
 		jsr BONUS.Initialise
 		jsr MESSAGES.Initialise
 
+
+		lda #$ff
+		cmp $d012
+		bne *-3
+
+		jsr HUD.Initialise
+		jsr IRQ.InitGameIRQ
 
 
 
@@ -180,7 +184,7 @@ Entry:
 		inc ZP_COUNTER
 
 
-		//Check if transiiton is over and jump to Bonus screen if so
+		//Check if transition is over and jump to Bonus screen if so
 		lda BONUS.BonusActive
 		beq !+
 		jmp !BonusScreen+

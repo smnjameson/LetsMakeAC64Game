@@ -27,14 +27,24 @@ PIPES: {
 			.byte $16,$02
 		SwitchSpawnLoc:
 			.byte $20,$04
-	}
-	__MAPDATA_COPY:
 		NumberOfEnemies:
 			.byte $00 //Autofilled by initialise function
 		EnemyWeight:
 			.byte $00 //Autofilled by initialise function
 		NumberOfPowerups:
 			.byte $00 //Autofilled by initialise function
+			
+		TransparentColor:
+			.byte 4
+		MultiColor:
+			.byte 9
+		PipeColor:
+			.byte 7
+		DoorColor:
+			.byte 2			
+	}
+	__MAPDATA_COPY:
+
 
 
 	NextEnemyIndex:
@@ -51,31 +61,19 @@ PIPES: {
 
 
 		//Initialise selfmods based on current level
-			lda PLAYER.CurrentLevel
-			asl
-			tax 
-			lda MAPDATA.MAP_POINTERS, x
-			clc
-			adc #<MAPDATA.EnemyListData
+			lda #<MAPDATA.MAP_1.EnemyList
 			sta Update.EnemyList + 1
 			sta SpawnEnemyFromPipe.EnemyList + 1
-			inx
-			lda MAPDATA.MAP_POINTERS, x
-			adc #>MAPDATA.EnemyListData
+			lda #>MAPDATA.MAP_1.EnemyList
 			sta Update.EnemyList + 2
 			sta SpawnEnemyFromPipe.EnemyList + 2
 
-			lda PLAYER.CurrentLevel
-			asl
-			tax 
-			lda MAPDATA.MAP_POINTERS, x
-			clc
-			adc #<MAPDATA.PipeSpawnData
+
+			lda #<MAPDATA.MAP_1.PipeSpawnX
 			sta SelfMod + 1
-			inx
-			lda MAPDATA.MAP_POINTERS, x
-			adc #>MAPDATA.PipeSpawnData
+			lda #>MAPDATA.MAP_1.PipeSpawnX
 			sta SelfMod + 2
+
 
 			//Copy map data for easy access
 			ldx #$00
@@ -84,7 +82,7 @@ PIPES: {
 			lda $BEEF, x
 			sta MAPDATA_COPY, x
 			inx
-			cpx #[__MAPDATA_COPY - MAPDATA_COPY + 3] //+3 for the extra data (NumEnemies/Weight/NumPowerups etc)
+			cpx #[__MAPDATA_COPY - MAPDATA_COPY] //
 			bne !Loop-
 
 			rts

@@ -295,9 +295,6 @@ HUD: {
 
 
 
-
-
-
 	//Acc = Score to add (25) (BCD Format) $25 = 25
 	//X = trailing zeros count (1)
 	//Y = Player 
@@ -368,23 +365,32 @@ HUD: {
 			//Accumulator has total eaten
 			//Bar has 56 units total
 			//Therefore we need to show (TotalEaten * 56) / TotalEnemies
-					lda PLAYER.CurrentLevel
-					asl
-					tax
-					lda MAPDATA.MAP_POINTERS, x
-					clc
-					adc #<MAPDATA.EnemyListData
+					// lda PLAYER.CurrentLevel
+					// asl
+					// tax
+					// lda MAPDATA.MAP_POINTERS, x
+					// clc
+					// adc #<MAPDATA.EnemyListData
+					lda #<MAPDATA.MAP_1.EnemyList
 					sta SelfMod + 1
-					inx
-					lda MAPDATA.MAP_POINTERS, x
-					adc #>MAPDATA.EnemyListData
+					// inx
+					// lda MAPDATA.MAP_POINTERS, x
+					// adc #>MAPDATA.EnemyListData
+					lda #>MAPDATA.MAP_1.EnemyList
 					sta SelfMod + 2
 
 					//Add number of enemies to get to BArUnits
 					lda SelfMod + 1
 					clc
-					adc PIPES.NumberOfEnemies
-					adc PIPES.NumberOfPowerups
+					adc PIPES.MAPDATA_COPY.NumberOfEnemies
+					sta SelfMod + 1
+					lda SelfMod + 2
+					adc #$00
+					sta SelfMod + 2
+
+					lda SelfMod + 1
+					clc
+					adc PIPES.MAPDATA_COPY.NumberOfPowerups
 					sta SelfMod + 1
 					lda SelfMod + 2
 					adc #$00

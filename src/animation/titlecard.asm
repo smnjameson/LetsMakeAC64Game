@@ -167,8 +167,10 @@ TITLECARD: {
 			jsr TRANSITION_BARS.Init
 
 
-			lda #$08
+			lda MAPDATA.MAP_1.TransparentColor
 			sta $d021
+			lda MAPDATA.MAP_1.MultiColor
+			sta $d022	
 			lda #$00
 			sta $d023
 			lda #%00001100
@@ -179,7 +181,7 @@ TITLECARD: {
 			sta $d016			
 			lda $d011	
 			and #%11110000
-			ora #%00001011
+			ora #%00001000
 			sta $d011	
 
 					//TODO Draw the correct stuff behind the transition sprites

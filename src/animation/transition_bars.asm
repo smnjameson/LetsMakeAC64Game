@@ -61,7 +61,7 @@ TRANSITION_BARS: {
 			and #%11110111
 			sta $d016
 			lda $d011
-			and #%01110111
+			and #%01110000
 			sta $d011
 			
 

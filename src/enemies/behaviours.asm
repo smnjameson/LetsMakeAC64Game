@@ -157,7 +157,7 @@ BEHAVIOURS: {
 			tax
 			dex
 
-			lda PIPES.EnemyWeight		
+			lda PIPES.MAPDATA_COPY.EnemyWeight		
 			clc
 			adc PLAYER.Player_Weight, x
 			sta PLAYER.Player_Weight, x

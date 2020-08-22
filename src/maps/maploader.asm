@@ -2,7 +2,32 @@
 
   	.label BUFFER = $bc00
 
+  	DoorChars:
+  		.byte $35,$36,$37,$38,$39,$3b
+  	__DoorChars:
+  	PipeChars:
+  		.byte $1d,$1e,$1f,$20,$21,$22,$23,$24,$25,$26
+  		.byte $59,$5a,$5b,$5c
+  	__PipeChars:
+
 	DrawMap: {
+			//First set door and pipe colors
+			lda MAPDATA.MAP_1.PipeColor
+			ldy #[__PipeChars - PipeChars - 1]
+		!:
+			ldx PipeChars, y
+			sta CHAR_COLORS,x
+			dey 
+			bpl !-
+
+			lda MAPDATA.MAP_1.DoorColor
+			ldy #[__DoorChars - DoorChars - 1]
+		!:
+			ldx DoorChars, y
+			sta CHAR_COLORS,x
+			dey 
+			bpl !-
+					 
 			//Label the ZP temp vars for use here
 			.label Row = TEMP1
 			.label Col = TEMP2
@@ -19,14 +44,11 @@
 
 
 			//Initialise the map lookup self mod
-			lda PLAYER.CurrentLevel
-			asl 
-			tax
-			lda MAPDATA.MAP_POINTERS, x
+			lda #<MAPDATA.MAP_1
 			sta Tile + 1
-			inx
-			lda MAPDATA.MAP_POINTERS, x
+			lda #>MAPDATA.MAP_1
 			sta Tile + 2
+
 
 			//Reset row counter
 			lda	#$00

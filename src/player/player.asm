@@ -247,7 +247,7 @@ PLAYER: {
 			sta $d01b
 			lda $d011
 			and #%11110000
-			ora #%00001011
+			ora #%00001000
 			sta $d011
 			lda $d016
 			and #%11110000
@@ -280,6 +280,8 @@ PLAYER: {
 			lda #$00
 			sta Player1_Weight
 			sta Player2_Weight
+
+			sta SCREEN_SHAKE_VAL
 
 			lda #$ff
 			sta Player1_ExitIndex
@@ -320,16 +322,9 @@ PLAYER: {
 
 
 			//MAP LOOKUP
-			lda PLAYER.CurrentLevel
-			asl
-			tay
-			lda MAPDATA.MAP_POINTERS, y
-			clc
-			adc #<MAPDATA.PlayerSpawnData
+			lda #<MAPDATA.MAP_1.PlayerSpawns
 			sta MAP_LOOKUP_VECTOR + 0
-			iny 
-			lda MAPDATA.MAP_POINTERS, y
-			adc #>MAPDATA.PlayerSpawnData
+			lda #>MAPDATA.MAP_1.PlayerSpawns
 			sta MAP_LOOKUP_VECTOR + 1
 
 
@@ -1214,6 +1209,8 @@ PLAYER: {
 			lda Player_Size, x
 			pha
 
+			jmp !Size2+
+			
 			lda Player_Weight, x
 			cmp #$12
 			bcs !Size1+
