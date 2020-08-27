@@ -1,4 +1,5 @@
-* = * "PLAYER CODE"
+* = * "Player"
+
 PLAYER: {
 	.label POWERUP_SPEED = $01 //Done
 	.label POWERUP_INVULN = $02 //Done
@@ -410,7 +411,7 @@ PLAYER: {
 		//Get floor collisions for each foot for Player 1
 		lda #$00
 		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
-		ldy #20
+		ldy #23
 		jsr PLAYER.GetCollisionPoint
 
 		jsr UTILS.GetCharacterAt
@@ -423,7 +424,7 @@ PLAYER: {
 		
 		lda #$00
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
-		ldy #20
+		ldy #23
 		jsr PLAYER.GetCollisionPoint
 
 		jsr UTILS.GetCharacterAt
@@ -514,7 +515,7 @@ PLAYER: {
 
 		lda #$01
 		ldx #PLAYER_LEFT_COLLISON_BOX + FOOT_COLLISION_OFFSET
-		ldy #20
+		ldy #23
 		jsr PLAYER.GetCollisionPoint
 
 		jsr UTILS.GetCharacterAt
@@ -528,7 +529,7 @@ PLAYER: {
 
 		lda #$01
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
-		ldy #20
+		ldy #23
 		jsr PLAYER.GetCollisionPoint
 
 		jsr UTILS.GetCharacterAt
@@ -1209,8 +1210,6 @@ PLAYER: {
 			lda Player_Size, x
 			pha
 
-			jmp !Size2+
-			
 			lda Player_Weight, x
 			cmp #$12
 			bcs !Size1+
@@ -1712,9 +1711,9 @@ PLAYER: {
 			beq !+
 			lda (PlayerY), y
 			sec
-			sbc #$05
+			sbc #$02
 			and #$f8
-			ora #$06
+			ora #$03
 			sta (PlayerY), y
 		!:
 

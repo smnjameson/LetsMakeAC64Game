@@ -35,9 +35,9 @@ BONUS: {
 	
 	InitialiseTransition: {
 			sei
-			lda #$00
+			lda MAPDATA.MAP_1.TransparentColor
 			sta $d021
-			lda #$05
+			lda MAPDATA.MAP_1.MultiColor
 			sta $d022
 
 			jsr TITLECARD.BlackOutHUD

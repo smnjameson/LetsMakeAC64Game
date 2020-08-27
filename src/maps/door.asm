@@ -1,3 +1,4 @@
+* = * "Door"
 DOOR: {
 	.label FONT_DATA = $f000
 	.label DOOR_FONT_DATA = $f400
@@ -114,6 +115,8 @@ DOOR: {
 			jmp !SwitchOnAndPartialActive+
 
 		!DonePlayerChecks:
+			lda ENEMIES.EnemyOnSwitch
+			bne !SwitchOnAndPartialActive+
 			jmp !SwitchNotActive+
 
 
@@ -138,6 +141,7 @@ DOOR: {
 			sta (DOOR_VECTOR1), y
 			jmp !Exit+
 
+		
 		!SwitchOnAndPartialActive:
 
 			ldy #$00
@@ -441,6 +445,7 @@ DOOR: {
 		.fill 8, <[FONT_DATA + 59 * 8 + i]
 		.fill 8, <[FONT_DATA + 59 * 8 + i]
 		.fill 8, <[FONT_DATA + 59 * 8 + i]
+
 	DoorDataMSB:
 		.fill 8, >[FONT_DATA + 53 * 8 + i]
 		.fill 8, >[FONT_DATA + 57 * 8 + i]

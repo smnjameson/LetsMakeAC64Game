@@ -1,4 +1,11 @@
+*=* "Hud"
+HUD_DATA:
+	.import binary "../../assets/maps/hud.bin"
+
+
 HUD: {
+	EatMeter:
+		.import binary "../../assets/maps/eatmeter.bin"
 	PreviousPlayersActive:
 			.byte $00
 
@@ -33,15 +40,14 @@ HUD: {
 
 
 	InitialiseEatMeter: {
-			ldx #12
+			ldx #15
 		!Loop:
-			lda HUD_DATA + 40, x
-			sta SCREEN_RAM + 23 * 40, x
-			lda HUD_DATA + 80, x
-			sta SCREEN_RAM + 24 * 40, x
-			inx
-			cpx #28
-			bne !Loop-
+			lda EatMeter, x
+			sta SCREEN_RAM + 23 * 40 +12, x
+			lda EatMeter + 16, x
+			sta SCREEN_RAM + 24 * 40 + 12, x
+			dex
+			bpl !Loop-
 
 
 			ldx #39

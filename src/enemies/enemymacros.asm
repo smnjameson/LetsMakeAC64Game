@@ -328,8 +328,13 @@ getEnemyCollisionsSR: {
 doFallSR: {
 		tay
 		lda CHAR_COLORS, y
-		and #UTILS.COLLISION_COLORABLE
+		bit TABLES.Plus + UTILS.COLLISION_COLORABLE
 		beq !Fall+
+
+		bit TABLES.Plus + UTILS.COLLISION_SWITCH
+		beq !+
+		sta ENEMIES.EnemyOnSwitch
+	!:
 
 		lda ENEMIES.EnemyState, x
 		and #[255 - ENEMIES.STATE_FALL]
@@ -368,9 +373,9 @@ doFallSR: {
 snapEnemyToFloor: {
 		lda ENEMIES.EnemyPosition_Y1, x
 		sec
-		sbc #$05
+		sbc #$02
 		and #$f8
-		ora #$05
+		ora #$03
 		sta ENEMIES.EnemyPosition_Y1, x
 		rts
 }

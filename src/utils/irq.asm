@@ -1,19 +1,11 @@
+*=* "IRQ"
 IRQ: {
-	/*
-	furroy: need screen shake when fat guy jumps and lands !!!!!!
-	*/
-
 	ScreenShakeTimer:
 		.byte $00
 
 	ScreenShakeValues:
 		.byte 3,4,3,5,3,6,3,6,3
-		.byte 3,4,3,5,3,6,3,6,3
-		.byte 3,4,3,5,3,6,3,6,3
-		// .byte 1,1,1,1,1,1,1,1,1
-		// .byte 4,4,4,4,5,4,6,4,6
-		// .byte 3,3,3,3,3,3,3,3
-		
+	
 	Setup: {
 		sei
 
@@ -46,16 +38,6 @@ IRQ: {
 
 	InitGameIRQ: {
 		sei
-		// lda #<MainIRQ    
-		// ldx #>MainIRQ
-		// sta IRQ_LSB   // 0314
-		// stx IRQ_MSB	// 0315
-
-		// lda #$e2
-		// sta $d012
-		// lda $d011
-		// and #%01111111
-		// sta $d011	
 
 			lda #<SecondIRQ    
 			ldx #>SecondIRQ
@@ -74,12 +56,11 @@ IRQ: {
 		cli
 		rts
 	}
-	ColorRamp1:
-		.byte $0b, $02, $02, $04, $0e, $03, $0d, $01
-
-		.byte $01, $0d, $03, $0e, $04, $02, $0b, $0b
-	RampIndex:
-		.byte $07
+	// ColorRamp1:
+	// 	.byte $0b, $02, $02, $04, $0e, $03, $0d, $01
+	// 	.byte $01, $0d, $03, $0e, $04, $02, $0b, $0b
+	// RampIndex:
+	// 	.byte $07
 
 	MainIRQ: {		
 		:StoreState()
@@ -90,7 +71,7 @@ IRQ: {
 			
 			lda $d011
 			and #%01111000
-			ora #%00000011 //TODO DEBUG
+			ora #%00000011 
 			sta $d011
 
 			//HUD Color
@@ -133,12 +114,18 @@ IRQ: {
 
 			//Calculate any screen shake ready
 			//for the next IRQ
+			lda DOOR.Player1Exiting
+			ora DOOR.Player2Exiting
+			bne !NoShake+
+
 			lda ScreenShakeValues
 			sta SCREEN_SHAKE_VAL
 			ldx ScreenShakeTimer
 			beq !NoShake+
 			dec ScreenShakeTimer
-			ldx ScreenShakeTimer
+			lda ScreenShakeTimer
+			and #$07
+			tax
 			lda ScreenShakeValues, x
 		!NoShake:
 			sec

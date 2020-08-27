@@ -1,3 +1,4 @@
+* = * "Projectiles"
 //Player projectile number in X (0-3)
 .macro DestroyPlayerProjectile() {
 	lda #$00	

@@ -78,12 +78,12 @@ Enemy_006: {
 			bpl !DoJumpRoutine+
 
 			//Should I fall??				
-			:doFall(12, 21) //Check below enemy and fall if needed
+			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+
 			:setStaticMemory(WAS_FALLING, $01)
 			lda FallFrame
 			:setEnemyFrame(0)
-			:doFall(12, 21) //Check below enemy and fall if needed
+			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+			
 			:setStaticMemory(WAS_FALLING, $01)
 			jmp !Done+
@@ -92,6 +92,8 @@ Enemy_006: {
 			beq !+
 			:setStaticMemory(WAS_FALLING, $00)
 			:setStaticMemory(SLAM_COUNTER, $0c)
+			lda #$04
+			sta IRQ.ScreenShakeTimer
 		!:
 
 			//Snap enemy to floor

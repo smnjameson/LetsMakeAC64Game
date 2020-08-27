@@ -34,7 +34,7 @@ Enemy_002: {
 
 			:hasHitProjectile()
 			//Should I fall??
-			:doFall(12, 21) //Check below enemy and fall if needed
+			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+
 			jmp !Done+
 		!:
@@ -181,7 +181,7 @@ Enemy_002: {
 			beq !CheckRight+
 
 			//Do walk left
-			:getEnemyCollisions(0, 21)
+			:getEnemyCollisions(0, 23)
 			tay
 			lda CHAR_COLORS, y
 			and #UTILS.COLLISION_COLORABLE
@@ -212,7 +212,7 @@ Enemy_002: {
 			bit TABLES.Plus + ENEMIES.STATE_WALK_RIGHT
 			beq !+
 			//Do Walk right
-			:getEnemyCollisions(24, 21)
+			:getEnemyCollisions(24, 23)
 			tay
 			lda CHAR_COLORS, y
 			and #UTILS.COLLISION_COLORABLE

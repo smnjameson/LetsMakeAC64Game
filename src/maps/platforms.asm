@@ -1,6 +1,7 @@
+* = * "Platforms"
 PLATFORMS: {
-		.label MAX_PLATFORMS = 16
-	* =* "COLOR PLATFORM"
+	.label MAX_PLATFORMS = 8
+	
 	COLOR_ORIGIN_LSB:
 		.fill MAX_PLATFORMS, 0	
 	COLOR_ORIGIN_MSB:
@@ -89,12 +90,6 @@ PLATFORMS: {
 	FillPlatformToggle:
 			.byte $00
 	FillPlatform: {
-		// 	inc FillPlatformToggle
-		// 	lda FillPlatformToggle
-		// 	and #$01
-		// 	beq !+
-		// 	rts
-		// !:
 			lda #$00
 			sta PLATFORM_COMPLETE
 

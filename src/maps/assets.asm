@@ -21,17 +21,20 @@
 * = $d000 "Player Sprites" //Start at frame #64/$40
 	.import binary "../../assets/sprites/player_sprites.bin"
 
-* = $8000 "Map data"
+* = $8000 "Tile data"
 	MAP_TILES:
 		.import binary "../../assets/maps/tiles.bin"
-
+* = * "Color Data"
 	CHAR_COLORS:
 		.import binary "../../assets/maps/cols.bin"
 
-	HUD_DATA:
-		.import binary "../../assets/maps/hud.bin"
 
 	#import "mapdata.asm"
+
+* = $b800 "Soft sprite patterns"
+	.fill 1024, 0
+* = $bc00 "Map buffer"
+	.fill 1024, 0
 
 * = $ec00 "Reserved for intro sprites"
 	.import binary "../../assets/sprites/title_card.bin"

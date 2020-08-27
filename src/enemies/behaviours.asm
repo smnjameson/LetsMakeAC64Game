@@ -1,4 +1,5 @@
 BEHAVIOURS: {
+	
 	NumberOfEnemyBehaviours:
 		.byte (EnemyMSB-EnemyLSB / 2)
 
@@ -68,7 +69,7 @@ BEHAVIOURS: {
 			:setEnemyColor($0c, null)
 		!Skip:
 
-			:doFall(12, 21)
+			:doFall(12, 23)
 		// 	bcs !+
 		// 	:snapEnemyToFloor()
 		// !:

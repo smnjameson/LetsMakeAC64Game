@@ -37,6 +37,7 @@ BasicUpstart2(Entry)
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
 #import "animation/titlecard.asm"
+#import "animation/transition_bars.asm"
 #import "sound/sound.asm"
 
 Random: { 
@@ -165,13 +166,14 @@ Entry:
 		jsr BONUS.Initialise
 		jsr MESSAGES.Initialise
 
+		jsr IRQ.InitGameIRQ
 
-		lda #$ff
+		lda #$fa
 		cmp $d012
 		bne *-3
 
 		jsr HUD.Initialise
-		jsr IRQ.InitGameIRQ
+		
 
 
 
@@ -283,16 +285,12 @@ Entry:
 
 	Counter:
 		.byte $00, $00
-	SinTableX:
-		.fill 256, (sin((i/256) * (PI * 2)) * cos((i/128) * (PI * 2)) * 60 + 150) & $fe 
-	CosTableY:
-		.fill 256, cos((i/256) * (PI * 2)) * 60 + 80
+
 
 #import "maps/assets.asm"
 
 
-* = $b600 "Transition Bars"
-#import "animation/transition_bars.asm"
+
 
 //This fixes the ghost byte issue on screen shake
 //By forcing all IRQs to run indirectly from the last 

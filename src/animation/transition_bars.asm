@@ -1,3 +1,4 @@
+* = * "Transition bars"
 TRANSITION_BARS: {
 
 	.label SPRITE_POINTERS1 = $c3f8
@@ -49,7 +50,7 @@ TRANSITION_BARS: {
 			sta $d01a 
 
 			// asl $d019
-			cli
+			
 			
 
 
@@ -57,18 +58,19 @@ TRANSITION_BARS: {
 			jsr InitSprites
 			jsr AnimateBars
 
-			lda $d016
-			and #%11110111
-			sta $d016
+			// lda $d016
+			// and #%11110111
+			// sta $d016
 			lda $d011
-			and #%01110000
+			and #%01111000
+			// ora #%00000011
 			sta $d011
-			
 
 			lda #$00
 			sta ChangeDirection
 
 
+			cli
 
 			pla
 			bne !Exit+

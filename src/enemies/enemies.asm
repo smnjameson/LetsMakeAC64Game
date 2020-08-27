@@ -11,6 +11,8 @@ ENEMIES: {
 	.label STATE_STUNNED    = %01000000
 	.label STATE_DYING   	= %10000000
 
+	EnemyOnSwitch:
+		.byte $00
 	EnemyTotalCount:
 		.byte $00
 	PowerUpTotalCount:
@@ -85,6 +87,9 @@ ENEMIES: {
 			.label ENEMY_BEHAVIOUR = VECTOR1
 			.label TEMP = TEMP11
 
+			lda #$00
+			sta EnemyOnSwitch
+			
 			ldy #MAX_ENEMIES - 1
 		!Loop:
 			lda EnemyType, y

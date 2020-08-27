@@ -1,3 +1,4 @@
+* = * "Utils"
 UTILS: {
 	.label COLLISION_SOLID = %00010000
 	.label COLLISION_COLORABLE = %00100000
@@ -22,13 +23,12 @@ UTILS: {
 
 	GetColorAt: {
 			.label PlayerFloorCollision = TEMP1
-			// .break
+
 			lda (PlayerFloorCollision),y
 			tax
 			lda CHAR_COLORS, x
 			and #UTILS.COLLISION_COLORABLE
 			bne !+
-			lda #$00
 			rts
 		!:
 			lda PlayerFloorCollision + 0
@@ -191,8 +191,6 @@ UTILS: {
 			pla 
 			cmp COLLISION_TEMP
 			bcs !NoCollision+
-
-
 
 		!Collision:
 			sec

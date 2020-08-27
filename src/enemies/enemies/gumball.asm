@@ -65,7 +65,7 @@ Enemy_007: {
 			jsr CheckScreenEdges
 
 			//Should I fall??				
-			:doFall(12, 21) //Check below enemy and fall if needed
+			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+
 			:getStaticMemory(FALLING_SPAWN)
 			beq !noFallSpawn+
@@ -99,7 +99,7 @@ Enemy_007: {
 			beq !CheckRight+
 
 			//Do walk left
-			:getEnemyCollisions(0, 21)
+			:getEnemyCollisions(0, 23)
 			tay
 			lda CHAR_COLORS, y
 			and #UTILS.COLLISION_COLORABLE
@@ -134,7 +134,7 @@ Enemy_007: {
 			beq !+
 
 			//Do Walk right
-			:getEnemyCollisions(24, 21)
+			:getEnemyCollisions(24, 23)
 			tay
 			lda CHAR_COLORS, y
 			and #UTILS.COLLISION_COLORABLE

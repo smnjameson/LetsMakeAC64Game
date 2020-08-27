@@ -329,7 +329,7 @@ CROWN: {
 
 			lda #$0e
 			sta COLLISION_POINT_X_OFFSET
-			lda #$07
+			lda #$0a
 			sta COLLISION_POINT_Y_OFFSET
 			jsr UTILS.GetCollisionPoint
 
@@ -343,7 +343,7 @@ CROWN: {
 			sta CrownFallIndex
 			lda Crown_Y
 			and #$f8
-			ora #$03
+			ora #$01
 			sta Crown_Y
 
 			jmp !FallComplete+

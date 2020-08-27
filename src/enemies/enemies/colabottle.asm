@@ -30,7 +30,7 @@ Enemy_003: {
 
 			:hasHitProjectile()
 			//Should I fall??
-			:doFall(12, 21) //Check below enemy and fall if needed
+			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+
 			jmp !Done+
 		!:

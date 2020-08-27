@@ -1,3 +1,4 @@
+*=* "Map Loader"
   MAPLOADER: {
 
   	.label BUFFER = $bc00
