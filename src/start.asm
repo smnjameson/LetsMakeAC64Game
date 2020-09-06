@@ -2,7 +2,6 @@
 
 BasicUpstart2(Entry)
 
- 
 #import "../libs/tables.asm"  
 #import "../libs/vic.asm" 
 #import "../libs/macros.asm"
@@ -20,8 +19,8 @@ BasicUpstart2(Entry)
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
 #import "maps/door.asm"
-#import "player/player.asm"
 #import "player/projectiles.asm"
+#import "player/player.asm"
 #import "player/hud.asm"
 #import "player/crown.asm"
 #import "animation/charanimations.asm"
@@ -37,7 +36,8 @@ BasicUpstart2(Entry)
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
 #import "animation/titlecard.asm"
-#import "animation/transition_bars.asm"
+// #import "animation/transition_bars.asm"
+#import "animation/transition_chars.asm"
 #import "sound/sound.asm"
 
 Random: { 
@@ -122,6 +122,8 @@ Entry:
 		jsr SOFTSPRITES.CreateSpriteBlitTable
 
 		jsr IRQ.Setup 
+
+
 
 
 	!INTRO_TRANSITION:

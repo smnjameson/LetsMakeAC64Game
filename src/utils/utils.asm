@@ -9,6 +9,8 @@ UTILS: {
 		//y register = y char position
 		.label COLLISION_LOOKUP = TEMP1
 
+		jsr WrapX
+
 		lda TABLES.BufferLSB ,y
 		sta COLLISION_LOOKUP
 		lda TABLES.BufferMSB ,y
@@ -20,7 +22,48 @@ UTILS: {
 		rts
 	}
 
+	SetColorAtIfColorable: {
+			.label COLLISION_LOOKUP = TEMP1
+			tax 
 
+			jsr WrapX
+			
+			lda TABLES.BufferLSB ,y
+			sta COLLISION_LOOKUP
+			lda TABLES.BufferMSB ,y
+			sta COLLISION_LOOKUP + 1
+
+			txa
+			tay
+			lda (COLLISION_LOOKUP), y
+			tax
+			lda CHAR_COLORS, x 
+			and #COLLISION_COLORABLE
+			beq !Exit+
+
+			
+
+			clc
+			lda COLLISION_LOOKUP + 1
+			adc #[$d8 - >MAPLOADER.BUFFER]
+			sta COLLISION_LOOKUP + 1
+			lda #$09
+			sta (COLLISION_LOOKUP), y	
+		!Exit:
+			rts
+	}
+
+	WrapX: {
+			cpx #$80
+			bcc !+
+			ldx #$00
+		!:
+			cpx #$28 
+			bcc !+
+			ldx #$27
+		!:	
+			rts
+	}
 	GetColorAt: {
 			.label PlayerFloorCollision = TEMP1
 

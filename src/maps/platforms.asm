@@ -6,6 +6,15 @@ PLATFORMS: {
 		.fill MAX_PLATFORMS, 0	
 	COLOR_ORIGIN_MSB:
 		.fill MAX_PLATFORMS, 0
+	COLOR_ORIGIN_LSB_L:
+		.fill MAX_PLATFORMS, 0	
+	COLOR_ORIGIN_MSB_L:
+		.fill MAX_PLATFORMS, 0	
+	COLOR_ORIGIN_LSB_R:
+		.fill MAX_PLATFORMS, 0	
+	COLOR_ORIGIN_MSB_R:
+		.fill MAX_PLATFORMS, 0	
+
 	ORIGINAL_COLOR:
 		.fill MAX_PLATFORMS, 0
 	NEW_COLOR:
@@ -32,10 +41,14 @@ PLATFORMS: {
 			sta NEW_COLOR, x 
 			pla
 			sta COLOR_ORIGIN_LSB, x 
+			sta COLOR_ORIGIN_LSB_L, x 
+			sta COLOR_ORIGIN_LSB_R, x 
 			tya 
 			sta COLOR_ORIGIN_MSB, x
+			sta COLOR_ORIGIN_MSB_L, x
+			sta COLOR_ORIGIN_MSB_R, x
 
-
+	
 			lda COLOR_ORIGIN_LSB, x
 			sta PLATFORM_LOOKUP + 0
 			lda COLOR_ORIGIN_MSB, x
@@ -51,6 +64,8 @@ PLATFORMS: {
 		!:
 			sta ORIGINAL_COLOR, x
 
+
+
 			inx 
 			cpx #MAX_PLATFORMS
 			bne !+
@@ -62,17 +77,23 @@ PLATFORMS: {
 			rts
 	}
 
+
+
 	UpdateColorOrigins: {
 			ldx #MAX_PLATFORMS - 1
+
+
 		!Loop:
 			lda COLOR_ORIGIN_LSB, x
 			sta PLATFORM_LOOKUP + 0
 			sta PLATFORM_CHAR_LOOKUP + 0
+
 			lda COLOR_ORIGIN_MSB, x
 			sta PLATFORM_LOOKUP + 1
 			sec
 			sbc #[$d8 - [>SCREEN_RAM]]
 			sta PLATFORM_CHAR_LOOKUP + 1
+
 
 			bne !+
 			beq !Skip+
@@ -85,6 +106,7 @@ PLATFORMS: {
 			bpl !Loop-
 			rts
 	}
+
 
 
 	FillPlatformToggle:
@@ -109,6 +131,7 @@ PLATFORMS: {
 		!skip:
 			pla
 			tay
+
 
 			lda (PLATFORM_LOOKUP), y
 			and #$0f

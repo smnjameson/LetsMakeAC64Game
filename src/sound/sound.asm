@@ -1,3 +1,4 @@
+* = * "Sound"
 SOUND: {
 	CurrentGameTrack:
 		.byte $ff

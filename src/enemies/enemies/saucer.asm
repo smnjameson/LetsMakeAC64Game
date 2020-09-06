@@ -130,11 +130,26 @@ Enemy_004: {
 			lda ENEMIES.EnemyPosition_X1, x
 			ror
 
-			cmp #$0c
-			bcc !DoXBounce+
-			cmp #$a0
-			bcs !DoXBounce+
+			cmp #[PLAYER.LEFT_SCREEN_EDGE / 2]
+			bcs !+
+			lda #$01
+			sta ENEMIES.EnemyPosition_X2, x
+			lda #[PLAYER.RIGHT_SCREEN_EDGE]
+			sta ENEMIES.EnemyPosition_X1, x	
+			jmp !ExitBounce+
 		!:
+			cmp #[[PLAYER.RIGHT_SCREEN_EDGE + $100] / 2]
+			bcc !+
+			lda #$00
+			sta ENEMIES.EnemyPosition_X2, x
+			lda #[PLAYER.LEFT_SCREEN_EDGE]
+			sta ENEMIES.EnemyPosition_X1, x				
+			jmp !ExitBounce+
+		!:
+
+			// jsr CheckScreenEdges
+			// beq !DoXBounce+
+	
 			:getStaticMemory(DX)
 			clc
 			adc #$01

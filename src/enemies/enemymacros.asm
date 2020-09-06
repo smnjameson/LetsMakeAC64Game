@@ -104,9 +104,15 @@ CheckScreenEdges: {
 		lda ENEMIES.EnemyPosition_X2, x
 		bne !Done+
 		lda ENEMIES.EnemyPosition_X1, x
-		cmp #$18
+		// cmp #$18
+		cmp #PLAYER.LEFT_SCREEN_EDGE
 		bcs !Done+
 
+		lda #$01
+		sta ENEMIES.EnemyPosition_X2, x
+		lda #[PLAYER.RIGHT_SCREEN_EDGE]
+		sta ENEMIES.EnemyPosition_X1, x
+		bne !ChangeDone+
 
 	!Change:
 		//ChangeDir
@@ -114,6 +120,8 @@ CheckScreenEdges: {
 		and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
 		ora #[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]
 		sta ENEMIES.EnemyState, x
+	!ChangeDone:
+
 
 		lda #$00
 		rts
@@ -132,8 +140,14 @@ CheckScreenEdges: {
 		lda ENEMIES.EnemyPosition_X2, x
 		beq !Done+
 		lda ENEMIES.EnemyPosition_X1, x
-		cmp #$40
+		cmp #PLAYER.RIGHT_SCREEN_EDGE
 		bcc !Done+
+		
+		lda #$00
+		sta ENEMIES.EnemyPosition_X2, x
+		lda #[PLAYER.LEFT_SCREEN_EDGE ]
+		sta ENEMIES.EnemyPosition_X1, x	
+		bne !ChangeDone+
 
 	!Change:
 		//ChangeDir
@@ -141,6 +155,9 @@ CheckScreenEdges: {
 		and #[255 -[ENEMIES.STATE_FACE_RIGHT + ENEMIES.STATE_WALK_RIGHT]]
 		ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
 		sta ENEMIES.EnemyState, x
+
+	!ChangeDone:
+
 
 		lda #$00
 		rts
@@ -654,4 +671,19 @@ CheckVsProjectiles: {
 		ldx #$BB
 	!:
 		rts
+}
+
+.macro clearColorable() {
+		.label TEMP = TEMP8
+		txa 
+		pha 
+
+		lda #$0c
+		ldy #$17
+		jsr ENEMIES.GetCollisionPoint
+
+		jsr UTILS.SetColorAtIfColorable
+		
+		pla 
+		tax 
 }

@@ -2,6 +2,8 @@ PIPES: {
 	.label MAX_ENEMIES_ON_SCREEN = $05
 	.label PIPE_UPDATE_TIME = $20
 
+	PipeCount:
+		.byte $00
 	SpawnDelayTimer:
 		.byte $00
 	PipesActive:	//Bulge will extend to pipe length + 1
@@ -85,6 +87,16 @@ PIPES: {
 			cpx #[__MAPDATA_COPY - MAPDATA_COPY] //
 			bne !Loop-
 
+			ldx #$00
+		!loop:
+			lda MAPDATA_COPY.PipeLengthAndDirection, x
+			beq !+
+			inx
+			cpx #$05
+			bne !loop-
+		!:
+			stx PipeCount
+
 			rts
 	}
 
@@ -103,7 +115,10 @@ PIPES: {
 
 			//Check if there are less than 5 enemies
 			ldx ENEMIES.EnemyTotalCount
-			ldy #$04 //Pipe to check next
+			// ldy #$04 //Pipe to check next
+			ldy PipeCount
+			dey
+
 		!Loop:
 			lda PipesActive, y
 			beq !+
@@ -112,7 +127,7 @@ PIPES: {
 			dey 
 			bpl !Loop-
 			txa
-			cmp #MAX_ENEMIES_ON_SCREEN
+			cmp PipeCount//#MAX_ENEMIES_ON_SCREEN
 
 			bcs !SpawnCheckComplete+
 
@@ -128,7 +143,9 @@ PIPES: {
 
 
 			//Do we have an inactive pipe?
-			ldx #$04
+			// ldx #$04
+			ldx PipeCount
+			dex 
 		!:
 			lda PipesActive, x
 			beq !FoundInactivePipe+
@@ -142,7 +159,9 @@ PIPES: {
 		!:
 			jsr Random
 			and #$07
-			cmp #$05
+			// cmp #$05
+			cmp PipeCount
+
 			bcs !-
 			tax 
 			lda PipesActive, x
@@ -167,7 +186,10 @@ PIPES: {
 
 	UpdatePipeBulges: {
 			// inc $d020
-			ldx #$04
+			// ldx #$04
+			ldx PipeCount
+			dex 
+			
 		!Loop:
 			//Is there an active pipe?
 			lda PipesActive, x

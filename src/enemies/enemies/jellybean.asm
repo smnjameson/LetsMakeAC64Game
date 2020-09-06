@@ -180,6 +180,7 @@ Enemy_002: {
 
 			beq !CheckRight+
 
+
 			//Do walk left
 			:getEnemyCollisions(0, 23)
 			tay
@@ -188,6 +189,13 @@ Enemy_002: {
 			beq !ChangeDir+
 		!WalkLeft:
 			:UpdatePosition(-$080, $000)
+
+			jsr CheckScreenEdges
+			bne !+
+			:setEnemyFrame(21)
+			jmp !Done+
+		!:
+
 			lda PlayerIsInRange
 			beq !+
 			:UpdatePosition(-$100, $000)
@@ -196,6 +204,8 @@ Enemy_002: {
 			tay
 			lda WalkLeft, y
 			:setEnemyFrame(null)
+
+
 
 			jmp !Done+
 
@@ -208,9 +218,11 @@ Enemy_002: {
 			jmp !Done+
 			
 
+
 		!CheckRight:
 			bit TABLES.Plus + ENEMIES.STATE_WALK_RIGHT
 			beq !+
+			
 			//Do Walk right
 			:getEnemyCollisions(24, 23)
 			tay
@@ -219,6 +231,13 @@ Enemy_002: {
 			beq !ChangeDir+
 		!WalkRight:
 			:UpdatePosition($080, $000)
+	
+			jsr CheckScreenEdges
+			bne !+
+			:setEnemyFrame(16)
+			jmp !Done+
+		!:
+
 			lda PlayerIsInRange
 			beq !+
 			:UpdatePosition($100, $000)
@@ -227,6 +246,8 @@ Enemy_002: {
 			tay
 			lda WalkRight, y
 			:setEnemyFrame(null)
+
+
 
 			jmp !Done+
 
@@ -240,6 +261,7 @@ Enemy_002: {
 		!:
 
 		!Done:
+
 			lda PlayerIsInRange
 			beq !+
 			lda ZP_COUNTER

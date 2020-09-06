@@ -29,8 +29,8 @@ PLAYER: {
 	.label JOY_RT = %01000
 	.label JOY_FR = %10000
 
-	.label LEFT_SCREEN_EDGE = $14 //MSB = 0
-	.label RIGHT_SCREEN_EDGE = $44 //MSB = 1
+	.label LEFT_SCREEN_EDGE = $0a //MSB = 0  ///14
+	.label RIGHT_SCREEN_EDGE = $4e //MSB = 1  //44
 
 	.label PLAYER_RIGHT_COLLISON_BOX = 19
 	.label PLAYER_LEFT_COLLISON_BOX = 5
@@ -1424,7 +1424,10 @@ PLAYER: {
 
 			lda Player1_LeftCollision, y
 			and #UTILS.COLLISION_SOLID
-			bne !+
+			beq !skip001+
+			jmp !+
+
+		!skip001:
 
 			cpy #$00
 			bne !Plyr2+
@@ -1440,18 +1443,28 @@ PLAYER: {
 			sbc #$00
 			sta Player1_X + 2
 
-			//CHeck screen edge
+			//Check screen edge
 			lda Player1_X + 2
 			bne !SkipEdgeCheck+
 			lda Player1_X + 1
 			cmp #LEFT_SCREEN_EDGE
 			bcs !SkipEdgeCheck+
+
+			// lda #$00
+			// sta Player1_X + 0
+			// lda #LEFT_SCREEN_EDGE
+			// sta Player1_X + 1
+
 			lda #$00
 			sta Player1_X + 0
-			lda #LEFT_SCREEN_EDGE
+			lda #RIGHT_SCREEN_EDGE
 			sta Player1_X + 1
+			lda #$01
+			sta Player1_X + 2
+
 		!SkipEdgeCheck:
 			jmp !PlyrDone+
+
 
 		!Plyr2:
 			sec
@@ -1471,10 +1484,20 @@ PLAYER: {
 			lda Player2_X + 1
 			cmp #LEFT_SCREEN_EDGE
 			bcs !SkipEdgeCheck+
+
+			// lda #$00
+			// sta Player2_X + 0
+			// lda #LEFT_SCREEN_EDGE
+			// sta Player2_X + 1
+
+
 			lda #$00
 			sta Player2_X + 0
-			lda #LEFT_SCREEN_EDGE
+			lda #RIGHT_SCREEN_EDGE
 			sta Player2_X + 1
+			lda #$01
+			sta Player2_X + 2
+
 		!SkipEdgeCheck:
 		!PlyrDone:
 
@@ -1498,7 +1521,9 @@ PLAYER: {
 
 			lda Player1_RightCollision, y
 			and #UTILS.COLLISION_SOLID
-			bne !+
+			beq !skip001+
+			jmp !+
+		!skip001:
 
 			cpy #$00
 			bne !Plyr2+
@@ -1521,10 +1546,19 @@ PLAYER: {
 			lda Player1_X + 1
 			cmp #RIGHT_SCREEN_EDGE
 			bcc !SkipEdgeCheck+
+
+			// lda #$00
+			// sta Player1_X + 0
+			// lda #RIGHT_SCREEN_EDGE
+			// sta Player1_X + 1
+
 			lda #$00
 			sta Player1_X + 0
-			lda #RIGHT_SCREEN_EDGE
+			lda #LEFT_SCREEN_EDGE
 			sta Player1_X + 1
+			lda #$00
+			sta Player1_X + 2
+
 		!SkipEdgeCheck:
 			jmp !PlyrDone+
 
@@ -1546,10 +1580,19 @@ PLAYER: {
 			lda Player2_X + 1
 			cmp #RIGHT_SCREEN_EDGE
 			bcc !SkipEdgeCheck+
+
+			// lda #$00
+			// sta Player2_X + 0
+			// lda #RIGHT_SCREEN_EDGE
+			// sta Player2_X + 1
+
 			lda #$00
 			sta Player2_X + 0
-			lda #RIGHT_SCREEN_EDGE
+			lda #LEFT_SCREEN_EDGE
 			sta Player2_X + 1
+			lda #$00
+			sta Player2_X + 2
+
 		!SkipEdgeCheck:
 
 		!PlyrDone:
@@ -1675,7 +1718,7 @@ PLAYER: {
 		!CheckCol:
 			
 			lda (PlayerFloorCollision),y
-			and #UTILS.COLLISION_SOLID
+			and #UTILS.COLLISION_COLORABLE
 			beq !Falling+
 
 

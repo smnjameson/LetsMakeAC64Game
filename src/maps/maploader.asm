@@ -36,12 +36,12 @@
 			//Initialise the screen/color ram self mod code
 			lda #<SCREEN_RAM //$00  
 			sta Scr + 1
-			sta Color + 1
+			// sta Color + 1
 
 			lda #>SCREEN_RAM //$c0  
 			sta Scr + 2
-			lda #>VIC.COLOR_RAM //$c0  
-			sta Color + 2
+			// lda #>VIC.COLOR_RAM //$c0  
+			// sta Color + 2
 
 
 			//Initialise the map lookup self mod
@@ -96,8 +96,9 @@
 			tax
 			lda CHAR_COLORS, x
 			ldx TABLES.TileScreenLocations2x2, y 
-		Color:
-			sta $BEEF, x //Self modified color ram
+		// Color:
+		// 	sta $BEEF, x //Self modified color ram
+
 			iny
 			cpy #$04
 			bne TileLookup
@@ -116,10 +117,10 @@
 			lda Scr + 1
 			adc #$02
 			sta Scr + 1
-			sta Color + 1
+			// sta Color + 1
 			bcc !+
 			inc Scr + 2
-			inc Color + 2
+			// inc Color + 2
 		!:
 
 			//Advance 1 column
@@ -135,10 +136,10 @@
 			lda Scr + 1
 			adc #$28
 			sta Scr + 1
-			sta Color + 1
+			// sta Color + 1
 			bcc !+
 			inc Scr + 2
-			inc Color + 2
+			// inc Color + 2
 		!:
 			
 			inc Row

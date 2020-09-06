@@ -70,7 +70,12 @@ Enemy_008: {
 			beq !ChangeDir+
 		!WalkLeft:
 			:UpdatePosition(-$080, $000)
-
+		
+			jsr CheckScreenEdges
+			bne !+
+			:setEnemyFrame(21)
+			jmp !Done+
+		!:
 			:getStaticMemory(WALK_FRAME)
 			tay
 			lda WalkLeft, y
@@ -99,6 +104,11 @@ Enemy_008: {
 		!WalkRight:
 			:UpdatePosition($080, $000)
 
+			jsr CheckScreenEdges
+			bne !+
+			:setEnemyFrame(16)
+			jmp !Done+
+		!:
 			:getStaticMemory(WALK_FRAME)
 			tay
 			lda WalkRight, y

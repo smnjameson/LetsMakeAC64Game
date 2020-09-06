@@ -25,6 +25,8 @@ TITLECARD: {
 	UpdateReady:
 		.byte $00
 
+
+
 	Initialise: {
 			sei
 
@@ -35,8 +37,6 @@ TITLECARD: {
 			ora #%00000001	
 			sta $d01a
 
-
-
 			lda #<TransitionIRQ_1
 			sta IRQ_LSB
 			lda #>TransitionIRQ_1
@@ -44,9 +44,7 @@ TITLECARD: {
 
 			lda #$00
 			sta $d012
-			lda $d011
-			and #%01110000
-			sta $d011
+
 			
 
 			//Setup transition
@@ -125,25 +123,40 @@ TITLECARD: {
 			dex
 			bne !-
 
-			lda #$00
-			sta TRANSITION_BARS.UpdateDirection
-			lda #$00
-			jsr TRANSITION_BARS.Init
+			// lda #$00
+			// sta TRANSITION_BARS.UpdateDirection
+			// lda #$00
+			// jsr TRANSITION_BARS.Init
+			jsr TRANSITION_CHARS.ResetBars
+			lda $d016
+			and #%11110111
+			sta $d016
+			lda $d011
+			and #%01110111
+			sta $d011			
+			lda #$01
+			sta TRANSITION_CHARS.Direction
+			jsr TRANSITION_CHARS.Init
+			lda #$07
+			sta $d021
+
+
 
 			lda #$01
 			sta TITLECARD.TransitionDirection
 			jsr TITLECARD.Initialise
-			lda $d011
-			pha
-			lda #$5b
-			sta $d011
-			jsr TITLECARD.ClearTitleCardScreen
-			pla
-			sta $d011
 
+
+			jsr TITLECARD.ClearTitleCardScreen
+
+			lda $d011
+			and #%01110000
+			sta $d011
 		!:
 			lda TITLECARD.isComplete
 			beq !-
+
+
 			rts
 	}
 
@@ -161,20 +174,30 @@ TITLECARD: {
 			bpl *-3
 				
 			sei
-			lda #$01
-			sta TRANSITION_BARS.UpdateDirection
-			lda #$01
-			jsr TRANSITION_BARS.Init
+
+			// jsr TRANSITION_CHARS.ResetBars		
+			// lda #$00
+			// sta TRANSITION_CHARS.Direction
+			// jsr TRANSITION_CHARS.Init
+			// lda #$07
+			// sta $d021
 
 
-			lda MAPDATA.MAP_1.TransparentColor
-			sta $d021
-			lda MAPDATA.MAP_1.MultiColor
-			sta $d022	
+			// lda #$01
+			// sta TRANSITION_BARS.UpdateDirection
+			// lda #$01
+			// jsr TRANSITION_BARS.Init
+
+
+	
+
 			lda #$00
-			sta $d023
-			lda #%00001100
-			sta $d018
+			sta TRANSITION_CHARS.Direction
+			jsr TRANSITION_CHARS.ResetBars
+			jsr TRANSITION_CHARS.DrawAllRowsFull
+			lda #%00011100
+			sta $d018	
+
 			lda $d016
 			and #%11110000
 			ora #%00011000
@@ -182,18 +205,42 @@ TITLECARD: {
 			lda $d011	
 			and #%11110000
 			ora #%00001000
-			sta $d011	
+			sta $d011
+			
+			lda MAPDATA.MAP_1.TransparentColor
+			sta $d021
+			lda MAPDATA.MAP_1.MultiColor
+			sta $d022	
+			lda #$00
+			sta $d023
 
+			// .break
 					//TODO Draw the correct stuff behind the transition sprites
 					jsr MAPLOADER.DrawMap
 
-					jsr CopyTitleCardScreen
+					// jsr CopyTitleCardScreen
 
 					jsr BlackOutHUD
+			
+			lda $d016
+			ora #%00010000
+			sta $d016
 
-		!:
-			lda TRANSITION_BARS.ChangeDirection
-			beq !-
+			jsr TRANSITION_CHARS.Init
+
+			// .break
+			
+			lda #%00001100
+			sta $d018
+
+
+
+
+
+
+		// !:
+		// 	lda TRANSITION_BARS.ChangeDirection
+		// 	beq !-
 
 			sei
 
@@ -210,6 +257,7 @@ TITLECARD: {
 			lda #$00
 			sta $d01d
 			sta $d017
+
 			rts
 	}
 
@@ -226,6 +274,7 @@ TITLECARD: {
 			rts
 	}
 
+
 	ClearTitleCardScreen: {
 			ldx #$00
 
@@ -233,14 +282,16 @@ TITLECARD: {
 			.for(var i=0 ;i<4; i++) {
 				lda #$00
 				sta $c000 + i * $fa, x
-				lda #$04
-				sta $d800 + i * $fa, x
+				// lda #$04
+				// sta $d800 + i * $fa, x
 			}
 			inx
 			cpx #$fa
 			bne !-
 			rts
 	}
+
+
 
 	BlackOutHUD: {
 				ldx #$77
@@ -254,41 +305,42 @@ TITLECARD: {
 				bpl !-
 				rts
 	}
+
 	TransitionIRQ_1: {
-		sta RestoreAcc + 1
-		stx RestoreX + 1
-		sty RestoreY + 1
+			sta RestoreAcc + 1
+			stx RestoreX + 1
+			sty RestoreY + 1
 
-			inc ZP_COUNTER
+				inc ZP_COUNTER
 
-			lda #$00
-			sta SideSpriteIndex
+				lda #$00
+				sta SideSpriteIndex
 
-			lda SideSpritePositions + 0
-			sta SideSpritePositions + 1
+				lda SideSpritePositions + 0
+				sta SideSpritePositions + 1
 
-			sta $d012
+				sta $d012
 
-			lda #<TransitionIRQ_2
-			sta IRQ_LSB
-			lda #>TransitionIRQ_2
-			sta IRQ_MSB	
+				lda #<TransitionIRQ_2
+				sta IRQ_LSB
+				lda #>TransitionIRQ_2
+				sta IRQ_MSB	
 
-		//Check is complete
-		lda isComplete
-		cmp #$01
-		bne !+
+			//Check is complete
+			lda isComplete
+			cmp #$01
+			bne !+
 
-	!:
+		!:
 
-		asl $d019 
-	RestoreAcc:
-		lda #$BEEF
-	RestoreX:
-		ldx #$BEEF
-	RestoreY:
-		ldy #$BEEF
-		rti
+			asl $d019 
+		RestoreAcc:
+			lda #$BEEF
+		RestoreX:
+			ldx #$BEEF
+		RestoreY:
+			ldy #$BEEF
+			rti
 	}
 
 
