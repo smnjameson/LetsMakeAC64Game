@@ -157,7 +157,8 @@ Enemy_005: {
 			:setEnemyFrame(0)
 		!Done:	
 		!Skip:
-		
+			:clearColorable()
+	
 			:PositionEnemy()
 			rts
 

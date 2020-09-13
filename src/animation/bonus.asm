@@ -1,5 +1,4 @@
 BONUS: {
-	* = * "BONUS ACTIVE"
 	BonusActive:
 		.byte $00
 
@@ -16,11 +15,11 @@ BONUS: {
 		.byte $00
 
 	BonusCounters:	//x1000 + x250 + 15000
-		.byte $10,$50,$01  //Maximum combined totals
+		.byte $38,$50,$01  //Maximum combined totals
 	BonusPlayer1Counters:
-		.byte $08,$28	//Player 1+ player 2 should NOT exceed totals
+		.byte $38,$50	//Player 1+ player 2 should NOT exceed totals
 	BonusPlayer2Counters:
-		.byte $08,$28
+		.byte $00,$00
 	BonusCountersOriginal:	//copied from BonusCounters at start
 		.byte $00,$00,$00
 
@@ -48,6 +47,17 @@ BONUS: {
 			lda #$01
 			sta BonusActive
 
+			//Color default text black
+			lda #$00
+			ldx #$00
+		!:
+			sta $d900, x
+			sta $da00, x
+			sta $db00, x
+			dex
+			bne !-
+
+
 			lda #$00
 			sta BonusStage
 
@@ -60,28 +70,18 @@ BONUS: {
 			lda #$00
 			sta BonusCountersOriginal + 02
 		!:
-			// sei
-			// lda #<BonusIRQ   
-			// ldx #>BonusIRQ
-			// sta IRQ_LSB   // 0314
-			// stx IRQ_MSB	// 0315 
-			// cli
 
 			lda #%00001110
 			sta $d018
-
-			
-
-			// jsr TITLECARD.ClearTitleCardScreen
 
 			//Setup inital screen
 			//Bonus Label
 			ldx #$09
 		!:
 			lda BonusLabelLine1, x
-			sta SCREEN_RAM + $01 * $28 + $0f, x
+			sta SCREEN_RAM + $01 * $28 + $13, x
 			lda BonusLabelLine2, x
-			sta SCREEN_RAM + $02 * $28 + $0f, x
+			sta SCREEN_RAM + $02 * $28 + $13, x
 			dex
 			bpl !-
 
@@ -101,25 +101,202 @@ BONUS: {
 		!:
 
 
+			//Level sprite
+			lda #$8d
+			sta SPRITE_POINTERS + 0
+			lda #$00
+			sta $d027
+			lda $d010
+			and #%11111110
+			sta $d010
+			lda #$3e
+			sta $d001
+			lda #$30 
+			sta $d000
+			lda $d01b
+			and #%11111110
+			sta $d01b 
+			lda $d01c
+			and #%11111110
+			sta $d01c 
+			lda $d015
+			ora #%00000001
+			sta $d015
+
+			jsr DrawLevelNumber
+
+			jsr ShiftLevelNumber
+
+			lda CURRENT_LEVEL
+			cmp #$09
+			bcc !exit+
+
+			ldx #$04
+		!:
+			jsr ShiftLevelNumber
+			dex
+			bne !-
+
+
+			//Initialise scores
+			lda #$30
+			ldx #$05
+		!:
+			sta P1_BONUS_SCORE, x
+			sta P2_BONUS_SCORE, x 
+			dex
+			bpl !-
+
+		!exit:
 			rts			
 	}
 
+	ShiftLevelNumber: {
+			.for(var i=0; i<7; i++) {
+				lsr $e340 + 42 + i*3
+				ror $e340 + 43 + i*3
+				ror $e340 + 44 + i*3
+			}
+			rts 
+	}	
+
+	DrawLevelNumber: {
+			//first clear numbers
+			ldx #$20
+			lda #$00
+		!:
+			sta $e340 + 42, x  //Sprite location
+			dex 
+			bpl !-
+
+			ldx #$00
+			lda CURRENT_LEVEL
+			clc
+			adc #$01
+		!:		
+			cmp #$0a
+			bcc !units+
+			sec 
+			sbc #$0a
+			inx 
+			bne !-
+		!units:
+			pha  
+
+			cpx #$00
+			beq !PrintUnits+
+
+
+		!PrintTens:
+			txa 
+			asl
+			asl 
+			asl 
+			tax 
+			ldy #$00
+		!:
+			lda $f980, x
+			sta $e340 + 42, y 
+			inx 
+			iny
+			iny
+			iny 
+			cpy #$15
+			bne !-
+
+		!PrintUnits:
+			pla
+			asl
+			asl 
+			asl 
+			tax 
+			ldy #$00
+		!:
+			lda $f980, x
+			sta $e340 + 43, y 
+			inx 
+			iny
+			iny
+			iny 
+			cpy #$15
+			bne !-	
+
+			rts
+	}
+
+	Player1Text:
+		.text "PLAYER" 
+		.byte $00
+		.text "1"
+	Player2Text:
+		.text "PLAYER"
+		.byte $00
+		.text "2"
+	DrawTotalScores: {
+			//Draw total scores
+			ldx #$07
+		!loop:
+			lda PLAYER.PlayersActive
+			and #$01
+			beq !noP1+
+			lda Player1Text, x
+			sta SCREEN_RAM + 01 * $28 + 10, x
+			lda #$07
+			sta $d800 + 01 * $28 + 10, x
+
+			lda P1_SCORE, x
+			sta SCREEN_RAM + 03 * $28 + 10, x
+			lda #$07
+			sta $d800 + 03 * $28 + 10, x
+
+			cpx #$06
+			bcs !+
+			lda P1_BONUS_SCORE, x
+			sta SCREEN_RAM + $17 * $28 + 11, x
+		!:
+
+
+		!noP1:
+
+			lda PLAYER.PlayersActive
+			and #$02
+			beq !noP2+
+			lda Player2Text, x
+			sta SCREEN_RAM + 01 * $28 + 30, x
+			lda #$07
+			sta $d800 + 01 * $28 + 30, x
+			lda P2_SCORE, x
+			sta SCREEN_RAM + 03 * $28 + 30, x
+			lda #$07
+			sta $d800 + 03 * $28 + 30, x
+
+			cpx #$06
+			bcs !+
+			lda P2_BONUS_SCORE, x
+			sta SCREEN_RAM + $17 * $28 + 31, x
+		!:
+		!noP2:
+
+			dex
+			bpl !loop-
+			rts
+	}
 
 
 	PlayerBarX:
 		.byte 11,31
 	PlayerTextX:
-		.byte 10,30
+		.byte 9,29
 	PlayerBar1Colors:
-		.byte $02,$05
+		.byte $02,$03
 	PlayerBar2Colors:
-		.byte $02,$05
+		.byte $02,$03
 	PlayerBarHeight:
 		.byte $00,$00
 
-	PlayerText:
-		.encoding "screencode_upper"
-		.text "PLAYER"
+	// PlayerText:
+	// 	.encoding "screencode_upper"
+	// 	.text "P"
 
 	DrawPlayerBars: {
 			//1b 2f   y=4-18   x=7 or 27  offset Right = 5  
@@ -195,35 +372,54 @@ BONUS: {
 
 			
 			stx BONUS_PLAYER
+
 			lda PlayerTextX, x
 			tax
-			ldy #$00
-		!:
-			lda PlayerText,y
-			sta SCREEN_RAM + $16 * $28, x
-			lda BONUS_COLOR
-			sta VIC.COLOR_RAM + $16 * $28, x
-			lda #$30
-			sta SCREEN_RAM + $17 * $28 + $01, x
-			inx
+		// 	ldy #$00
+		// !:
+		// 	lda PlayerText,y
+		// 	sta SCREEN_RAM + $16 * $28, x
+		// 	lda BONUS_COLOR
+		// 	sta VIC.COLOR_RAM + $16 * $28, x
+		// 	lda #$30
+		// 	sta SCREEN_RAM + $17 * $28 + $01, x
+		// 	inx
+		// 	iny
+		// 	cpy #$06
+		// 	bne !-
+
+			//P in P1/P2 + Score
+			// lda #$10
+			// sta SCREEN_RAM + $17 * $28, x
+			// lda BONUS_COLOR
+		 // 	sta VIC.COLOR_RAM + $17 * $28, x
+
+		 	ldy #$00
+		 !:
+		 	lda #$30
+		 	sta SCREEN_RAM + $17 * $28 + $02, x
+		 	lda BONUS_COLOR
+		 	sta VIC.COLOR_RAM + $17 * $28 + $02, x
+		 	inx
 			iny
 			cpy #$06
-			bne !-
+		 	bne !-
 
 
-			lda #$31
-			clc
-			adc BONUS_PLAYER
-			pha
-			ldx BONUS_PLAYER
-			lda PlayerTextX, x
-			clc
-			adc #$07
-			tax
-			pla
-			sta SCREEN_RAM + $16 * $28, x
-			lda BONUS_COLOR
-			sta VIC.COLOR_RAM + $16 * $28, x
+		 	//1 & 2 in P1/2
+			// lda #$31
+			// clc
+			// adc BONUS_PLAYER
+			// pha
+			// ldx BONUS_PLAYER
+			// lda PlayerTextX, x
+			// clc
+			// adc #$01
+			// tax
+			// pla
+			// sta SCREEN_RAM + $17 * $28, x
+			// lda BONUS_COLOR
+			// sta VIC.COLOR_RAM + $17 * $28, x
 
 
 			ldx #$00
@@ -310,8 +506,8 @@ BONUS: {
 			ldy #$00
 		!Loop:
 			lda BonusRamp, x
-			sta VIC.COLOR_RAM + $01 * $28 + $0f, y
-			sta VIC.COLOR_RAM + $02 * $28 + $0f, y
+			sta VIC.COLOR_RAM + $01 * $28 + $13, y
+			sta VIC.COLOR_RAM + $02 * $28 + $13, y
 			inx
 			cpx #$10
 			bne !+
@@ -346,6 +542,9 @@ BONUS: {
 			jsr SetBar
 		!:
 		!NoSetBar:
+
+			jsr DrawTotalScores
+
 			rts
 	}
 
@@ -353,7 +552,7 @@ BONUS: {
 	PlayerToggle:
 		.byte $00
 	StageIncrement: //Multiples of 250pts
-		.byte $04,$01,$04
+		.byte $01,$01,$04
 	StageIncTimer:
 		.byte $03,$01,$03
 	*=* "BonusStageStrings"
@@ -362,7 +561,7 @@ BONUS: {
 		.encoding "screencode_upper"
 		.text "ENEMIES@KILLED"
 		.word SCREEN_RAM + $09 * $28 + $11
-		.text "@@@@@@;1000@@@"
+		.text "@@@@@@;250@@@@"
 	.align $20
 		.text "@TAGGED@AREAS@"
 		.word SCREEN_RAM + $0d * $28 + $11
@@ -370,7 +569,7 @@ BONUS: {
 	.align $20
 		.text "@P@@WINS@RACE@"
 		.word SCREEN_RAM + $11 * $28 + $11
-		.text "@@@@@@<15000@@"
+		.text "@@@@@@<5000@@@"
 
 	DoBonusStage: {
 			lda BonusStage
@@ -520,6 +719,19 @@ BONUS: {
 			clc
 			adc StageIncrement, x
 			sta PlayerBarHeight + 0
+
+			txa 
+			pha 
+			lda StageIncrement, x
+			ldy #$00
+			jsr AddScore
+
+			pla
+			tax
+			lda StageIncrement, x
+			ldy #$00
+			jsr AddScoreTotal
+
 			jmp !Exit+
 
 		!Player2:
@@ -532,6 +744,19 @@ BONUS: {
 			clc
 			adc StageIncrement, x
 			sta PlayerBarHeight + 1
+
+			txa 
+			pha 
+			lda StageIncrement, x
+			ldy #$01
+			jsr AddScore
+
+			pla
+			tax
+			lda StageIncrement, x
+			ldy #$01
+			jsr AddScoreTotal
+
 			jmp !Exit+
 
 
@@ -571,7 +796,7 @@ BONUS: {
 			sbc #$01
 			tax
 			lda BonusCountersOriginal + 2 //Exit bonus
-			cmp #$0f
+			cmp #$05
 			beq !FinishStage+
 			clc
 			adc #$01
@@ -582,6 +807,21 @@ BONUS: {
 			clc
 			adc StageIncrement, y
 			sta PlayerBarHeight,x
+
+
+			tya 
+			pha 
+			lda StageIncrement, y
+			ldy BonusCounters + 02
+			dey
+			jsr AddScore
+
+			pla
+			tay 
+			lda StageIncrement, y
+			ldy BonusCounters + 02
+			dey
+			jsr AddScoreTotal
 
 
 		!DrawExitBonus:
@@ -636,9 +876,138 @@ BONUS: {
 
 
 
+	ScoreTable:
+			.byte $00,$25,$50,$75,$10
+	ScoreTableZeros:
+			.byte $00,$01,$01,$01,$02
+	//Acc starts as how many mutlipes of 250
+	//Acc = Score to add (25) (BCD Format) $25 = 25
+	//X = trailing zeros count (1)
+	//Y = Player 
+	AddScore: {
+			.label SCORE = SCOREVECTOR1
+			.label SCORETOADD = SCORETEMP1
+			.label TEMP = SCORETEMP2
+			tax 
+			lda ScoreTable, x 
+			pha 
+			lda ScoreTableZeros, x 
+			tax 
+			pla 
+
+			sta SCORETOADD
+			cpy #$00
+			bne !P2+
+		!P1:
+			lda #<P1_BONUS_SCORE
+			sta SCORE
+			lda #>P1_BONUS_SCORE
+			sta SCORE + 1
+			jmp !Done+
+
+		!P2:
+			lda #<P2_BONUS_SCORE
+			sta SCORE
+			lda #>P2_BONUS_SCORE
+			sta SCORE + 1
+		!Done:
+
+			stx TEMP
+			lda #$05
+			sec
+			sbc TEMP
+			tay
 
 
+			clc
+		!Loop:
+			lda SCORETOADD
+			and #$0f
+			adc (SCORE), y 
+			cmp #58
+			bcc !+
+			sbc #10
+		!:
+			sta (SCORE), y 
+			php //SAVE CARRY
+			
+			lda SCORETOADD
+			lsr
+			lsr
+			lsr
+			lsr
+			sta SCORETOADD
+			plp //RESTORE CARRY
+			dey
+			bpl !Loop-
 
+			rts
+	}
+
+
+	//Acc starts as how many mutlipes of 250
+	//Acc = Score to add (25) (BCD Format) $25 = 25
+	//X = trailing zeros count (1)
+	//Y = Player 
+	AddScoreTotal: {
+			.label SCORE = SCOREVECTOR1
+			.label SCORETOADD = SCORETEMP1
+			.label TEMP = SCORETEMP2
+			tax 
+			lda ScoreTable, x 
+			pha 
+			lda ScoreTableZeros, x 
+			tax 
+			pla 
+
+			sta SCORETOADD
+			cpy #$00
+			bne !P2+
+		!P1:
+			lda #<P1_SCORE
+			sta SCORE
+			lda #>P1_SCORE
+			sta SCORE + 1
+			jmp !Done+
+
+		!P2:
+			lda #<P2_SCORE
+			sta SCORE
+			lda #>P2_SCORE
+			sta SCORE + 1
+		!Done:
+
+			stx TEMP
+			lda #$07
+			sec
+			sbc TEMP
+			tay
+
+
+			clc
+		!Loop:
+			lda SCORETOADD
+			and #$0f
+			adc (SCORE), y 
+			cmp #58
+			bcc !+
+			sbc #10
+		!:
+			sta (SCORE), y 
+			php //SAVE CARRY
+			
+			lda SCORETOADD
+			lsr
+			lsr
+			lsr
+			lsr
+			sta SCORETOADD
+			plp //RESTORE CARRY
+			dey
+			bpl !Loop-
+
+			rts
+	}
 
 
 	SetBar: {

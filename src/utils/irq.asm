@@ -204,7 +204,7 @@ IRQ: {
 			sta $d011	
 
 		!ExitIRQ:
-
+			
 			asl $d019 //Acknowledging the interrupt
 		:RestoreState()
 		rti

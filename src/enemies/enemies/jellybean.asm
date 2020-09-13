@@ -284,7 +284,7 @@ Enemy_002: {
 		!:
 			:setStaticMemory(WALK_FRAME, null)
 		!Skip:
-
+			:clearColorable()
 			:PositionEnemy()
 			rts
 

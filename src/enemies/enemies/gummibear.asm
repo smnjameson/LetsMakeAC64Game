@@ -126,6 +126,7 @@ Enemy_008: {
 		!:
 
 		!Done:
+			:clearColorable()
 			:PositionEnemy()
 			rts
 

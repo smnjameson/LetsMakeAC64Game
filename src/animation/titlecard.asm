@@ -365,7 +365,7 @@ TITLECARD: {
 			and #%11100000
 			ora #%00010000
 			sta $d016
-			lda #$ff
+			lda #$fe
 			sta $d01b
 
 			lda TransitionTopIndex

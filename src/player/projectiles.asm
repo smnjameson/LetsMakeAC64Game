@@ -185,6 +185,8 @@ PROJECTILES: {
 			sta Player1_Proj_Y1, x
 			cmp #$a8
 			bcc !+
+			cmp #$b8
+			bcs !+
 			:DestroyPlayerProjectile()
 		!:
 
@@ -226,6 +228,14 @@ PROJECTILES: {
 			.label COLLISION_DATA = TEMP1
 			.label TEMP = TEMP2
 			stx TEMP
+
+			lda SOFTSPRITES.SpriteData_Y, x 
+			cmp #$a8
+			bcc !+
+			lda #$00
+			sta COLLISION_DATA
+			beq  !skipCollision+
+		!:
 
 			//Center 4,3
 			lda Player1_Proj_Y1, x
@@ -288,6 +298,7 @@ PROJECTILES: {
 
 			:DestroyPlayerProjectile()
 		!:
+		!skipCollision:
 			rts
 	}
 

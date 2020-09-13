@@ -199,6 +199,7 @@ PLAYER: {
 	Player2_Size_Timer:
 			.byte $00
 
+
 	Player_ExitIndex:
 	Player1_ExitIndex:
 			.byte $ff
@@ -443,6 +444,17 @@ PLAYER: {
 		sta Player1FloorColor
 
 
+		//Moving inside walls check
+		lda #$00
+		ldx #$0c
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		and #UTILS.COLLISION_SOLID
+		bne !PlayerOneComplete+ 
+
 
 		//Get Left Collision
 		lda #$00
@@ -469,7 +481,11 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_LeftCollision
 		sta Player1_LeftCollision
+
+
+
 	!Skip:
+
 
 		//Get Right Collision
 		lda #$00
@@ -496,6 +512,9 @@ PLAYER: {
 		lda CHAR_COLORS, x
 		ora Player1_RightCollision
 		sta Player1_RightCollision
+
+	!:
+
 	!Skip:
 	!PlayerOneComplete:
 
@@ -546,6 +565,17 @@ PLAYER: {
 		lda #$01
 	!:
 		sta Player2FloorColor
+
+		//Moving inside walls check
+		lda #$01
+		ldx #$0c
+		ldy #11
+		jsr PLAYER.GetCollisionPoint
+		jsr UTILS.GetCharacterAt
+		tax
+		lda CHAR_COLORS, x
+		and #UTILS.COLLISION_SOLID
+		bne !PlayerTwoComplete+ 
 
 
 		//Get Left Collision
@@ -1049,6 +1079,29 @@ PLAYER: {
 			jmp !Loop-
 		!:
 
+
+			lda Player2_ExitIndex
+			beq !noswap+
+			cmp Player1_ExitIndex
+			bcs !noswap+
+
+		!swap:
+			//swap color
+			lda $d027 + 6
+			tax 
+			lda $d027 + 7
+			sta $d027 + 6
+			stx $d027 + 7
+
+			//swap frame
+			lda [SPRITE_POINTERS + 6]
+			tax 
+			lda [SPRITE_POINTERS + 7]
+			sta [SPRITE_POINTERS + 6]
+			stx [SPRITE_POINTERS + 7]
+
+		!noswap:	
+
 			rts
 	}
 
@@ -1206,6 +1259,10 @@ PLAYER: {
 			txa //Player number 0or1
 			asl //Because speed value is 16 bit
 			tay //Speed offset 0 or 2
+
+			lda #$02
+			sta Player_Size, x
+			rts
 
 			lda Player_Size, x
 			pha

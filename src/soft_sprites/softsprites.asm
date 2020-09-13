@@ -292,6 +292,10 @@ SOFTSPRITES: {
 				lda VECTOR4 + 1
 				sta SpriteData_CLEAR_MSB, x
 
+				lda SpriteData_Y, x 
+				cmp #$a8
+				bcs !SkipDraw+
+
 				//0,0
 				stx TEMP
 				clc
@@ -365,6 +369,7 @@ SOFTSPRITES: {
 				lda SpriteColor, x
 				sta (COLOR_ROW), y
 			!:
+			!SkipDraw:
 
 			rts		
 	}
@@ -383,6 +388,12 @@ SOFTSPRITES: {
 				bne !+
 				rts
 			!:
+				lda SpriteData_Y, x 
+				cmp #$a8
+				bcc !+
+				rts
+			!:
+
 				/*
 					 OPtimisation is to not restore color
 					 however this recudes the variance in BG graphics

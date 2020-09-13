@@ -490,6 +490,26 @@ HUD: {
 
 			rts
 	}
+
+	//Positions (2,24) & (30,24)
+	RecordScore: {
+			ldx #$07
+		!:
+			lda SCREEN_RAM + 24 * $28, x
+			sec 
+			sbc #$ac
+			sta P1_SCORE, x
+
+			lda SCREEN_RAM + 24 * $28 + 32, x
+			sec 
+			sbc #$ac
+			sta P2_SCORE, x
+
+			dex
+			bpl !-
+			rts
+
+	}
 }
 
 

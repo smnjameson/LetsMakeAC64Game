@@ -10,6 +10,7 @@ UTILS: {
 		.label COLLISION_LOOKUP = TEMP1
 
 		jsr WrapX
+		jsr WrapY
 
 		lda TABLES.BufferLSB ,y
 		sta COLLISION_LOOKUP
@@ -64,6 +65,19 @@ UTILS: {
 		!:	
 			rts
 	}
+
+	WrapY: {
+			cpy #$80
+			bcc !+
+			ldy #$00
+		!:
+			cpy #$16
+			bcc !+
+			ldy #$15
+		!:	
+			rts
+	}
+
 	GetColorAt: {
 			.label PlayerFloorCollision = TEMP1
 
@@ -134,9 +148,14 @@ UTILS: {
 			adc COLLISION_POINT_Y_OFFSET
 			sec
 			sbc #Y_BORDER_OFFSET
+			bcs !+
+			lda #$00
+			beq !SkipDivide+
+		!:
 			lsr
 			lsr
 			lsr
+		!SkipDivide:
 			tay
 
 			cpy #$16

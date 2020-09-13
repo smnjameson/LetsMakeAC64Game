@@ -28,7 +28,14 @@
 			sta CHAR_COLORS,x
 			dey 
 			bpl !-
-					 
+			
+			ldx #$0f
+			lda MAPDATA.MAP_1.DoorColor
+		!:
+			sta CHAR_COLORS + $80,x
+			dex
+			bpl !-
+			
 			//Label the ZP temp vars for use here
 			.label Row = TEMP1
 			.label Col = TEMP2

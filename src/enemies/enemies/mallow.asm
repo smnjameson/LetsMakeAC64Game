@@ -184,6 +184,7 @@ Enemy_006: {
 			lda SlamFrame
 			:setEnemyFrame(0)
 		!:
+			:clearColorable()
 			:PositionEnemy()
 			rts
 

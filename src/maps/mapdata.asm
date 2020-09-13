@@ -1,9 +1,10 @@
-* = * "Map Data"
+.var PC_MapData = *
+* = * "Map Data" virtual
 MAPDATA: {
 
 	MAP_1: {
 		Level:	//Level ALWAYS first data in map data
-			.import binary "../../assets/maps/map_4.bin"
+			.import binary "../../assets/maps/map_3.bin"
 
 		PlayerSpawns:
 			.byte $98,$00,$b8	//Player1  X,XMSB, Y
@@ -33,7 +34,7 @@ MAPDATA: {
 		SwitchSpawnLoc:
 			.byte $0a,$10
 
-		.label NUMBER_OF_ENEMIES = 4
+		.label NUMBER_OF_ENEMIES = 6
 		NumberEnemies:
 			.byte NUMBER_OF_ENEMIES //__EnemyList - EnemyList - Countof255
 
@@ -57,7 +58,7 @@ MAPDATA: {
 
 		//Dynamically sized data from this point only
 		EnemyList:
-			.byte 3,3,3,3,255
+			.byte 7,6,6,6,7,7,255
 		__EnemyList:
 			.byte 0
 
@@ -72,3 +73,7 @@ MAPDATA: {
 	// .import binary "Exomizedlevel1"
 
 }
+
+
+* = $8300
+	.import binary "../../assets/maps/map_001.bin"

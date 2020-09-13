@@ -165,7 +165,8 @@ Enemy_007: {
 		!:
 		!Done:
 			
-
+			:clearColorable()
+		
 			:PositionEnemy()
 			rts
 
@@ -197,6 +198,7 @@ Enemy_007: {
 			and #[ENEMIES.STATE_FACE_RIGHT]
 			beq !MoveLeft+
 		!MoveRight:
+		
 			:UpdatePosition($200, 0)
 			jmp !Done-
 		!MoveLeft:

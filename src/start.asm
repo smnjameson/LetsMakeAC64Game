@@ -48,8 +48,7 @@ Random: {
         bcc noEor
     doEor:    
         eor #$1d
-        // eor $dc04
-        // eor $dd04
+        // eor $dc04 
     noEor:  
         sta seed
         rts
@@ -152,6 +151,8 @@ Entry:
 		jsr TITLECARD.TransitionOut
 
 
+		lda #$16
+		sta CURRENT_LEVEL
 		
 		
 
@@ -192,7 +193,12 @@ Entry:
 		lda BONUS.BonusActive
 		beq !+
 		jmp !BonusScreen+
-	!:
+	!:	
+
+		//debug
+		// lda #$03
+		// sta PLAYER.PlayersActive
+		// jmp !EndLevelTransition+
 
 		//Are we both exiting?? Are we in normal loop?
 		lda PLAYER.PlayersActive
@@ -243,6 +249,12 @@ Entry:
 		
 		/////////////////////////////////
 		!EndLevelTransition:
+				jsr HUD.RecordScore
+
+				lda $d011
+				and #%11111000
+				sta $d011
+
 				jsr BONUS.InitialiseTransition
 				lda #$01
 				sta TITLECARD.IsBonus
