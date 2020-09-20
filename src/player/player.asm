@@ -1260,9 +1260,10 @@ PLAYER: {
 			asl //Because speed value is 16 bit
 			tay //Speed offset 0 or 2
 
-			lda #$02
-			sta Player_Size, x
-			rts
+			//DEBUG
+			// lda #$02
+			// sta Player_Size, x
+			// rts
 
 			lda Player_Size, x
 			pha

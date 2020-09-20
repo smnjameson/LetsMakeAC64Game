@@ -13,6 +13,7 @@ CROWN: {
 	Initialise: {
 			// lda #$46
 			// sta SPRITE_POINTERS + 5	
+
 			rts
 	}
 
@@ -443,6 +444,7 @@ CROWN: {
 		!:
 
 
+
 			//Player 2
 			lda PLAYER.PlayersActive
 			and #$02
@@ -450,6 +452,8 @@ CROWN: {
 			lda PLAYER.Player2_State
 			and #[PLAYER.STATE_EATING]
 			bne !+
+
+			
 
 			lda PLAYER.Player2_IsDying
 			bne !+
@@ -471,8 +475,8 @@ CROWN: {
 			sta Sprite1_XOFF
 			lda #$10
 			sta Sprite1_W
-			lda #$06
-			sta Sprite1_YOFF				
+			// lda #$06
+			// sta Sprite1_YOFF				
 			lda #$15
 			sta Sprite1_H
 			jsr UTILS.GetSpriteCollision

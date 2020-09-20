@@ -218,7 +218,7 @@ Entry:
 	!:
 		jmp !EndLevelTransition+
 
-
+		
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
 		!NormalLoop:
 		// inc $d020
@@ -245,7 +245,8 @@ Entry:
 			jmp !Loop- 
 		!NotNormalLoop:
 		/////////////////////////////////
- 
+ 			
+
 		
 		/////////////////////////////////
 		!EndLevelTransition:

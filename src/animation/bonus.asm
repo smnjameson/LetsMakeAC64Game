@@ -1,4 +1,8 @@
 BONUS: {
+	.const PLAYER_BASE_Y = $d2
+	.const PLAYER1_X = $7c
+	.const PLAYER2_X = $11a
+
 	BonusActive:
 		.byte $00
 
@@ -15,23 +19,31 @@ BONUS: {
 		.byte $00
 
 	BonusCounters:	//x1000 + x250 + 15000
-		.byte $38,$50,$01  //Maximum combined totals
+		.byte $38,$10,$02,$01  //Maximum combined totals (last is player 1 or 2 that got to exit first)
 	BonusPlayer1Counters:
-		.byte $38,$50	//Player 1+ player 2 should NOT exceed totals
+		.byte $00,$00	//Player 1+ player 2 should NOT exceed totals
 	BonusPlayer2Counters:
-		.byte $00,$00
+		.byte $38,$10
 	BonusCountersOriginal:	//copied from BonusCounters at start
-		.byte $00,$00,$00
+		.byte $00,$00,$00,$00
+	ActivePlayers:
+		.byte %00000000, %00001000, %00010000, %00011000 
 
-
+	CrownTweeenIndex:
+		.byte $00
+	CrownOffTween:
+		.fill 32, $d2 - (sin((i/24) * (PI - PI/4) + (PI/4)) - sin(PI/4)) * ($ff-$d2) 
 
 	Initialise: {
 			lda #$00
 			sta BonusActive
-			
+			lda #$00
+			sta CrownTweeenIndex
 			rts
 	}
 	
+
+
 	InitialiseTransition: {
 			sei
 			lda MAPDATA.MAP_1.TransparentColor
@@ -69,6 +81,11 @@ BONUS: {
 			beq !+
 			lda #$00
 			sta BonusCountersOriginal + 02
+		!:
+			lda BonusCounters + 03
+			beq !+
+			lda #$00
+			sta BonusCountersOriginal + 03
 		!:
 
 			lda #%00001110
@@ -129,7 +146,9 @@ BONUS: {
 
 			lda CURRENT_LEVEL
 			cmp #$09
-			bcc !exit+
+			bcs !+
+			jmp !exit+
+		!:
 
 			ldx #$04
 		!:
@@ -147,9 +166,103 @@ BONUS: {
 			dex
 			bpl !-
 
+
+			//Initialise player sprites in 3 & 4
+			ldx PLAYER.PlayersActive
+			lda $d015
+			ora ActivePlayers, x
+			sta $d015
+			lda $d01c
+			ora #%00011100
+			sta $d01c
+			lda PLAYER.PlayerColors + 0
+			sta $d02a
+			lda PLAYER.PlayerColors + 1
+			sta $d02b
+			ldx PLAYER.Player1_Size
+			lda Player1Sizes, x
+			sta SPRITE_POINTERS + 3
+			ldx PLAYER.Player2_Size
+			lda Player2Sizes, x
+			sta SPRITE_POINTERS + 4
+
+			lda #PLAYER_BASE_Y
+			sta $d007
+			sta $d009
+
+			lda #PLAYER1_X
+			sta $d006
+			lda #<PLAYER2_X
+			sta $d008
+			lda $d010
+			and #%11100111
+			ora #%00010000
+			sta $d010
+
+
+			//Initialise crown sprite
+			lda $d015
+			and #%11111011
+			sta $d015
+			ldx BonusCounters + 3
+			beq !NoCrown+
+			ora #%00000100
+			sta $d015
+
+			lda PlayerCrownFrame - 1, x
+			sta SPRITE_POINTERS + 2
+			lda #$08
+			sta $d029
+
+			cpx #$02
+			beq !p2+
+		!p1:	
+			lda #PLAYER1_X 
+			sta $d004
+			lda $d010
+			and #%11111011
+			sta $d010
+			jmp !pdone+
+
+		!p2:
+			lda #PLAYER2_X 
+			sta $d004
+			
+			lda $d010
+			ora #%00000100
+			sta $d010
+
+
+		!pdone:
+			lda CrownOffTween
+			sta $d005
+	
+		!NoCrown:
 		!exit:
 			rts			
 	}
+
+	PlayerCrownFrame:
+		.byte $47, $46
+	Player1Sizes:
+		.byte $40, $58, $70
+	Player2Sizes:
+		.byte $43, $5b, $73
+	BonusAnimationOffset:
+		.byte $00, $00
+
+	AnimatePlayer: {
+			lda BonusAnimationOffset, y 
+			clc
+			adc #$01
+			cmp #$03
+			bne !+
+			lda #$00
+		!:
+			sta BonusAnimationOffset, y 
+			rts
+	}
+
 
 	ShiftLevelNumber: {
 			.for(var i=0; i<7; i++) {
@@ -375,24 +488,6 @@ BONUS: {
 
 			lda PlayerTextX, x
 			tax
-		// 	ldy #$00
-		// !:
-		// 	lda PlayerText,y
-		// 	sta SCREEN_RAM + $16 * $28, x
-		// 	lda BONUS_COLOR
-		// 	sta VIC.COLOR_RAM + $16 * $28, x
-		// 	lda #$30
-		// 	sta SCREEN_RAM + $17 * $28 + $01, x
-		// 	inx
-		// 	iny
-		// 	cpy #$06
-		// 	bne !-
-
-			//P in P1/P2 + Score
-			// lda #$10
-			// sta SCREEN_RAM + $17 * $28, x
-			// lda BONUS_COLOR
-		 // 	sta VIC.COLOR_RAM + $17 * $28, x
 
 		 	ldy #$00
 		 !:
@@ -406,21 +501,6 @@ BONUS: {
 		 	bne !-
 
 
-		 	//1 & 2 in P1/2
-			// lda #$31
-			// clc
-			// adc BONUS_PLAYER
-			// pha
-			// ldx BONUS_PLAYER
-			// lda PlayerTextX, x
-			// clc
-			// adc #$01
-			// tax
-			// pla
-			// sta SCREEN_RAM + $17 * $28, x
-			// lda BONUS_COLOR
-			// sta VIC.COLOR_RAM + $17 * $28, x
-
 
 			ldx #$00
 			jsr ClearBar
@@ -428,57 +508,57 @@ BONUS: {
 			jsr ClearBar
 
 
-			jsr DrawCrownBonus
+			// jsr DrawCrownBonus
 			rts
 
 
 	}
 
-	CrownTextLine1:
-		.encoding "screencode_upper"
-		.text "CROWN"
-	CrownTextLine2:
-		.text "BONUS"
-	CrownTextLine3:
-		.text ";1:25"
-	CrownTextPosition: 
-		.byte $02, $02
+	// CrownTextLine1:
+	// 	.encoding "screencode_upper"
+	// 	.text "CROWN"
+	// CrownTextLine2:
+	// 	.text "BONUS"
+	// CrownTextLine3:
+	// 	.text ";1:25"
+	// CrownTextPosition: 
+	// 	.byte $02, $02
 
 
-	DrawCrownBonus: {
-			lda PLAYER.PlayersActive
-			cmp #$03
-			beq !+
-			rts
-		!:
+	// DrawCrownBonus: {
+	// 		lda PLAYER.PlayersActive
+	// 		cmp #$03
+	// 		beq !+
+	// 		rts
+	// 	!:
 
-			lda CROWN.PlayerHasCrown
-			bne !+
-			rts
-		!:
+	// 		lda CROWN.PlayerHasCrown
+	// 		bne !+
+	// 		rts
+	// 	!:
 
-			sec
-			sbc #$01
-			tax
-			lda CrownTextPosition, x
-			tay
+	// 		sec
+	// 		sbc #$01
+	// 		tax
+	// 		lda CrownTextPosition, x
+	// 		tay
 
-			ldx #$00
-		!:
-			lda CrownTextLine1, x
-			sta SCREEN_RAM + $09 * $28, y
-			lda CrownTextLine2, x
-			sta SCREEN_RAM + $0a * $28, y
-			lda CrownTextLine3, x
-			sta SCREEN_RAM + $0d * $28, y
-			iny
-			inx
-			cpx #$05
-			bne !-
+	// 		ldx #$00
+	// 	!:
+	// 		lda CrownTextLine1, x
+	// 		sta SCREEN_RAM + $09 * $28, y
+	// 		lda CrownTextLine2, x
+	// 		sta SCREEN_RAM + $0a * $28, y
+	// 		lda CrownTextLine3, x
+	// 		sta SCREEN_RAM + $0d * $28, y
+	// 		iny
+	// 		inx
+	// 		cpx #$05
+	// 		bne !-
 
 
-			rts
-	}
+	// 		rts
+	// }
 
 	BonusIRQ: {
 			pha
@@ -498,6 +578,15 @@ BONUS: {
 
 	*=*"Update"
 	Update: {
+			ldx CrownTweeenIndex
+			cpx #$20
+			beq !+
+			inc CrownTweeenIndex
+
+			lda CrownOffTween, x
+			sta $d005
+		!:
+
 			//First animate color ramp for bonus
 			lda ZP_COUNTER
 			and #$0f
@@ -518,12 +607,6 @@ BONUS: {
 			bne !Loop-
 
 
-			//Now do bar updates
-			// lda ZP_COUNTER
-			// and #$07
-			// bne !NoSetBar+
-			// inc PlayerBarHeight + 0
-			// inc PlayerBarHeight + 1
 			jsr DoBonusStage
 
 			lda PLAYER.PlayersActive
@@ -552,28 +635,36 @@ BONUS: {
 	PlayerToggle:
 		.byte $00
 	StageIncrement: //Multiples of 250pts
-		.byte $01,$01,$04
+		.byte $04,$01,$01,$04
 	StageIncTimer:
-		.byte $03,$01,$03
-	*=* "BonusStageStrings"
+		.byte $03,$03,$01,$03
+
 	.align $20
 	BonusStageStrings:
 		.encoding "screencode_upper"
+		.text "@P@@HAS@CROWN@"
+		.word SCREEN_RAM + $08 * $28 + $11
+		.text "@@@@<10000@@@@"
+	.align $20
 		.text "ENEMIES@KILLED"
-		.word SCREEN_RAM + $09 * $28 + $11
+		.word SCREEN_RAM + $0c * $28 + $11
 		.text "@@@@@@;250@@@@"
 	.align $20
 		.text "@TAGGED@AREAS@"
-		.word SCREEN_RAM + $0d * $28 + $11
+		.word SCREEN_RAM + $10 * $28 + $11
 		.text "@@@@@@;250@@@@"
 	.align $20
 		.text "@P@@WINS@RACE@"
-		.word SCREEN_RAM + $11 * $28 + $11
-		.text "@@@@@@<5000@@@"
+		.word SCREEN_RAM + $14 * $28 + $11
+		.text "@@@@<5000@@@@@"
 
 	DoBonusStage: {
 			lda BonusStage
-
+			cmp #$04
+			bne !+
+			jsr AwardCrown
+			rts
+		!:
 			asl
 			asl
 			asl
@@ -597,12 +688,23 @@ BONUS: {
 			//If we are on last stage (Race win)
 			//Skip whole thing if 1 player
 			ldx BonusStage
-			cpx #$02
-			bcc !+
+			cpx #$03
+			bne !+
 			lda BonusCounters, x
 			bne !+
 			jmp !Exit+
 		!:
+
+			//If we are on first stage (Crown win)
+			//Skip whole thing if 1 player
+			ldx BonusStage
+			cpx #$00
+			bne !+
+			lda BonusCounters + 3
+			bne !+
+			inc BonusStage
+			rts
+		!: 
 
 			//Draw bonus title eg: "ENEMIES KILLED"
 			ldy #$0d
@@ -641,9 +743,16 @@ BONUS: {
 			//If we are on last stage (Race win)
 			//then jump to last stage counter
 			ldx BonusStage
-			cpx #$02
-			bcc !+
+			cpx #$03
+			bne !+
 			jmp !LastStage+
+		!:
+
+			//If we are on first stage (Crown win)
+			//then jump to crown stage counter
+			ldx BonusStage
+			bne !+
+			jmp !CrownStage+
 		!:
 
 
@@ -658,9 +767,9 @@ BONUS: {
 
 
 			ldx BonusStage
-			lda BonusCountersOriginal, x
+			lda BonusCountersOriginal - 1, x
 			sec
-			sbc BonusCounters, x
+			sbc BonusCounters - 1, x
 		//Calculate 10s
 			ldy #$00
 		!:
@@ -692,16 +801,15 @@ BONUS: {
 			jmp !Exit+
 		!:
 
-
 			//Decrease counter for players and total
 			ldx BonusStage
-			lda BonusCounters, x
+			lda BonusCounters - 1, x
 			bne !+
 			jmp !FinishStage+
 		!:
 			sec
 			sbc #$01
-			sta BonusCounters, x
+			sta BonusCounters - 1, x
 
 			lda PlayerToggle
 			eor #$01
@@ -710,11 +818,11 @@ BONUS: {
 
 
 		!Player1:
-			lda BonusPlayer1Counters,x 
+			lda BonusPlayer1Counters - 1,x 
 			beq !Player2+
 			sec
 			sbc #$01
-			sta BonusPlayer1Counters,x
+			sta BonusPlayer1Counters - 1,x
 			lda PlayerBarHeight + 0
 			clc
 			adc StageIncrement, x
@@ -731,15 +839,17 @@ BONUS: {
 			lda StageIncrement, x
 			ldy #$00
 			jsr AddScoreTotal
+			ldy #$00
+			jsr AnimatePlayer
 
 			jmp !Exit+
 
 		!Player2:
-			lda BonusPlayer2Counters,x 
+			lda BonusPlayer2Counters - 1,x 
 			beq !Player1-
 			sec
 			sbc #$01
-			sta BonusPlayer2Counters,x 
+			sta BonusPlayer2Counters - 1,x 
 			lda PlayerBarHeight + 1
 			clc
 			adc StageIncrement, x
@@ -756,6 +866,8 @@ BONUS: {
 			lda StageIncrement, x
 			ldy #$01
 			jsr AddScoreTotal
+			ldy #$01
+			jsr AnimatePlayer
 
 			jmp !Exit+
 
@@ -776,17 +888,6 @@ BONUS: {
 			adc #$30
 			sta (BONUS_VECTOR2), y
 
-			//Now add 4 to get the first char of counter
-			clc
-			lda BONUS_VECTOR2 + 0
-			adc #$2f
-			sta BONUS_VECTOR2 + 0
-			lda BONUS_VECTOR2 + 1
-			adc #$00
-			sta BONUS_VECTOR2 + 1
-
-
-
 			lda ZP_COUNTER
 			and StageIncTimer, x
 			bne !DrawExitBonus+
@@ -797,7 +898,9 @@ BONUS: {
 			tax
 			lda BonusCountersOriginal + 2 //Exit bonus
 			cmp #$05
-			beq !FinishStage+
+			bne !+
+			jmp !FinishStage+
+		!:
 			clc
 			adc #$01
 			sta BonusCountersOriginal + 2
@@ -822,6 +925,10 @@ BONUS: {
 			ldy BonusCounters + 02
 			dey
 			jsr AddScoreTotal
+			ldy BonusCounters + 02
+			dey
+			jsr AnimatePlayer
+
 
 
 		!DrawExitBonus:
@@ -840,23 +947,87 @@ BONUS: {
 			iny
 			jmp !-
 		!done:
-			//Y is now 10s
-			pha
-			tya
+
+
+			rts
+
+
+
+		!CrownStage:
+			sec
+			lda BONUS_VECTOR2 + 0
+			sbc #$28
+			sta BONUS_VECTOR2 + 0
+			lda BONUS_VECTOR2 + 1
+			sbc #$00
+			sta BONUS_VECTOR2 + 1
+
+			//Add the player number to the Label
+			ldy #$02
+			lda BonusCounters + 03
 			clc
 			adc #$30
-			ldy #$00
-			cmp #$30
-			bne !+
-			lda #$00
-		!:
 			sta (BONUS_VECTOR2), y
 
-			pla
+
+			lda ZP_COUNTER
+			and StageIncTimer, x
+			bne !DrawCrownBonus+
+
+			lda BonusCounters + 03
+			sec
+			sbc #$01
+			tax
+			lda BonusCountersOriginal + 3 //Exit bonus
+			cmp #$0a //How many ticks?
+			beq !FinishStage+
 			clc
-			adc #$30
-			ldy #$01
-			sta (BONUS_VECTOR2), y		
+			adc #$01
+			sta BonusCountersOriginal + 3
+
+			ldy BonusStage
+			lda PlayerBarHeight, x
+			clc
+			adc StageIncrement, y
+			sta PlayerBarHeight,x
+
+
+			tya 
+			pha 
+			lda StageIncrement, y	
+			ldy BonusCounters + 03
+			dey
+			jsr AddScore
+
+			pla
+			tay 
+			lda StageIncrement, y
+			ldy BonusCounters + 03
+			dey
+			jsr AddScoreTotal
+			ldy BonusCounters + 03
+			dey
+			jsr AnimatePlayer
+
+
+
+		!DrawCrownBonus:
+			//Draw counter
+			// ldx BonusStage
+			lda BonusCountersOriginal +3
+			sec
+			sbc BonusCounters + 3
+		//Calculate 10s
+			ldy #$00
+		!:
+			cmp #$0a
+			bcc !done+
+			sec
+			sbc #$0a
+			iny
+			jmp !-
+		!done:
+
 
 
 			rts
@@ -873,7 +1044,56 @@ BONUS: {
 			rts 
 	}
 
+	AwardCrown: {
+			jsr WhoHasHighestScore
+			cpy #$00
+			beq !Exit+
+			cpy #$02
+			beq !p2+
 
+		!p1:
+			lda PlayerCrownFrame - 1, y
+			sta SPRITE_POINTERS + 2
+			lda #$01
+			sta CROWN.PlayerHasCrown
+			lda #PLAYER1_X
+			sta $d004
+			lda $d010
+			and #%11111011
+			sta $d010
+			lda $d005
+			clc
+			adc #$06
+			cmp $d007
+			bcs !Exit+
+			inc $d005
+			inc $d005
+			inc $d005
+			jmp !Exit+
+		!p2:
+
+			lda PlayerCrownFrame - 1, y
+			sta SPRITE_POINTERS + 2
+			lda #$02
+			sta CROWN.PlayerHasCrown
+			lda #<PLAYER2_X
+			sta $d004
+			lda $d010
+			ora #%00000100
+			sta $d010
+			lda $d005
+			clc
+			adc #$06
+			cmp $d009
+			bcs !Exit+
+			inc $d005
+			inc $d005
+			inc $d005
+			jmp !Exit+
+
+		!Exit:
+			rts
+	}
 
 
 	ScoreTable:
@@ -940,6 +1160,38 @@ BONUS: {
 			plp //RESTORE CARRY
 			dey
 			bpl !Loop-
+
+
+
+			rts
+	}
+
+	WhoHasHighestScore: {
+			ldy #$00
+			lda PLAYER.PlayersActive
+
+			cmp #$03
+			beq !+
+			rts
+		!:
+
+
+			ldx #$00
+		!:
+			lda P1_BONUS_SCORE, x
+			cmp P2_BONUS_SCORE, x
+			beq !skip+
+			bcc !p2+
+		!p1:
+			ldy #$01
+			rts
+		!p2:
+			ldy #$02
+			rts
+		!skip:
+			inx
+			cpx #$06
+			bne !-
 
 			rts
 	}
@@ -1029,6 +1281,41 @@ BONUS: {
 		//X = player num 0,1
 		//A = Bar Height 0-127, halved from 0-255
 			lsr
+
+			//Move Player
+			sta BONUS_BAR_TEMP2
+			cpx #$00
+			bne !p2+
+
+			ldy PLAYER.Player1_Size
+			lda Player1Sizes, y
+			clc
+			adc BonusAnimationOffset, x
+			sta SPRITE_POINTERS + 3
+			jmp !p12done+
+		!p2:
+			ldy PLAYER.Player2_Size
+			lda Player2Sizes, y
+			clc
+			adc BonusAnimationOffset, x
+			sta SPRITE_POINTERS + 4
+		!p12done:
+
+			txa 
+			pha 
+			asl 
+			tax 
+			lda #PLAYER_BASE_Y
+			sec
+			sbc BONUS_BAR_TEMP2
+			sta $d007, x
+
+
+
+			pla 
+			tax
+			lda BONUS_BAR_TEMP2
+
 
 			jsr ClearBar
 

@@ -398,7 +398,11 @@ TITLECARD: {
 			lda $d016
 			and #%11101111
 			sta $d016
+			jmp !MCFinished+	
+		!:
 
+			cmp #$05
+			bne !+	
 			lda #$00
 			sta $d01b
 			jmp !MCFinished+			
