@@ -51,6 +51,7 @@ TITLE_SCREEN: {
 
 	Destroy: {
 			lda #$00
+			ldx #$00
 		!:
 			sta SCREEN_RAM + $06 * $28 + 000, x
 			sta SCREEN_RAM + $06 * $28 + 190, x

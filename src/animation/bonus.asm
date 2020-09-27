@@ -19,7 +19,7 @@ BONUS: {
 		.byte $00
 
 	BonusCounters:	//x1000 + x250 + 15000
-		.byte $38,$10,$02,$01  //Maximum combined totals (last is player 1 or 2 that got to exit first)
+		.byte $38,$10,$02,$01  //Maximum combined totals (3rd is player 1 or 2 that got to exit first, 4th is crown wearer)
 	BonusPlayer1Counters:
 		.byte $00,$00	//Player 1+ player 2 should NOT exceed totals
 	BonusPlayer2Counters:
@@ -34,7 +34,92 @@ BONUS: {
 	CrownOffTween:
 		.fill 32, $d2 - (sin((i/24) * (PI - PI/4) + (PI/4)) - sin(PI/4)) * ($ff-$d2) 
 
+	*=*"BonusExited"
+	BonusExited:
+		.byte $00
+
+	CountTaggedAreas: {
+			.label ROW = TEMP1
+			.label SCREEN_FETCH = VECTOR1
+			.label COLOR_FETCH = VECTOR2
+
+			lda #$00
+			sta BonusPlayer1Counters + 1
+			sta BonusPlayer2Counters + 1
+			sta SCREEN_FETCH + 0
+			sta COLOR_FETCH + 0
+			lda #$c0
+			sta SCREEN_FETCH + 1
+			lda #$d8
+			sta COLOR_FETCH + 1
+
+			lda PLAYER.PlayerColors + 0
+			clc
+			adc #$08
+			sta ShiftedColors + 0
+			lda PLAYER.PlayerColors + 1
+			clc
+			adc #$08
+			sta ShiftedColors + 1
+
+
+			lda #$16
+			sta ROW
+		!RowLoop:
+			ldy #$00
+		!ColumnLoop:
+			lda (SCREEN_FETCH), y 
+			tax 
+			lda CHAR_COLORS, x 
+			and #UTILS.COLLISION_COLORABLE
+			beq !Skip+
+			lda (COLOR_FETCH), y 
+			and #$0f
+			cmp ShiftedColors + 0
+			bne !p2+
+		!p1:
+			inc BonusPlayer1Counters + 1
+			jmp !pdone+
+		!p2:		
+			cmp ShiftedColors + 1
+			bne !pdone+
+			inc BonusPlayer2Counters + 1
+		!pdone:
+		!Skip:
+			iny
+			cpy #$28
+			bne !ColumnLoop-
+
+			dec ROW
+			beq !Exit+
+
+			clc
+			lda SCREEN_FETCH + 0
+			adc #$28
+			sta SCREEN_FETCH + 0
+			sta COLOR_FETCH + 0
+			bcc !+
+			inc SCREEN_FETCH + 1
+			inc COLOR_FETCH + 1
+		!:
+			jmp !RowLoop-
+		!Exit:
+
+
+			lda BonusPlayer1Counters + 1
+			clc
+			adc BonusPlayer2Counters + 1
+			sta BonusCounters + 1
+
+			rts
+	}
+	ShiftedColors:
+			.byte $00,$00
+
+
+
 	Initialise: {
+
 			lda #$00
 			sta BonusActive
 			lda #$00
@@ -51,13 +136,38 @@ BONUS: {
 			lda MAPDATA.MAP_1.MultiColor
 			sta $d022
 
+			jsr CountTaggedAreas
+
 			jsr TITLECARD.BlackOutHUD
 			rts
 	}
 
 	Start: {
+			lda #$00
+			sta BonusExited
+
 			lda #$01
 			sta BonusActive
+
+			//set the bonus values
+			lda CROWN.PlayerHasCrown
+			sta BonusCounters + 3
+
+			lda PLAYER.Player1_EatCount
+			sta BonusPlayer1Counters + 0
+			lda PLAYER.Player2_EatCount
+			sta BonusPlayer2Counters + 0
+			clc 
+			adc BonusPlayer1Counters + 0
+			sta BonusCounters + 0
+
+
+			lda DOOR.FirstThroughDoor
+			sta BonusCounters + 2
+
+			lda #$00
+			sta PlayerBarHeight + 0
+			sta PlayerBarHeight + 1
 
 			//Color default text black
 			lda #$00
@@ -143,20 +253,7 @@ BONUS: {
 			jsr DrawLevelNumber
 
 			jsr ShiftLevelNumber
-
-			lda CURRENT_LEVEL
-			cmp #$09
-			bcs !+
-			jmp !exit+
-		!:
-
-			ldx #$04
-		!:
-			jsr ShiftLevelNumber
-			dex
-			bne !-
-
-
+			
 			//Initialise scores
 			lda #$30
 			ldx #$05
@@ -165,6 +262,7 @@ BONUS: {
 			sta P2_BONUS_SCORE, x 
 			dex
 			bpl !-
+
 
 
 			//Initialise player sprites in 3 & 4
@@ -203,16 +301,18 @@ BONUS: {
 			//Initialise crown sprite
 			lda $d015
 			and #%11111011
-			sta $d015
-			ldx BonusCounters + 3
-			beq !NoCrown+
 			ora #%00000100
 			sta $d015
+			lda #$00
+			sta $d004
+			lda #$08
+			sta $d029
+			ldx BonusCounters + 3
+			beq !NoCrown+
 
 			lda PlayerCrownFrame - 1, x
 			sta SPRITE_POINTERS + 2
-			lda #$08
-			sta $d029
+
 
 			cpx #$02
 			beq !p2+
@@ -237,7 +337,23 @@ BONUS: {
 			lda CrownOffTween
 			sta $d005
 	
+
+
 		!NoCrown:
+
+			lda PLAYER.CurrentLevel
+			cmp #$09
+			bcs !+
+			jmp !exit+
+		!:
+
+			ldx #$04
+		!:
+			jsr ShiftLevelNumber
+			dex
+			bne !-
+
+
 		!exit:
 			rts			
 	}
@@ -275,7 +391,7 @@ BONUS: {
 
 	DrawLevelNumber: {
 			//first clear numbers
-			ldx #$20
+			ldx #$18
 			lda #$00
 		!:
 			sta $e340 + 42, x  //Sprite location
@@ -283,7 +399,7 @@ BONUS: {
 			bpl !-
 
 			ldx #$00
-			lda CURRENT_LEVEL
+			lda PLAYER.CurrentLevel
 			clc
 			adc #$01
 		!:		
@@ -576,8 +692,11 @@ BONUS: {
 			rti
 	}
 
-	*=*"Update"
 	Update: {
+			lda BonusCounters + 3
+			beq !+
+
+
 			ldx CrownTweeenIndex
 			cpx #$20
 			beq !+
@@ -631,7 +750,7 @@ BONUS: {
 			rts
 	}
 
-	
+
 	PlayerToggle:
 		.byte $00
 	StageIncrement: //Multiples of 250pts
@@ -661,8 +780,9 @@ BONUS: {
 	DoBonusStage: {
 			lda BonusStage
 			cmp #$04
-			bne !+
+			bcc !+
 			jsr AwardCrown
+			jsr CheckForCloseBonus
 			rts
 		!:
 			asl
@@ -690,9 +810,10 @@ BONUS: {
 			ldx BonusStage
 			cpx #$03
 			bne !+
-			lda BonusCounters, x
-			bne !+
-			jmp !Exit+
+			lda PLAYER.PlayersActive	
+			cmp #$03
+			beq !+
+			jmp !FinishStage+
 		!:
 
 			//If we are on first stage (Crown win)
@@ -874,6 +995,8 @@ BONUS: {
 
 
 		!LastStage:
+			// .break
+
 			sec
 			lda BONUS_VECTOR2 + 0
 			sbc #$28
@@ -915,6 +1038,7 @@ BONUS: {
 			tya 
 			pha 
 			lda StageIncrement, y
+			
 			ldy BonusCounters + 02
 			dey
 			jsr AddScore
@@ -1039,6 +1163,10 @@ BONUS: {
 			ldx BonusStage
 			inx
 			stx BonusStage
+			cpx #$04
+			bne !+
+			inc PLAYER.CurrentLevel
+		!:
 
 		!Exit:
 			rts 
@@ -1056,6 +1184,7 @@ BONUS: {
 			sta SPRITE_POINTERS + 2
 			lda #$01
 			sta CROWN.PlayerHasCrown
+			sta CROWN.CrownAvailable
 			lda #PLAYER1_X
 			sta $d004
 			lda $d010
@@ -1076,6 +1205,7 @@ BONUS: {
 			sta SPRITE_POINTERS + 2
 			lda #$02
 			sta CROWN.PlayerHasCrown
+			sta CROWN.CrownAvailable
 			lda #<PLAYER2_X
 			sta $d004
 			lda $d010
@@ -1092,6 +1222,24 @@ BONUS: {
 			jmp !Exit+
 
 		!Exit:
+			
+			rts
+	}
+
+	CheckForCloseBonus: {
+			lda $dc00
+			and #$10
+			beq !ExitBonus+
+			lda $dc01
+			and #$10
+			beq !ExitBonus+
+			jmp !exit+
+		!ExitBonus:
+			
+			lda #$01
+			
+			sta BonusExited
+		!exit:
 			rts
 	}
 

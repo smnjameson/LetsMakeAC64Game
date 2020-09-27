@@ -9,11 +9,15 @@ CROWN: {
 			.byte $31
 	CrownFallIndex:
 			.byte $00
+	CrownAvailable:
+			.byte $00
+
 
 	Initialise: {
 			// lda #$46
 			// sta SPRITE_POINTERS + 5	
-
+			lda #$00
+			sta CrownAvailable
 			rts
 	}
 
@@ -26,6 +30,11 @@ CROWN: {
 		 */
 		 	//Enable crown if it is active
 			//Crown sprite
+			lda CrownAvailable
+			bne !+
+			rts
+
+		!:
 			lda PlayerHasCrown	
 			bpl !+
 			jmp !NoCrown+
@@ -380,7 +389,10 @@ CROWN: {
 			.label Sprite1_YOFF = COLLISION_POINT_Y_OFFSET
 			.label Sprite2_YOFF = COLLISION_POINT_Y1_OFFSET
 
-			
+			lda CrownAvailable
+			bne !+
+			rts
+		!:
 
 			//Define crown dimenisons
 			lda #<Crown_X
@@ -486,6 +498,7 @@ CROWN: {
 			:playSFX(SOUND.PlayerCrown)
 			jmp !Exit+
 		!:
+		
 
 		!Exit:
 			rts

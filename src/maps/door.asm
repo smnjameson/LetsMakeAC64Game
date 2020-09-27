@@ -16,11 +16,15 @@ DOOR: {
 		.byte $09,$0f,$0b,$0d,$0c,$0a,$0e,$08
 	__SwitchRamp:
 
+	FirstThroughDoor:
+		.byte $00
+
 	Initialise: {
 			lda #$00
 			sta DoorSpawned
 			sta DoorAnimRow
 			sta SwitchPressed
+			sta FirstThroughDoor
 			rts
 	}
 
@@ -280,6 +284,14 @@ DOOR: {
 			ldy PLAYER.Player_Size, x
 			lda PlayerSizeAnimIndexStart, y
 			sta PLAYER.Player_ExitIndex, x
+
+			lda FirstThroughDoor
+			bne !+
+			txa 
+			clc 
+			adc #$01
+			sta FirstThroughDoor
+		!:
 			:playSFX(SOUND.DoorExit)
 		!Skip:
 			dex

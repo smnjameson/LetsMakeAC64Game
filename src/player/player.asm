@@ -231,6 +231,7 @@ PLAYER: {
 	ColorSwitchRow:
 			.byte $00
 
+		
 	Initialise: {
 			lda #%00001100
 			sta $d018
@@ -282,6 +283,8 @@ PLAYER: {
 			lda #$00
 			sta Player1_Weight
 			sta Player2_Weight
+			sta Player1_EatCount
+			sta Player2_EatCount
 
 			sta SCREEN_SHAKE_VAL
 

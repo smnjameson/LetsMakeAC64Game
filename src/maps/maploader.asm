@@ -11,7 +11,43 @@
   		.byte $59,$5a,$5b,$5c
   	__PipeChars:
 
+  	LoadLevel: {
+  			.label LEVEL_DATA = VECTOR1
+  			.label TARGET_DATA = VECTOR2
+
+  			lda PLAYER.CurrentLevel
+  			asl
+  			tax 
+  			lda LevelLookup, x
+  			sta LEVEL_DATA + 0
+  			inx
+  			lda LevelLookup, x
+  			sta LEVEL_DATA + 1
+
+  			lda #<MAPDATA
+  			sta TARGET_DATA + 0
+  			lda #>MAPDATA
+  			sta TARGET_DATA + 1
+
+  			ldx #$03
+  			ldy #$00
+  		!loop:
+  			lda (LEVEL_DATA), y
+  			sta (TARGET_DATA), y
+  			iny
+  			bne !loop-
+  			dex 
+  			beq !Exit+
+  			inc LEVEL_DATA + 1
+  			inc TARGET_DATA + 1
+  			jmp !loop-
+
+  		!Exit:
+  			rts
+  	}
+
 	DrawMap: {
+			jsr LoadLevel
 			//First set door and pipe colors
 			lda MAPDATA.MAP_1.PipeColor
 			ldy #[__PipeChars - PipeChars - 1]

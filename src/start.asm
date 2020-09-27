@@ -30,7 +30,7 @@ BasicUpstart2(Entry)
 #import "enemies/enemies.asm"
 #import "enemies/behaviours.asm"
 #import "enemies/enemymacros.asm"
-#import "enemies/pipes.asm"
+#import "enemies/pipes.asm" 
 
 
 #import "intro/titlescreen.asm"
@@ -151,9 +151,10 @@ Entry:
 		jsr TITLECARD.TransitionOut
 
 
-		lda #$16
-		sta CURRENT_LEVEL
-		
+		lda #$00
+		sta PLAYER.CurrentLevel
+
+		jsr CROWN.Initialise
 		
 
 	!GAME_ENTRY:
@@ -164,7 +165,7 @@ Entry:
 
 		jsr SOFTSPRITES.Initialise
 		jsr ENEMIES.Initialise
-		jsr CROWN.Initialise
+		
 		jsr DOOR.Initialise
 		jsr BONUS.Initialise
 		jsr MESSAGES.Initialise
@@ -271,27 +272,45 @@ Entry:
 
 					jsr BONUS.Update
 					jsr $1003
-				clc
-				bcc !EndLevelLoop-
-
-				// jsr TITLE_SCREEN.Destroy
-
-				jsr TITLECARD.TransitionOut
-
-				jmp !GAME_ENTRY-
-
-
 
 
 		/////////////////////////////////
 		!BonusScreen:
-			// lda TITLECARD.UpdateReady
-			// beq !IntroLoop-
-			// lda #$00
-			// sta TITLECARD.UpdateReady
-			//UPDATE BONUS
 
-			jmp !Loop- 
+			lda BONUS.BonusExited
+			bne !BonusExiting+
+			jmp !EndLevelLoop- 
+
+		!BonusExiting:
+		// 	lda #$00
+		// 	ldx #$00
+		// !:
+		// 	sta SCREEN_RAM + $000, x
+		// 	sta SCREEN_RAM + $100, x
+		// 	sta SCREEN_RAM + $200, x
+		// 	sta SCREEN_RAM + $300, x
+		// 	dex 
+		// 	bne !-	 
+			jsr TITLE_SCREEN.Destroy
+
+			ldx #$00
+		!:
+			lda #$29
+			sta SCREEN_RAM, x 
+			lda #$02
+			sta $d800 , x 
+			inx 
+			cpx #$c8
+			bne !-
+
+			//reset player stuff
+			lda #$00
+			sta PLAYER.Player1_Size
+			sta PLAYER.Player2_Size
+			jsr SOUND.ClearSoundRegisters
+			jsr TITLECARD.TransitionOut
+			jmp !GAME_ENTRY-
+
 			
 		/////////////////////////////////
 		
