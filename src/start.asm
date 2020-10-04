@@ -129,6 +129,8 @@ Entry:
 		lda #$00	//Initialize current song
 		jsr $1000
 
+		jsr HUD.ResetScores
+
 		lda #$00
 		sta TITLECARD.IsBonus
 		jsr TITLECARD.TransitionIn
@@ -222,26 +224,39 @@ Entry:
 		
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
 		!NormalLoop:
-		// inc $d020
 			jsr SOFTSPRITES.UpdateSprites
-			
+
+			inc $d020
 			jsr PLAYER.PlayerControl
+			inc $d020
 			jsr PLAYER.JumpAndFall
- 			jsr PLAYER.GetCollisions
+ 			inc $d020
+			jsr PLAYER.GetCollisions
+			inc $d020
 			jsr PLAYER.DrawPlayer
-		 	jsr CROWN.DrawCrown
+		 	inc $d020
+			jsr CROWN.DrawCrown
+			lda #$00
+			sta $d020
 			
 			jsr PROJECTILES.UpdateProjectiles
 
+
 			jsr ENEMIES.UpdateEnemies
+
 			jsr PIPES.Update
+
 			jsr HUD.DrawLives
 			jsr HUD.Update
+
 			jsr SOUND.UpdateTrackDisplay
 			jsr PLATFORMS.UpdateColorOrigins
 			jsr DOOR.Update
 			jsr MESSAGES.Update
+
 			jsr $1003
+
+
 		// dec $d020
 			jmp !Loop- 
 		!NotNormalLoop:

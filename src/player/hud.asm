@@ -29,12 +29,16 @@ HUD: {
 			dex
 			bpl !Loop-
 
+			
+
 			jsr ColorTheMeter
 			jsr UpdateEatMeter
 
 			lda #$00
 			sta PreviousPlayersActive
 			jsr Update
+
+			jsr SetScores
 			rts
 	}
 
@@ -509,6 +513,51 @@ HUD: {
 			bpl !-
 			rts
 
+	}
+
+
+	ResetScores: {
+			lda #$30
+			ldx #$07
+		!:
+			sta P1_SCORE, x			
+			sta P2_SCORE, x			
+			dex
+			bpl !-
+			rts
+	}
+
+	SetScores: {
+			clc 
+
+		!p1:	
+			lda PLAYER.PlayersActive
+			and #$01
+			beq !p2+
+
+			ldx #$07
+		!:
+			lda P1_SCORE, x	
+			adc #[$dc - $30]		
+			sta SCREEN_RAM + 24 * 40 + 0, x
+			dex
+			bpl !-
+
+
+		!p2:
+			lda PLAYER.PlayersActive
+			and #$02
+			beq !Exit+
+			ldx #$07
+		!:
+			lda P2_SCORE, x	
+			adc #[$dc - $30]		
+			sta SCREEN_RAM + 24 * 40 + 32, x
+			dex
+			bpl !-
+
+		!Exit:
+			rts	
 	}
 }
 

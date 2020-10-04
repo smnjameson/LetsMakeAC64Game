@@ -13,22 +13,27 @@
 
   	LoadLevel: {
   			.label LEVEL_DATA = VECTOR1
-  			.label TARGET_DATA = VECTOR2
+  			.label NEXT_LEVEL_DATA = VECTOR2
+  			.label TARGET_DATA = VECTOR3
 
   			lda PLAYER.CurrentLevel
   			asl
   			tax 
   			lda LevelLookup, x
   			sta LEVEL_DATA + 0
+  			sta NEXT_LEVEL_DATA + 0
   			inx
   			lda LevelLookup, x
   			sta LEVEL_DATA + 1
+  			sta NEXT_LEVEL_DATA + 1
 
   			lda #<MAPDATA
   			sta TARGET_DATA + 0
   			lda #>MAPDATA
   			sta TARGET_DATA + 1
 
+
+  			//Copy just 1 page
   			ldx #$03
   			ldy #$00
   		!loop:
@@ -42,12 +47,60 @@
   			inc TARGET_DATA + 1
   			jmp !loop-
 
+
   		!Exit:
+  			//decompress A = LSB, X = MSB
+  			//Start at last byte of level
+  			//eg for level 1:
+  			// $8300 + (LevelLookup.LEVEL002 - LevelLookup.LEVEL001) - 1
+  			// lda NEXT_LEVEL_DATA + 0
+  			// sta LEVEL_DATA + 0
+  			// lda NEXT_LEVEL_DATA + 1
+  			// sta LEVEL_DATA + 1
+  			// clc
+  			// lda PLAYER.CurrentLevel
+  			// adc #$01
+  			// asl
+  			// tax 
+  			// lda LevelLookup, x
+  			// sta NEXT_LEVEL_DATA + 0
+  			// inx
+  			// lda LevelLookup, x
+  			// sta NEXT_LEVEL_DATA + 1
+
+  			// sec 
+  			// lda NEXT_LEVEL_DATA + 0
+  			// sbc LEVEL_DATA + 0
+  			// sta LEVEL_DATA + 0
+  			// lda NEXT_LEVEL_DATA + 1
+  			// sbc LEVEL_DATA + 1
+  			// clc
+  			// adc #$83
+  			// sta LEVEL_DATA + 1
+
+
+			// lda #$00
+			// ldx #$83
+			// // .break
+			// jsr EXODECRUNCH.Start
+
+  		
   			rts
   	}
 
+
+
 	DrawMap: {
 			jsr LoadLevel
+
+			lda MAPDATA.MAP_1.TransparentColor
+			sta $d021
+			lda MAPDATA.MAP_1.MultiColor
+			sta $d022	
+			lda #$00
+			sta $d023
+
+
 			//First set door and pipe colors
 			lda MAPDATA.MAP_1.PipeColor
 			ldy #[__PipeChars - PipeChars - 1]

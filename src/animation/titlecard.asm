@@ -207,20 +207,15 @@ TITLECARD: {
 			ora #%00001000
 			sta $d011
 			
-			lda MAPDATA.MAP_1.TransparentColor
-			sta $d021
-			lda MAPDATA.MAP_1.MultiColor
-			sta $d022	
-			lda #$00
-			sta $d023
+
 
 			// .break
-					//TODO Draw the correct stuff behind the transition sprites
-					jsr MAPLOADER.DrawMap
+				//TODO Draw the correct stuff behind the transition sprites
+				jsr MAPLOADER.DrawMap
 
-					// jsr CopyTitleCardScreen
+				// jsr CopyTitleCardScreen
 
-					jsr BlackOutHUD
+				jsr BlackOutHUD
 			
 			lda $d016
 			ora #%00010000

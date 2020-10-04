@@ -98,8 +98,7 @@ IRQ: {
 			sta VIC.SCREEN_CONTROL_2
 
 
-			lda #$0e
-			sta VIC.EXTENDED_BG_COLOR_1
+
 
 			lda #$00	//Hide sprites
 			sta $d00a
@@ -132,6 +131,9 @@ IRQ: {
 			sbc #$03
 			sta SCREEN_SHAKE_VAL
 
+
+			lda #$0e
+			sta VIC.EXTENDED_BG_COLOR_1
 
 
 			lda #<SecondIRQ    

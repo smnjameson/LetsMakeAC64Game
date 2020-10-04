@@ -669,7 +669,7 @@ PLAYER: {
 			sta PLAYER_Y
 			lda #>Player1_Y
 			sta PLAYER_Y + 1
-			jmp !PlayerSetupComplete+
+			jmp UTILS.GetCollisionPoint
 
 		!Player2Setup:
 			lda #<Player2_X
@@ -682,9 +682,8 @@ PLAYER: {
 			sta PLAYER_Y + 1
 		!PlayerSetupComplete:
 
-			jsr UTILS.GetCollisionPoint
+			jmp UTILS.GetCollisionPoint
 
-			rts
 	}
 
 

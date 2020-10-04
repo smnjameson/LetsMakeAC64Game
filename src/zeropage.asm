@@ -46,6 +46,7 @@ VECTOR8: 	.word $00
 
 
 
+
 IRQ_TEMP1: 	.byte $00
 
 
@@ -157,3 +158,13 @@ P2_SCORE:
 	.fill 8, $00
 P2_BONUS_SCORE:
 	.fill 6, $30
+
+
+
+zp_len_lo: .byte $00
+zp_src_lo: .byte $00
+zp_src_hi: .byte $00
+zp_bits_hi: .byte $00
+zp_bitbuf: .byte $00
+zp_dest_lo: .byte $00
+zp_dest_hi: .byte $00
