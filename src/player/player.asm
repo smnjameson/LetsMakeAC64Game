@@ -426,10 +426,14 @@ PLAYER: {
 		jsr UTILS.GetColorAt
 		sta Player1FloorColor
 		
-		lda #$00
+		// lda #$00
+		// ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
+		// ldy #23
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
-		ldy #23
-		jsr PLAYER.GetCollisionPoint
+		stx COLLISION_POINT_X_OFFSET
+		jsr UTILS.GetCollisionPoint
+
 
 		jsr UTILS.GetCharacterAt
 		tax
@@ -448,10 +452,17 @@ PLAYER: {
 
 
 		//Moving inside walls check
-		lda #$00
-		ldx #$0c
+		// lda #$00
+		// ldx #$0c
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
+		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
+		stx COLLISION_POINT_X_OFFSET
 		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -466,19 +477,31 @@ PLAYER: {
 		and #STATE_FACE_LEFT
 		beq !Skip+
 
-		lda #$00
+		// lda #$00
+		// ldx #PLAYER_LEFT_COLLISON_BOX
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_LEFT_COLLISON_BOX
-		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		stx COLLISION_POINT_X_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta Player1_LeftCollision
 
-		lda #$00
-		ldx #PLAYER_LEFT_COLLISON_BOX
+
+		// lda #$00
+		// ldx #PLAYER_LEFT_COLLISON_BOX
+		// ldy #18
+		// jsr PLAYER.GetCollisionPoint
 		ldy #18
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -497,19 +520,30 @@ PLAYER: {
 		and #STATE_FACE_RIGHT
 		beq !Skip+
 
-		lda #$00
+		// lda #$00
+		// ldx #PLAYER_RIGHT_COLLISON_BOX
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_RIGHT_COLLISON_BOX
+		stx COLLISION_POINT_X_OFFSET
 		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta Player1_RightCollision
 
-		lda #$00
-		ldx #PLAYER_RIGHT_COLLISON_BOX
+		// lda #$00
+		// ldx #PLAYER_RIGHT_COLLISON_BOX
+		// ldy #18
+		// jsr PLAYER.GetCollisionPoint
 		ldy #18
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -540,6 +574,7 @@ PLAYER: {
 		ldy #23
 		jsr PLAYER.GetCollisionPoint
 
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -549,10 +584,13 @@ PLAYER: {
 		sta Player2FloorColor
 
 
-		lda #$01
+		// lda #$01
+		// ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
+		// ldy #23
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_RIGHT_COLLISON_BOX - FOOT_COLLISION_OFFSET
-		ldy #23
-		jsr PLAYER.GetCollisionPoint
+		stx COLLISION_POINT_X_OFFSET
+		jsr UTILS.GetCollisionPoint
 
 		jsr UTILS.GetCharacterAt
 		tax
@@ -570,10 +608,17 @@ PLAYER: {
 		sta Player2FloorColor
 
 		//Moving inside walls check
-		lda #$01
+		// lda #$01
+		// ldx #$0c
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
 		ldx #$0c
+		stx COLLISION_POINT_X_OFFSET
 		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -588,19 +633,30 @@ PLAYER: {
 		and #STATE_FACE_LEFT
 		beq !Skip+
 
-		lda #$01
+		// lda #$01
+		// ldx #PLAYER_LEFT_COLLISON_BOX
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_LEFT_COLLISON_BOX
-		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		stx COLLISION_POINT_X_OFFSET
+		jsr UTILS.GetCollisionPoint
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta Player2_LeftCollision
 
-		lda #$01
+		// lda #$01
+		// ldx #PLAYER_LEFT_COLLISON_BOX
+		// ldy #18
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_LEFT_COLLISON_BOX
+		stx COLLISION_POINT_X_OFFSET
 		ldy #18
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
@@ -617,19 +673,30 @@ PLAYER: {
 		and #STATE_FACE_RIGHT
 		beq !Skip+
 
-		lda #$01
+		// lda #$01
+		// ldx #PLAYER_RIGHT_COLLISON_BOX
+		// ldy #11
+		// jsr PLAYER.GetCollisionPoint
 		ldx #PLAYER_RIGHT_COLLISON_BOX
+		stx COLLISION_POINT_X_OFFSET
 		ldy #11
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x
 		sta Player2_RightCollision
 
-		lda #$01
-		ldx #PLAYER_RIGHT_COLLISON_BOX
+		// lda #$01
+		// ldx #PLAYER_RIGHT_COLLISON_BOX
+		// ldy #18
+		// jsr PLAYER.GetCollisionPoint
 		ldy #18
-		jsr PLAYER.GetCollisionPoint
+		sty COLLISION_POINT_Y_OFFSET
+		jsr UTILS.GetCollisionPoint
+
 		jsr UTILS.GetCharacterAt
 		tax
 		lda CHAR_COLORS, x

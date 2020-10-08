@@ -159,7 +159,9 @@ P2_SCORE:
 P2_BONUS_SCORE:
 	.fill 6, $30
 
-
+BEHAVE_STACKX: .byte $00
+BEHAVE_STACKY: .byte $00
+BEHAVE_FULL: .byte $00
 
 zp_len_lo: .byte $00
 zp_src_lo: .byte $00

@@ -449,6 +449,8 @@ ENEMIES: {
 					//CPU JAM #2 addr was set to $BD7F
 * = * "Behaviour self mod"
 			jsr $BEEF
+			lda #$00
+			sta $d020
 			rts
 
 	}
@@ -511,7 +513,8 @@ ENEMIES: {
 			ror 
 			lsr
 			lsr
-			pha //SCREEN X
+			sta BEHAVE_STACKX
+			// pha //SCREEN X
 
 
 			//Divide enemy Y by 8 to get ScreenY
@@ -530,7 +533,7 @@ ENEMIES: {
 			ldy #$15
 		!:
 
-			pla
+			lda BEHAVE_STACKX
 
 			rts
 	}

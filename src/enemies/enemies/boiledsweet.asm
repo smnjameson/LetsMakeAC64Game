@@ -38,6 +38,8 @@ Enemy_001: {
 			.byte 0, 23
 
 	!OnUpdate:	
+			lda #$04
+			sta $d020
 			:exitIfStunned()
 
 

@@ -25,6 +25,8 @@ Enemy_003: {
 			rts
 
 	!OnUpdate:
+			lda #$02
+			sta $d020
 			:exitIfStunned()
 			:setEnemyColor(2, null)
 
@@ -61,7 +63,7 @@ Enemy_003: {
 			beq !CheckRight+
 
 			//Do walk left
-			jsr CheckScreenEdges
+			jsr CheckScreenEdges.CheckScreenEdgesBasic
 			beq !ChangeDir+
 		!WalkLeft:
 			:UpdatePosition(-$080, $000)

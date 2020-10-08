@@ -226,19 +226,12 @@ Entry:
 		!NormalLoop:
 			jsr SOFTSPRITES.UpdateSprites
 
-			inc $d020
 			jsr PLAYER.PlayerControl
-			inc $d020
 			jsr PLAYER.JumpAndFall
- 			inc $d020
 			jsr PLAYER.GetCollisions
-			inc $d020
 			jsr PLAYER.DrawPlayer
-		 	inc $d020
 			jsr CROWN.DrawCrown
-			lda #$00
-			sta $d020
-			
+
 			jsr PROJECTILES.UpdateProjectiles
 
 

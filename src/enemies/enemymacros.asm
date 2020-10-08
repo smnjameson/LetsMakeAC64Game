@@ -74,9 +74,13 @@ UpdatePositionSR01: {
 		rts
 }
 
+
+
 CheckScreenEdges: {
 		//First check both directions
 		//and dont change if both are blocked
+		//Allows flying through bg areas
+
 		:getEnemyCollisions(8, 15)
 		tay
 		lda CHAR_COLORS, y
@@ -89,7 +93,8 @@ CheckScreenEdges: {
 		and BEHAVIOUR_TEMP1
 		beq !CheckLeft+
 		jmp !Done+
-		
+
+	CheckScreenEdgesBasic:
 	!CheckLeft:
 		lda ENEMIES.EnemyState, x
 		and #ENEMIES.STATE_WALK_LEFT
@@ -166,6 +171,9 @@ CheckScreenEdges: {
 		lda #$01
 		rts
 }
+
+
+
 ChangeDirToRight: {
 	lda ENEMIES.EnemyState, x
 	and #[255 -[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]]
@@ -605,7 +613,7 @@ CheckVsProjectiles: {
 		lsr
 		lda PROJECTILES.Player1_Proj_X1, y
 		ror
-		pha
+		sta BEHAVE_STACKX
 
 		lda ENEMIES.EnemyPosition_X2, x
 		lsr
@@ -615,7 +623,7 @@ CheckVsProjectiles: {
 		sbc #$0c //Subtract border
 		sta TEMP10 
 
-		pla
+		lda BEHAVE_STACKX
 		sec
 		sbc TEMP10
 
@@ -643,10 +651,12 @@ CheckVsProjectiles: {
 		sta ENEMIES.EnemyStunTimer, x
 
 
-		txa
-		pha 
-		tya 
-		pha
+		stx BEHAVE_STACKX
+		sty BEHAVE_STACKY
+		// txa
+		// pha 
+		// tya 
+		// pha
 
 		lsr 
 		tay
@@ -654,10 +664,12 @@ CheckVsProjectiles: {
 		ldx #$02
 		jsr HUD.AddScore	
 
-		pla 
-		tay 
-		pla 
-		tax
+		// pla 
+		// tay 
+		// pla 
+		// tax
+		ldx BEHAVE_STACKX
+		ldy BEHAVE_STACKY
 
 		lda #$00
 		sta PROJECTILES.Player1_Proj_Type, y

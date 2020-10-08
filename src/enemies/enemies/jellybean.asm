@@ -6,6 +6,7 @@ Enemy_002: {
 		jmp !OnDeath+
 
 		.label WALK_FRAME = $00
+		.label HIT_FLOOR = $01
 
 	WalkLeft:
 		.byte $13,$14,$15
@@ -26,18 +27,34 @@ Enemy_002: {
 			ora #[ENEMIES.STATE_FACE_LEFT + ENEMIES.STATE_WALK_LEFT]
 			sta ENEMIES.EnemyState, x
 			:setStaticMemory(WALK_FRAME, 0)
+			:setStaticMemory(HIT_FLOOR, 0)
 			rts
 
 	!OnUpdate:
+			lda #$03
+			sta $d020
+
+			txa 
+			and #$01
+			eor ZP_COUNTER
+			and #$01
+			sta BEHAVE_FULL
+
+
 			:exitIfStunned()
-			:setEnemyColor(2, null)
+			// :setEnemyColor(2, null)
 
 			:hasHitProjectile()
+
 			//Should I fall??
+
+			:getStaticMemory(HIT_FLOOR)
+			bne !+
 			:doFall(12, 23) //Check below enemy and fall if needed
 			bcc !+
 			jmp !Done+
 		!:
+			:setStaticMemory(HIT_FLOOR, 1)
 			lda PLAYER.Player_Freeze_Active
 			beq !+
 			jmp !Skip+
@@ -50,6 +67,11 @@ Enemy_002: {
 
 			.const Y_RANGE = $10
 			.const X_RANGE = $40 //MAximum $7f
+
+			lda BEHAVE_FULL
+			beq !+
+			jmp !SkipFull+
+		!:
 
 			//Check if ANY player is in range
 			lda #$00
@@ -172,8 +194,14 @@ Enemy_002: {
 			sta PlayerIsInRange
 	
 		!NotInRange:
+		!SkipFull:
 
 
+			lda BEHAVE_FULL
+			beq !+
+			jmp !SkipFull+
+		!:
+		
 		!CheckLeft:
 			lda ENEMIES.EnemyState, x
 			bit TABLES.Plus + ENEMIES.STATE_WALK_LEFT
@@ -190,7 +218,8 @@ Enemy_002: {
 		!WalkLeft:
 			:UpdatePosition(-$080, $000)
 
-			jsr CheckScreenEdges
+
+			jsr CheckScreenEdges.CheckScreenEdgesBasic
 			bne !+
 			:setEnemyFrame(21)
 			jmp !Done+
@@ -204,10 +233,9 @@ Enemy_002: {
 			tay
 			lda WalkLeft, y
 			:setEnemyFrame(null)
-
-
-
 			jmp !Done+
+
+
 
 		!ChangeDir:
 			:setEnemyFrame(21)
@@ -261,6 +289,8 @@ Enemy_002: {
 		!:
 
 		!Done:
+		!SkipFull:
+
 
 			lda PlayerIsInRange
 			beq !+
@@ -269,6 +299,7 @@ Enemy_002: {
 			bne !Skip+		
 			jmp !SetFrame+	
 		!:
+
 			//TODO: Optimise
 			//Do walk animation
 			lda ZP_COUNTER
@@ -284,6 +315,7 @@ Enemy_002: {
 		!:
 			:setStaticMemory(WALK_FRAME, null)
 		!Skip:
+
 			:clearColorable()
 			:PositionEnemy()
 			rts
