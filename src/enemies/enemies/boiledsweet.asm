@@ -17,15 +17,17 @@ Enemy_001: {
 			jsr Random
 			and #$01
 			asl
+			asl
 			clc
-			adc #$ff
+			adc #$fe
 			:setStaticMemory(DX, null)
 
 			jsr Random
 			and #$01
 			asl
+			asl
 			clc 
-			adc #$ff
+			adc #$fe
 			:setStaticMemory(DY, null)
 
 			lda FlyAnimation
@@ -40,6 +42,13 @@ Enemy_001: {
 	!OnUpdate:	
 			lda #$04
 			sta $d020
+			
+			txa 
+			and #$01
+			eor ZP_COUNTER
+			and #$01
+			sta BEHAVE_FULL
+
 			:exitIfStunned()
 
 
@@ -63,6 +72,13 @@ Enemy_001: {
 
 			:setEnemyColor(7, null)
 			:hasHitProjectile()
+
+			lda BEHAVE_FULL
+			beq !+
+			jmp !SkipFull+
+		!:		
+		
+
 			:getStaticMemory(DY)
 			tay
 			:getStaticMemory(DX)
@@ -141,7 +157,7 @@ Enemy_001: {
 			:setStaticMemory(DX, null)
 		!NoXBounce:	
 		!ExitBounce:
-
+		!SkipFull:
 			:PositionEnemy()
 			rts
 

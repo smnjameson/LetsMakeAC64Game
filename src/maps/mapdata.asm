@@ -75,20 +75,17 @@ MAPDATA: {
 }
 
 * = $8300 "DEMO MAP"
-	.import binary "../../assets/maps/map_001.bin"
+	.fill 512, 0
 
 
-* = $8600 "Exodecrunch"
-		#import "../libs/exodecrunch.asm"
-
-* = $8800 "Level Lookup"
+* = $8500 "Level Lookup"
 	LevelLookup:
 		.word LEVEL001
 		.word LEVEL002
 		.word LEVEL003
 		.word LEVELEND
 
-* = $8880 "Compressed Levels"
+* = $8600 "Compressed Levels"
 	LEVEL001:
 		.import binary "../../assets/compressed/map0.bin"
 	LEVEL002:

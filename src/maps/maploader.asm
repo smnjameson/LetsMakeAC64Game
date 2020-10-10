@@ -12,20 +12,18 @@
   	__PipeChars:
 
   	LoadLevel: {
-  			.label LEVEL_DATA = VECTOR1
-  			.label NEXT_LEVEL_DATA = VECTOR2
+  			.label REMAINDER = TEMP3
+  			.label DIVISOR = TEMP4
   			.label TARGET_DATA = VECTOR3
 
   			lda PLAYER.CurrentLevel
   			asl
   			tax 
   			lda LevelLookup, x
-  			sta LEVEL_DATA + 0
-  			sta NEXT_LEVEL_DATA + 0
+  			sta GetByte + 1
   			inx
   			lda LevelLookup, x
-  			sta LEVEL_DATA + 1
-  			sta NEXT_LEVEL_DATA + 1
+  			sta GetByte + 2
 
   			lda #<MAPDATA
   			sta TARGET_DATA + 0
@@ -33,58 +31,108 @@
   			sta TARGET_DATA + 1
 
 
-  			//Copy just 1 page
-  			ldx #$03
+
   			ldy #$00
-  		!loop:
-  			lda (LEVEL_DATA), y
-  			sta (TARGET_DATA), y
+  			//RL Decode 220 bytes for tile data
+  		!RLDecodeLoop:
+  			jsr GetByte
+  			cmp #$80
+  			bcs !LengthData+
+  			sta (TARGET_DATA), y 
   			iny
-  			bne !loop-
+  			jmp !Next+
+  		!LengthData:
+  			and #$7f
+  			tax 
+  			jsr GetByte
+  		!RlDecodeInnerLoop:
+  			sta (TARGET_DATA), y 
+  			iny
   			dex 
-  			beq !Exit+
-  			inc LEVEL_DATA + 1
-  			inc TARGET_DATA + 1
-  			jmp !loop-
+  			bne !RlDecodeInnerLoop-
+   		!Next:
+  			cpy #$dc //220
+  			bne !RLDecodeLoop-
+
+  			// Transfer 42 more bytes directly
+  			clc
+  			lda TARGET_DATA + 0
+  			adc #$dc 
+  			sta TARGET_DATA + 0
+  			lda TARGET_DATA + 1
+  			adc #$00
+  			sta TARGET_DATA + 1
+
+  			ldy #$00
+  		!Loop:
+  			jsr GetByte
+  			sta (TARGET_DATA), y 
+  			iny 
+  			cpy #$2a 
+  			bne !Loop-
+
+  			// Transfer bytes for enemyList until zero termianted
+  		!EnemyDataLoop:
+  			jsr GetByte 
+  			sta (TARGET_DATA), y 
+  			cmp #$00
+  			beq !BarUnits+
+  			iny 
+  			bne !EnemyDataLoop-
+
+  			// Generate Bar Units
+  		!BarUnits:
+  			iny 
+  	  		
+  			clc
+  			tya 
+  			adc TARGET_DATA + 0
+  			sta TARGET_DATA + 0
+  			lda TARGET_DATA + 1
+  			adc #$00
+  			sta TARGET_DATA + 1
+
+
+  			ldy #$00
+  			ldx #$00
+  			lda #$38
+  		!:	
+  			inx
+  			sec 
+			sbc MAPDATA.MAP_1.NumberEnemies
+			cmp MAPDATA.MAP_1.NumberEnemies
+			bcs !-
+
+			stx DIVISOR
+			sta REMAINDER
+			tax 
+
+			lda #$00
+		!loop:
+			clc
+			adc DIVISOR
+			cpx #$00
+			beq !+
+			clc
+			adc #$01
+			dex 
+		!:
+			sta (TARGET_DATA), y 
+			iny
+			cpy MAPDATA.MAP_1.NumberEnemies 
+			bne !loop-
+
 
 
   		!Exit:
-  			//decompress A = LSB, X = MSB
-  			//Start at last byte of level
-  			//eg for level 1:
-  			// $8300 + (LevelLookup.LEVEL002 - LevelLookup.LEVEL001) - 1
-  			// lda NEXT_LEVEL_DATA + 0
-  			// sta LEVEL_DATA + 0
-  			// lda NEXT_LEVEL_DATA + 1
-  			// sta LEVEL_DATA + 1
-  			// clc
-  			// lda PLAYER.CurrentLevel
-  			// adc #$01
-  			// asl
-  			// tax 
-  			// lda LevelLookup, x
-  			// sta NEXT_LEVEL_DATA + 0
-  			// inx
-  			// lda LevelLookup, x
-  			// sta NEXT_LEVEL_DATA + 1
+  			rts
 
-  			// sec 
-  			// lda NEXT_LEVEL_DATA + 0
-  			// sbc LEVEL_DATA + 0
-  			// sta LEVEL_DATA + 0
-  			// lda NEXT_LEVEL_DATA + 1
-  			// sbc LEVEL_DATA + 1
-  			// clc
-  			// adc #$83
-  			// sta LEVEL_DATA + 1
-
-
-			// lda #$00
-			// ldx #$83
-			// // .break
-			// jsr EXODECRUNCH.Start
-
-  		
+  		GetByte: 
+  			lda $BEEF 
+  			inc GetByte + 1
+  			bne !+
+  			inc GetByte + 2
+  		!:
   			rts
   	}
 

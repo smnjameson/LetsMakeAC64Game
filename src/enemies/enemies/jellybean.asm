@@ -216,7 +216,7 @@ Enemy_002: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkLeft:
-			:UpdatePosition(-$080, $000)
+			:UpdatePosition(-$100, $000)
 
 
 			jsr CheckScreenEdges.CheckScreenEdgesBasic
@@ -227,7 +227,7 @@ Enemy_002: {
 
 			lda PlayerIsInRange
 			beq !+
-			:UpdatePosition(-$100, $000)
+			:UpdatePosition(-$180, $000)
 		!:
 			:getStaticMemory(WALK_FRAME)
 			tay
@@ -258,7 +258,7 @@ Enemy_002: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkRight:
-			:UpdatePosition($080, $000)
+			:UpdatePosition($100, $000)
 	
 			jsr CheckScreenEdges
 			bne !+
@@ -268,7 +268,7 @@ Enemy_002: {
 
 			lda PlayerIsInRange
 			beq !+
-			:UpdatePosition($100, $000)
+			:UpdatePosition($180, $000)
 		!:
 			:getStaticMemory(WALK_FRAME)
 			tay

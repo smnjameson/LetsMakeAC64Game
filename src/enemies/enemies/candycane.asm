@@ -52,11 +52,22 @@ Enemy_005: {
 			rts
 
 	!OnUpdate:
+
+			txa 
+			and #$01
+			eor ZP_COUNTER
+			and #$01
+			sta BEHAVE_FULL
+
 			:exitIfStunned()
 			:setEnemyColor(1, null)
 
 			:hasHitProjectile()
 		
+
+
+	
+
 			lda PLAYER.Player_Freeze_Active
 			beq !+
 			jmp !Skip+
@@ -141,22 +152,28 @@ Enemy_005: {
 			:setStaticMemory(JUMP_INDEX, null)
 
 		!LateralMove:
+			lda BEHAVE_FULL
+			beq !+
+			jmp !SkipFull+
+		!:	
+
 			jsr CheckScreenEdges
 			//Lateral movement here
 			lda ENEMIES.EnemyState, x
 			and #[ENEMIES.STATE_FACE_RIGHT]
 			beq !MoveLeft+
 		!MoveRight:
-			:UpdatePosition($180, 0)
+			:UpdatePosition($300, 0)
 			lda JumpRight + 2
 			:setEnemyFrame(0)
 			jmp !Done+
 		!MoveLeft:
-			:UpdatePosition(-$180, 0)
+			:UpdatePosition(-$300, 0)
 			lda JumpLeft + 2
 			:setEnemyFrame(0)
 		!Done:	
 		!Skip:
+		!SkipFull:
 			:clearColorable()
 	
 			:PositionEnemy()
