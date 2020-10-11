@@ -30,14 +30,14 @@ PowerUp: {
 	!OnUpdate:
 			:getStaticMemory(POWERUP_TYPE)
 			tay
-			lda ZP_COUNTER
-			and #$01
-			beq !Col2+
-		!Col1:		
+		// 	lda ZP_COUNTER
+		// 	and #$01
+		// 	beq !Col2+
+		// !Col1:		
 			lda PowerUpColorsA, y 
 			bne !Apply+
-		!Col2:
-			lda PowerUpColorsB, y 
+		// !Col2:
+		// 	lda PowerUpColorsB, y 
 		!Apply:
 			sta ENEMIES.EnemyColor, x
 
@@ -45,7 +45,8 @@ PowerUp: {
 			:getStaticMemory(FRAME)
 			tay
 			lda ZP_COUNTER
-			and #$07
+			lsr 
+			and #$03
 			bne !+
 			iny
 			cpy #[__PowerUpFrames - PowerUpFrames]
@@ -64,7 +65,7 @@ PowerUp: {
 			sec 
 			sbc #$01
 			:setStaticMemory(BOUNCE, null)
-			:UpdatePosition(0, -96)
+			:UpdatePosition(0, -$c0)
 			jmp !Finish+
 
 		!Fall:

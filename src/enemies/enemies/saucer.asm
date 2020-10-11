@@ -46,7 +46,7 @@ Enemy_004: {
 			:getStaticMemory(WAVE_INDEX)
 			tay
 			jsr Random
-			cmp #$02
+			cmp #$04
 			bcs !normal+
 		!random:
 			tya
@@ -112,6 +112,9 @@ Enemy_004: {
 		!CancelMovement:
 			ldy #$00
 		!ApplyMovement:
+			:getStaticMemory(DX)
+			:UpdatePosition(null, null)				
+
 			:getStaticMemory(DX)
 			:UpdatePosition(null, null)				
 

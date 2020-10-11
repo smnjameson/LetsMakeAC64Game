@@ -105,7 +105,7 @@ Enemy_007: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkLeft:
-			:UpdatePosition(-$100, $000)
+			:UpdatePosition(-$200, $000)
 			:getStaticMemory(WALK_FRAME)
 			tay
 			lda WalkLeft, y
@@ -140,7 +140,7 @@ Enemy_007: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkRight:
-			:UpdatePosition($100, $000)
+			:UpdatePosition($200, $000)
 			:getStaticMemory(WALK_FRAME)
 			tay
 			lda WalkRight, y
@@ -179,10 +179,13 @@ Enemy_007: {
 			lda ENEMIES.EnemyPosition_Y1, x
 			sec
 			sbc BEHAVIOUR_TEMP1
+			sec
+			sbc BEHAVIOUR_TEMP1
 			sta ENEMIES.EnemyPosition_Y1, x
 			iny
+			iny
 			cpy #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable - 1]
-			bne !+
+			bcc !+
 		 	
 			//Turn off jump here
 			ldy #$ff

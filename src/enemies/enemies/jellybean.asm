@@ -31,16 +31,6 @@ Enemy_002: {
 			rts
 
 	!OnUpdate:
-			lda #$03
-			sta $d020
-
-			txa 
-			and #$01
-			eor ZP_COUNTER
-			and #$01
-			sta BEHAVE_FULL
-
-
 			:exitIfStunned()
 			// :setEnemyColor(2, null)
 
@@ -68,10 +58,6 @@ Enemy_002: {
 			.const Y_RANGE = $10
 			.const X_RANGE = $40 //MAximum $7f
 
-			lda BEHAVE_FULL
-			beq !+
-			jmp !SkipFull+
-		!:
 
 			//Check if ANY player is in range
 			lda #$00
@@ -185,7 +171,6 @@ Enemy_002: {
 			bcc !InRangeX+
 
 
-
 			jmp !NotInRange+
 
 
@@ -197,11 +182,7 @@ Enemy_002: {
 		!SkipFull:
 
 
-			lda BEHAVE_FULL
-			beq !+
-			jmp !SkipFull+
-		!:
-		
+
 		!CheckLeft:
 			lda ENEMIES.EnemyState, x
 			bit TABLES.Plus + ENEMIES.STATE_WALK_LEFT
@@ -294,16 +275,14 @@ Enemy_002: {
 
 			lda PlayerIsInRange
 			beq !+
-			lda ZP_COUNTER
-			and #$01
-			bne !Skip+		
 			jmp !SetFrame+	
 		!:
 
 			//TODO: Optimise
 			//Do walk animation
 			lda ZP_COUNTER
-			and #$07
+			lsr 
+			and #$03
 			bne !Skip+
 		!SetFrame:
 			:getStaticMemory(WALK_FRAME)

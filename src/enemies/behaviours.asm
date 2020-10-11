@@ -45,7 +45,8 @@ BEHAVIOURS: {
 	StunnedBehaviour: {
 		update: {
 			lda ZP_COUNTER
-			and #$03
+			lsr
+			and #$01
 			bne !+
 			dec ENEMIES.EnemyStunTimer, x
 			bne !+
@@ -81,7 +82,7 @@ BEHAVIOURS: {
 
 
 	AbsorbBehaviour: {
-		.label TimeBetweenEatFrames = $04
+		.label TimeBetweenEatFrames = $02
 
 		setup: {
 			txa
@@ -191,11 +192,11 @@ BEHAVIOURS: {
 			bmi !MoveRight+
 		!MoveLeft:
 			dec ENEMIES.EnemyEatOffsetX, x
-			:UpdatePosition($100, $000)
+			:UpdatePosition($200, $000)
 			jmp !DoneMoveHoriz+
 		!MoveRight:
 			inc ENEMIES.EnemyEatOffsetX, x
-			:UpdatePosition(-$100, $000)
+			:UpdatePosition(-$200, $000)
 		!DoneMoveHoriz:	
 
 			//Move enemy along Y
@@ -204,11 +205,11 @@ BEHAVIOURS: {
 			bmi !MoveUp+
 		!MoveDown:
 			dec ENEMIES.EnemyEatOffsetY, x
-			:UpdatePosition($000, $100)
+			:UpdatePosition($000, $200)
 			jmp !DoneMoveVert+
 		!MoveUp:
 			inc ENEMIES.EnemyEatOffsetY, x
-			:UpdatePosition($000, -$100)
+			:UpdatePosition($000, -$200)
 		!DoneMoveVert:	
 
 			//Initialise sprite copy vectors

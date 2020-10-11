@@ -2,7 +2,7 @@
 
 BasicUpstart2(Entry)
 
-#import "../libs/tables.asm"  
+#import "../libs/tables.asm"   
 #import "../libs/vic.asm" 
 #import "../libs/macros.asm"
 

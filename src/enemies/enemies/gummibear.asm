@@ -38,10 +38,12 @@ Enemy_008: {
 		!:
 			lda PLAYER.Player_Freeze_Active
 			bne !Skip+
+
 			//TODO: Optimise
 			//Do walk animation
 			lda ZP_COUNTER
-			and #$07
+			lsr
+			and #$03
 			bne !Skip+
 			:getStaticMemory(WALK_FRAME)
 			clc
@@ -69,7 +71,7 @@ Enemy_008: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkLeft:
-			:UpdatePosition(-$080, $000)
+			:UpdatePosition(-$100, $000)
 		
 			jsr CheckScreenEdges
 			bne !+
@@ -102,7 +104,7 @@ Enemy_008: {
 			and #UTILS.COLLISION_COLORABLE
 			beq !ChangeDir+
 		!WalkRight:
-			:UpdatePosition($080, $000)
+			:UpdatePosition($100, $000)
 
 			jsr CheckScreenEdges
 			bne !+

@@ -290,20 +290,20 @@ UpdatePositionSR05: {
 
 .macro setEnemyColor(color, color2) {
 
-	.if(color2 !=  null) {
-		lda ZP_COUNTER
-		and #$01
-		beq !+
-		lda #color
-		jmp !Skip+
-	!:
-		lda #color2
-	!Skip:
-	} else {
+	// .if(color2 !=  null) {
+	// 	lda ZP_COUNTER
+	// 	and #$01
+	// 	beq !+
+	// 	lda #color
+	// 	jmp !Skip+
+	// !:
+	// 	lda #color2
+	// !Skip:
+	// } else {
 		.if(color != 0 && color != null) {
 			lda #color
 		}
-	}
+	// }
 	!Set:
 	sta ENEMIES.EnemyColor, x
 }
@@ -347,6 +347,9 @@ getEnemyCollisionsSR: {
 
 .macro doFall(xcheck, ycheck) {
 		:getEnemyCollisions(xcheck, ycheck)
+		pha
+		jsr doFallSR
+		pla
 		jsr doFallSR
 }
 
@@ -358,6 +361,7 @@ doFallSR: {
 
 		bit TABLES.Plus + UTILS.COLLISION_SWITCH
 		beq !+
+		lda #$02
 		sta ENEMIES.EnemyOnSwitch
 	!:
 
@@ -657,7 +661,8 @@ CheckVsProjectiles: {
 		// pha 
 		// tya 
 		// pha
-
+		
+		tya
 		lsr 
 		tay
 		lda #$01

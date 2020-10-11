@@ -141,10 +141,13 @@ Enemy_006: {
 			lda ENEMIES.EnemyPosition_Y1, x
 			sec
 			sbc BEHAVIOUR_TEMP1
+			sec
+			sbc BEHAVIOUR_TEMP1
 			sta ENEMIES.EnemyPosition_Y1, x
 			iny
+			iny
 			cpy #[__MallowJumpAndFallTable - MallowJumpAndFallTable - 1]
-			bne !+
+			bcc !+
 		 	
 			//Reset jump timer
 			jsr Random

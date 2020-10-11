@@ -25,15 +25,6 @@ Enemy_003: {
 			rts
 
 	!OnUpdate:
-			lda #$02
-			sta $d020
-
-			txa 
-			and #$01
-			eor ZP_COUNTER
-			and #$01
-			sta BEHAVE_FULL
-
 			:exitIfStunned()
 			:setEnemyColor(2, null)
 
@@ -48,7 +39,8 @@ Enemy_003: {
 			//TODO: Optimise
 			//Do walk animation
 			lda ZP_COUNTER
-			and #$07
+			lsr 
+			and #$03
 			bne !Skip+
 			:getStaticMemory(WALK_FRAME)
 			clc
@@ -62,12 +54,6 @@ Enemy_003: {
 
 			//Snap enemy to floor
 			jsr snapEnemyToFloor
-
-
-			lda BEHAVE_FULL
-			beq !+
-			jmp !SkipFull+
-		!:
 
 		!CheckLeft:
 			lda ENEMIES.EnemyState, x
@@ -91,9 +77,7 @@ Enemy_003: {
 		!ChangeDir:
 			:setEnemyFrame(31)
 			jmp !Done+
-		
-
-
+			
 
 		!CheckRight:
 			bit TABLES.Plus + ENEMIES.STATE_WALK_RIGHT
@@ -116,8 +100,6 @@ Enemy_003: {
 			:setEnemyFrame(36)
 			// jmp !Done+
 		!:
-		!SkipFull:
-
 
 		!Done:
 			:clearColorable()

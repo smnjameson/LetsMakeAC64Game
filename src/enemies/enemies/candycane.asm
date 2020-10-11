@@ -53,21 +53,12 @@ Enemy_005: {
 
 	!OnUpdate:
 
-			txa 
-			and #$01
-			eor ZP_COUNTER
-			and #$01
-			sta BEHAVE_FULL
 
 			:exitIfStunned()
 			:setEnemyColor(1, null)
 
 			:hasHitProjectile()
 		
-
-
-	
-
 			lda PLAYER.Player_Freeze_Active
 			beq !+
 			jmp !Skip+
@@ -134,10 +125,13 @@ Enemy_005: {
 			lda ENEMIES.EnemyPosition_Y1, x
 			sec
 			sbc BEHAVIOUR_TEMP1
+			sec
+			sbc BEHAVIOUR_TEMP1
 			sta ENEMIES.EnemyPosition_Y1, x
 			iny
+			iny
 			cpy #[TABLES.__JumpAndFallTable - TABLES.JumpAndFallTable - 1]
-			bne !+
+			bcc !+
 		 	
 			//Reset jump timer
 			jsr Random
@@ -152,11 +146,6 @@ Enemy_005: {
 			:setStaticMemory(JUMP_INDEX, null)
 
 		!LateralMove:
-			lda BEHAVE_FULL
-			beq !+
-			jmp !SkipFull+
-		!:	
-
 			jsr CheckScreenEdges
 			//Lateral movement here
 			lda ENEMIES.EnemyState, x
@@ -173,7 +162,6 @@ Enemy_005: {
 			:setEnemyFrame(0)
 		!Done:	
 		!Skip:
-		!SkipFull:
 			:clearColorable()
 	
 			:PositionEnemy()

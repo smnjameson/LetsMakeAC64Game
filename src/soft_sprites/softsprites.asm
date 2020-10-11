@@ -1,7 +1,7 @@
 * = * "Softsprites"
 SOFTSPRITES: {
 	.label MAX_UNIQUE_CHARS = 4			//Maximum number of unique char IDs 
-	.label MAX_SPRITES_PER_FRAME = 2	//Maximum number of sprites to update per frame
+	.label MAX_SPRITES_PER_FRAME = 4	//Maximum number of sprites to update per frame
 	//.label MAX_SPRITES //DEFINED in ZERO PAGE file
 
 	.label SPRITE_FONT_START = 187

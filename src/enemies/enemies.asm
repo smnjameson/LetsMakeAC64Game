@@ -87,9 +87,10 @@ ENEMIES: {
 			.label ENEMY_BEHAVIOUR = VECTOR1
 			.label TEMP = TEMP11
 
-			lda #$00
-			sta EnemyOnSwitch
-			
+			lda EnemyOnSwitch
+			beq !+
+			dec EnemyOnSwitch
+		!:	
 			ldy #MAX_ENEMIES - 1
 		!Loop:
 			lda EnemyType, y
@@ -105,13 +106,22 @@ ENEMIES: {
 			lda VIC.SPRITE_ENABLE
 			ora TABLES.PowerOfTwo, y
 			sta VIC.SPRITE_ENABLE
-			lda EnemyType, y
 			sty TEMP
+
+			tya 
+			and #$01
+			eor ZP_COUNTER
+			and #$01
+			beq !+
+	
+			lda EnemyType, y
 			ldx TEMP
 			ldy #BEHAVIOURS.BEHAVIOUR_UPDATE
 			jsr CallBehaviour
 			ldy TEMP
 			jsr CheckPlayerCollision
+		!:
+
 			ldy TEMP
 				
 		!Skip:		
