@@ -79,6 +79,14 @@ ENEMIES: {
 			sta $d000, x
 			dex
 			bpl !-
+
+			lda #$00
+			ldx #MAX_ENEMIES-1 
+		!:
+			sta EnemyType, x 
+			dex 
+			bpl !-
+
 			rts
 	}
 
@@ -268,7 +276,8 @@ ENEMIES: {
 				ldy #$06
 				jsr CallBehaviour
 				
-				//Accumulator is now the powerup type!
+
+					//Accumulator is now the powerup type!
 				ldx POWERUP_PLAYER_NUM
 				clc
 				adc #$01
@@ -459,8 +468,7 @@ ENEMIES: {
 					//CPU JAM #2 addr was set to $BD7F
 * = * "Behaviour self mod"
 			jsr $BEEF
-			lda #$00
-			sta $d020
+
 			rts
 
 	}

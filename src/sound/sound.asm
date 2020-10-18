@@ -48,6 +48,8 @@ SOUND: {
 			clc
 			adc #$03
 			jsr $1000
+			lda #$01
+			sta TrackDisplayState
 			rts
 	}
 

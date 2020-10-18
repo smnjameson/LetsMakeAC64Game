@@ -370,6 +370,9 @@ HUD: {
 			clc
 			lda PLAYER.Player1_EatCount
 			adc PLAYER.Player2_EatCount
+			bne !+
+			rts
+		!:
 			pha
 
 			//Accumulator has total eaten
@@ -392,7 +395,7 @@ HUD: {
 					//Add number of enemies to get to BArUnits
 					lda SelfMod + 1
 					clc
-					adc PIPES.MAPDATA_COPY.NumberOfEnemies
+					adc MAPDATA.MAP_1.NumberEnemies
 					sta SelfMod + 1
 					lda SelfMod + 2
 					adc #$00
@@ -400,7 +403,7 @@ HUD: {
 
 					lda SelfMod + 1
 					clc
-					adc PIPES.MAPDATA_COPY.NumberOfPowerups
+					adc MAPDATA.MAP_1.NumberOfPowerups
 					sta SelfMod + 1
 					lda SelfMod + 2
 					adc #$00
@@ -409,11 +412,12 @@ HUD: {
 
 			pla
 			tax
+	
+			// inx //Fixes the offset casued by the null byte at the end of EnemyList
 
-			inx //Fixes the offset casued by the null byte at the end of EnemyList
+
 		SelfMod:
 			lda $BEEF, x
-
 			ldx #$00
 		!Loop:	
 			cmp #$04

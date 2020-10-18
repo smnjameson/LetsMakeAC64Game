@@ -121,7 +121,21 @@ Enemy_004: {
 			// jsr CheckScreenEdges
 
 
-
+		!YBounce:
+			lda ENEMIES.EnemyPosition_Y1, x
+			cmp #$32
+			bcc !DoYLockTop+
+			cmp #$cd
+			bcs !DoYLockBottom+
+			jmp !NoYBounce+
+		!DoYLockTop:
+			lda #$32
+			sta ENEMIES.EnemyPosition_Y1, x
+			jmp !NoYBounce+
+		!DoYLockBottom:
+			lda #$cd
+			sta ENEMIES.EnemyPosition_Y1, x
+		!NoYBounce:	
 
 		!XBounce:
 			jsr Random

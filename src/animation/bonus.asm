@@ -106,9 +106,22 @@ BONUS: {
 		!Exit:
 
 
+			lda PLAYER.PlayersActive
+			cmp #$03
+			beq !both+
+			cmp #$02
+			beq !p2only+
+		!p1only:
+			lda BonusPlayer1Counters + 1
+			jmp !store+
+		!p2only:
+			lda BonusPlayer2Counters + 1
+			jmp !store+
+		!both:	
 			lda BonusPlayer1Counters + 1
 			clc
 			adc BonusPlayer2Counters + 1
+		!store:
 			sta BonusCounters + 1
 
 			rts

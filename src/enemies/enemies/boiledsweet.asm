@@ -48,6 +48,7 @@ Enemy_001: {
 			tay
 			lda ZP_COUNTER
 			and #$03
+			lsr
 			bne !+
 			iny
 			cpy #[__FlyAnimation - FlyAnimation]

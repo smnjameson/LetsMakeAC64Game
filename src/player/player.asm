@@ -41,9 +41,9 @@ PLAYER: {
 	FreezeColorRamp:
 			.byte $03,$0e,$06,$06,$06,$06,$06,$0e
 	SpeedColorRamp:
-			.byte $0f,$0a,$04,$04,$04,$04,$04,$0a
+			.byte 0,0,0,1,0,0,0,1
 	JumpColorRamp:
-			.byte $0f,$0c,$08,$08,$08,$08,$08,$0c
+			.byte 0,0,0,1,0,0,0,1
 	FreezeColorIndex:
 			.byte $01
 	FreezeColor:
@@ -875,6 +875,7 @@ PLAYER: {
 				cmp #POWERUP_SPEED
 				bne !NotSpeed+
 				lda SpeedColor
+				beq !NormalColor+
 				sta VIC.SPRITE_COLOR_6, x
 				jmp !InvulnDone+
 			!NotSpeed:
@@ -884,11 +885,13 @@ PLAYER: {
 				cmp #POWERUP_JUMP
 				bne !NotJump+
 				lda JumpColor
+				beq !NormalColor+
 				sta VIC.SPRITE_COLOR_6, x
 				jmp !InvulnDone+
 			!NotJump:
 
 
+			!NormalColor:
 				lda PlayerColors, x
 				sta VIC.SPRITE_COLOR_6, x
 			!InvulnDone:
@@ -1149,25 +1152,25 @@ PLAYER: {
 		!:
 
 
-			lda Player2_ExitIndex
-			beq !noswap+
-			cmp Player1_ExitIndex
-			bcs !noswap+
+		// 	lda Player2_ExitIndex
+		// 	beq !noswap+
+		// 	cmp Player1_ExitIndex
+		// 	bcs !noswap+
 
-		!swap:
-			//swap color
-			lda $d027 + 6
-			tax 
-			lda $d027 + 7
-			sta $d027 + 6
-			stx $d027 + 7
+		// !swap:
+		// 	//swap color
+		// 	lda $d027 + 6
+		// 	tax 
+		// 	lda $d027 + 7
+		// 	sta $d027 + 6
+		// 	stx $d027 + 7
 
-			//swap frame
-			lda [SPRITE_POINTERS + 6]
-			tax 
-			lda [SPRITE_POINTERS + 7]
-			sta [SPRITE_POINTERS + 6]
-			stx [SPRITE_POINTERS + 7]
+		// 	//swap frame
+		// 	lda [SPRITE_POINTERS + 6]
+		// 	tax 
+		// 	lda [SPRITE_POINTERS + 7]
+		// 	sta [SPRITE_POINTERS + 6]
+		// 	stx [SPRITE_POINTERS + 7]
 
 		!noswap:	
 

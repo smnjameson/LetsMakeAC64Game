@@ -57,7 +57,7 @@ Random: {
 
 
     init: 
-        lda #$13
+        lda #$13 
         sta $dc05
         lda #$ff
         sta $dd05
@@ -259,6 +259,8 @@ Entry:
 		
 		/////////////////////////////////
 		!EndLevelTransition:
+				lda #$00
+				sta $d015
 				jsr HUD.RecordScore
 
 				lda $d011
