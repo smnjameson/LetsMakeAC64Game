@@ -92,6 +92,10 @@ ENEMIES: {
 
 
 	UpdateEnemies: {
+			lda PLAYER.PlayersActive
+			bne !+
+			rts
+		!:
 			.label ENEMY_BEHAVIOUR = VECTOR1
 			.label TEMP = TEMP11
 

@@ -386,6 +386,22 @@ TITLECARD: {
 			lda #$07
 			sta $d021
 
+		!:	
+			cmp #$03
+			bne !+	
+			lda TITLECARD.IsBonus
+			bne !F800+
+		!F000:
+			lda $d018
+			and #$f0
+			ora #%00001100
+			sta $d018
+			jmp !+
+		!F800:
+			lda $d018
+			and #$f0
+			ora #%00001110
+			sta $d018		
 
 		!:
 			cmp #$04
@@ -406,6 +422,11 @@ TITLECARD: {
 			cmp #$08	
 			bne !+
 
+			lda $d018
+			and #$f0
+			ora #%00001110
+			sta $d018
+
 			lda IsBonus
 			bne !IsInBonus+
 			lda $d016
@@ -416,7 +437,7 @@ TITLECARD: {
 			lda #$00
 			sta $d01b
 		!IsInBonus:
-			jmp !MCFinished+			
+			// jmp !MCFinished+			
 		!:	
 
 

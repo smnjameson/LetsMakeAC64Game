@@ -1361,12 +1361,23 @@ BONUS: {
 	//Acc starts as how many mutlipes of 250
 	//Acc = Score to add (25) (BCD Format) $25 = 25
 	//X = trailing zeros count (1)
-	//Y = Player 
+	//Y = Player 0 or 1
 	AddScoreTotal: {
+
 			.label SCORE = SCOREVECTOR1
 			.label SCORETOADD = SCORETEMP1
 			.label TEMP = SCORETEMP2
 			tax 
+
+			//Check player is active
+			tya 
+			clc 
+			adc #$1
+			and PLAYER.PlayersActive
+			bne !+
+			rts
+		!:
+
 			lda ScoreTable, x 
 			pha 
 			lda ScoreTableZeros, x 

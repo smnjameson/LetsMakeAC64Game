@@ -275,9 +275,9 @@ PLAYER: {
 
 
 
-			lda #$04
+			lda #$00
 			sta Player1_Lives
-			lda #$04
+			lda #$00
 			sta Player2_Lives
 
 			lda #$00
@@ -285,6 +285,8 @@ PLAYER: {
 			sta Player2_Weight
 			sta Player1_EatCount
 			sta Player2_EatCount
+			sta Player1_Size
+			sta Player2_Size
 
 			sta SCREEN_SHAKE_VAL
 
@@ -396,10 +398,30 @@ PLAYER: {
 			tya 
 			tax
 			dec Player_Lives, x
-
+			bpl !+
+			jmp GameOverPlayer
+		!:
 			jsr SpawnPlayer
 			rts
 	}
+
+	GameOverPlayer: {
+		!:
+		 	dec PlayersActive
+		 	dey 
+		 	bpl !-
+
+		 	//Record score
+		 	cmp #$00
+		 	bne !P2+
+		 !P1:
+		 	jsr HUD.RecordScoreP1
+		 	rts
+		 !P2:
+		 	jsr HUD.RecordScoreP2
+		 	rts
+	}
+
 
 	GetCollisions: {
 
@@ -778,6 +800,7 @@ PLAYER: {
 			lda CURRENT_PLAYER
 			and PlayersActive
 			bne !+
+
 			jmp !SkipPlayerCompletely+
 		!:
 
@@ -1399,6 +1422,10 @@ PLAYER: {
 			lda PlayersActive
 			and #$01
 			bne !+
+			lda PlayersActive
+			beq !Player2+
+			lda Player1_Lives
+			bmi !Player2+
 			lda $dc00
 			and #$10
 			bne !Player2+
@@ -1416,6 +1443,11 @@ PLAYER: {
 			lda PlayersActive
 			and #$02
 			bne !+
+			lda PlayersActive
+			beq !Done+
+			lda Player2_Lives
+			bmi !Done+
+
 			lda $dc01
 			and #$10
 			bne !Done+

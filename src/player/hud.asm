@@ -106,14 +106,97 @@ HUD: {
 	PlayerRow2:	
 		.text "00000000"
 
-	PressFireRow1:
-		.text " INSERT "
+	PressFireRow1a:
+		.text "P"
+		.byte $f8
+		.text " PRESS"
+	PressFireRow1b:
+		.text "P"
+		.byte $f9
+		.text " PRESS"
 	PressFireRow2:	
-		.text "  COIN  "
+		.text "  FIRE  "
+	GameOverRow1:
+		.text "  GAME  "
+	GameOverRow2:
+		.text "  OVER  "
 	// PlayerColors: 
 	// 	.byte $02,$05
 	PlayerActiveColors:
 		.byte $00,$00
+
+
+	SetGameOver: {
+
+			lda PLAYER.PlayersActive
+			beq !Player1GameOver+
+			lda PLAYER.Player1_Lives
+			bpl !P1Done+
+		!Player1GameOver:
+			ldx #$07
+		!loop:
+			lda GameOverRow1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 + 0, x
+			lda PLAYER.PlayerColors + 0
+			sta VIC.COLOR_RAM + 23 * 40 + 0, x
+
+			lda GameOverRow2, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 24 * 40 + 0, x
+			lda PLAYER.PlayerColors + 0
+			sta VIC.COLOR_RAM + 24 * 40 + 0, x
+			dex
+			bpl !loop-
+		!P1Done:
+
+			lda PLAYER.PlayersActive
+			beq !Player2GameOver+
+			lda PLAYER.Player2_Lives
+			bpl !P2Done+
+		!Player2GameOver:
+			ldx #$07
+		!loop:
+			lda GameOverRow1, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 23 * 40 + 32, x
+			lda PLAYER.PlayerColors + 1
+			sta VIC.COLOR_RAM + 23 * 40 + 32, x
+
+			lda GameOverRow2, x
+			clc
+			adc #$e5
+			cmp #$05
+			bne !+
+			lda #$00
+		!:
+			sta SCREEN_RAM + 24 * 40 + 32, x
+			lda PLAYER.PlayerColors + 1
+			sta VIC.COLOR_RAM + 24 * 40 + 32, x
+
+			dex
+			bpl !loop-
+		!P2Done:
+			rts
+	}
+
+
+
 
 	FlashInsertCoin: {
 			lda PLAYER.PlayersActive
@@ -122,6 +205,7 @@ HUD: {
 			rts
 		!:
 
+	FlashGameOver:
 			lda ZP_COUNTER
 			and #$10
 			beq !On+
@@ -175,11 +259,29 @@ HUD: {
 			cmp PLAYER.PlayersActive
 			bne !+
 
-			jsr FlashInsertCoin
-			rts
+			lda PLAYER.PlayersActive
+			bne !FlashCoin+
 
+			jmp FlashInsertCoin.FlashGameOver
+
+		!FlashCoin:
+			
+			jmp FlashInsertCoin
 		!:
 
+			
+		
+
+			//Previos playes active does not equal
+			//current players active so update text
+			
+
+			lda PLAYER.PlayersActive
+			bne !+
+			sta PreviousPlayersActive
+			jmp SetGameOver
+
+		!:
 			lda PreviousPlayersActive
 			and #$01
 			bne !Player1Done+
@@ -212,7 +314,7 @@ HUD: {
 		!Player1Inactive:
 			ldx #$07
 		!loop:
-			lda PressFireRow1, x
+			lda PressFireRow1a, x
 			clc
 			adc #$e5
 			cmp #$05
@@ -270,7 +372,7 @@ HUD: {
 		!Player2Inactive:
 			ldx #$07
 		!loop:
-			lda PressFireRow1, x
+			lda PressFireRow1b, x
 			clc
 			adc #$e5
 			cmp #$05
@@ -299,6 +401,9 @@ HUD: {
 
 			lda PLAYER.PlayersActive
 			sta PreviousPlayersActive
+
+
+			jsr SetGameOver
 
 			rts
 	}
@@ -472,6 +577,14 @@ HUD: {
 				!InnerLoop:
 						ldx HUD_LIVES_TEMP1
 
+						txa 
+						clc 
+						adc #$01
+						and PLAYER.PlayersActive
+						bne !+
+						lda #$00
+						jmp !Done+
+					!:
 						tya
 						cmp PLAYER.Player_Lives, x
 						bcs !+
@@ -491,6 +604,47 @@ HUD: {
 					dey
 					bpl !InnerLoop-
 
+					//Now check if this player has more than 4 lives
+
+					ldx HUD_LIVES_TEMP1
+					lda #$09
+					cpx #$01
+					bne !+
+					lda #$1d
+				!:
+					sta LIVES_POS_TEMP
+					
+					lda PLAYER.Player_Lives, x
+					cmp #$05
+					bcc !livesDone+
+					bmi !livesDone+
+					ldy #$00
+				!tens:
+					cmp #$0a 
+					bcc !units+
+					iny
+					sbc #$0a 
+					jmp !tens-
+
+				!units:
+					//Y contains tens and acc contains units
+					clc
+					adc #$dc
+					ldx LIVES_POS_TEMP
+					inx
+					sta SCREEN_RAM + 24 * $28, x
+
+				!drawTens:
+					ldx LIVES_POS_TEMP 
+					tya 
+					beq !livesDone+
+					clc
+					adc #$dc					
+					sta SCREEN_RAM + 24 * $28, x
+
+				!livesDone:
+
+
 
 			ldx HUD_LIVES_TEMP1
 			dex
@@ -501,6 +655,48 @@ HUD: {
 
 	//Positions (2,24) & (30,24)
 	RecordScore: {
+			lda PLAYER.PlayersActive
+			and #$01
+			beq !+
+			jsr RecordScoreP1
+		!:
+			lda PLAYER.PlayersActive
+			and #$02
+			beq !+
+			jsr RecordScoreP2
+		!:
+			rts
+	}
+
+
+	ResetScores: {
+			jsr ResetScoreP1
+			jsr ResetScoreP2
+			rts
+	}
+
+	ResetScoreP1: {
+			lda #$30
+			ldx #$07
+		!:
+			sta P1_SCORE, x
+			dex
+			bpl !-
+			rts	
+	}
+
+
+	ResetScoreP2: {
+			ldx #$07
+			lda #$30
+		!:
+			sta P2_SCORE, x
+			dex
+			bpl !-
+			rts		
+	}
+
+	RecordScoreP1: {
 			ldx #$07
 		!:
 			lda SCREEN_RAM + 24 * $28, x
@@ -508,6 +704,15 @@ HUD: {
 			sbc #$ac
 			sta P1_SCORE, x
 
+			dex
+			bpl !-
+			rts
+
+	}
+
+	RecordScoreP2: {
+			ldx #$07
+		!:
 			lda SCREEN_RAM + 24 * $28 + 32, x
 			sec 
 			sbc #$ac
@@ -516,20 +721,10 @@ HUD: {
 			dex
 			bpl !-
 			rts
-
 	}
 
 
-	ResetScores: {
-			lda #$30
-			ldx #$07
-		!:
-			sta P1_SCORE, x			
-			sta P2_SCORE, x			
-			dex
-			bpl !-
-			rts
-	}
+
 
 	SetScores: {
 			clc 

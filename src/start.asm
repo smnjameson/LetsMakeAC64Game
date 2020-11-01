@@ -22,7 +22,7 @@ BasicUpstart2(Entry)
 #import "player/projectiles.asm"
 #import "player/player.asm"
 #import "player/hud.asm"
-#import "player/crown.asm"
+#import "player/crown.asm" 
 #import "animation/charanimations.asm"
 #import "animation/messages.asm"
 #import "soft_sprites/softsprites.asm"
@@ -35,6 +35,7 @@ BasicUpstart2(Entry)
 
 #import "intro/titlescreen.asm"
 #import "animation/bonus.asm"
+#import "animation/gameover.asm"
 #import "animation/titlecard.asm"
 // #import "animation/transition_bars.asm"
 #import "animation/transition_chars.asm"
@@ -135,7 +136,9 @@ Entry:
 		sta TITLECARD.IsBonus
 		jsr TITLECARD.TransitionIn
 
-			!INTRO:
+	!INTRO:
+				lda #$00
+				sta PLAYER.CurrentLevel
 			IntroCallback:
 				jsr TITLE_SCREEN.Initialise
 			!IntroLoop:
@@ -154,9 +157,10 @@ Entry:
 
 
 		lda #$00
-		sta PLAYER.CurrentLevel
-
+		sta PLAYER.CurrentLevel		
 		jsr CROWN.Initialise
+		jsr HUD.ResetScoreP1
+		jsr HUD.ResetScoreP2
 		
 
 	!GAME_ENTRY:
@@ -180,7 +184,8 @@ Entry:
 
 		jsr HUD.Initialise
 		
-
+		lda #$00
+		sta GameOverCounter
 
 
 	//Inf loop
@@ -219,6 +224,10 @@ Entry:
 		cmp #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 		bne !NormalLoop+
 	!:
+
+		lda PLAYER.PlayersActive
+		beq !NormalLoop+
+
 		jmp !EndLevelTransition+
 
 		
@@ -235,12 +244,11 @@ Entry:
 			jsr PROJECTILES.UpdateProjectiles
 
 
-			jsr ENEMIES.UpdateEnemies
-
 			jsr PIPES.Update
 
 			jsr HUD.DrawLives
 			jsr HUD.Update
+
 
 			jsr SOUND.UpdateTrackDisplay
 			jsr PLATFORMS.UpdateColorOrigins
@@ -249,8 +257,17 @@ Entry:
 
 			jsr $1003
 
+			jsr ENEMIES.UpdateEnemies
 
-		// dec $d020
+			//Check for game over condition
+			lda PLAYER.PlayersActive
+			bne !+
+			inc GameOverCounter
+			lda GameOverCounter
+			cmp #$ff
+			bne !+
+			jmp !GameOver+
+		!:
 			jmp !Loop- 
 		!NotNormalLoop:
 		/////////////////////////////////
@@ -292,15 +309,7 @@ Entry:
 			jmp !EndLevelLoop- 
 
 		!BonusExiting:
-		// 	lda #$00
-		// 	ldx #$00
-		// !:
-		// 	sta SCREEN_RAM + $000, x
-		// 	sta SCREEN_RAM + $100, x
-		// 	sta SCREEN_RAM + $200, x
-		// 	sta SCREEN_RAM + $300, x
-		// 	dex 
-		// 	bne !-	 
+	 
 			jsr TITLE_SCREEN.Destroy
 
 			ldx #$00
@@ -321,15 +330,61 @@ Entry:
 			jsr TITLECARD.TransitionOut
 			jmp !GAME_ENTRY-
 
+
+
 			
 		/////////////////////////////////
-		
+		!GameOver:
+
+
+				lda #$00
+				sta $d015
+
+				lda $d011
+				and #%11111000
+				sta $d011
+
+				jsr BONUS.InitialiseTransition
+				lda #$01
+				sta TITLECARD.IsBonus
+				jsr TITLECARD.TransitionIn
+
+				jsr GAMEOVER.Start
+				
+			!GameoverLoop:
+				lda TITLECARD.UpdateReady
+				beq !GameoverLoop-
+				lda #$00
+				sta TITLECARD.UpdateReady
+
+				jsr GAMEOVER.Update
+				jsr $1003
+
+			/////////////////////////////////
+				lda GAMEOVER.GameOverExited
+				bne !GameOverExiting+
+				jmp !GameoverLoop- 	
+
+			!GameOverExiting:
+				lda #$00	//Initialize current song
+				jsr $1000
+				jsr HUD.ResetScores
+				lda #$00
+				sta TITLECARD.IsBonus
+				// jsr TITLECARD.TransitionIn
+
+				jmp !INTRO-
+
+
+
 	PerformFrameCodeFlag:
 		.byte $00
 
 	Counter:
 		.byte $00, $00
 
+	GameOverCounter:
+		.byte $00
 
 #import "maps/assets.asm"
 

@@ -45,6 +45,7 @@ TITLE_SCREEN: {
 			lda #$b2
 			sta SPRITE_POINTERS + 2
 
+			jsr GAMEOVER.DisplayHiScore
 			
 			rts
 	}

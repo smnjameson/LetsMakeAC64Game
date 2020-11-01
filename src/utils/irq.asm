@@ -87,10 +87,10 @@ IRQ: {
 
 
 
-			lda #$00	//Hide sprites
+			lda #$00	//Hide Player sprites
 			sta $d00c
 			sta $d00e 
-
+			sta $d00a
 
 
 			lda VIC.SCREEN_CONTROL_2
@@ -99,12 +99,25 @@ IRQ: {
 
 
 
+		
 
-			lda #$00	//Hide sprites
-			sta $d00a
-			lda $d010 
-			and #%00011111 
-			sta $d010 
+			//Save sprite positions
+			lda SPRITE_POINTERS + 0 
+			sta SPRITE_CLIP_SAVE + 0
+			lda SPRITE_POINTERS + 1 
+			sta SPRITE_CLIP_SAVE + 1
+			lda SPRITE_POINTERS + 2  
+			sta SPRITE_CLIP_SAVE + 2
+			lda SPRITE_POINTERS + 3  
+			sta SPRITE_CLIP_SAVE + 3
+			lda SPRITE_POINTERS + 4 
+			sta SPRITE_CLIP_SAVE + 4
+			lda #$5e
+			sta SPRITE_POINTERS + 0
+			sta SPRITE_POINTERS + 1
+			sta SPRITE_POINTERS + 2
+			sta SPRITE_POINTERS + 3
+			sta SPRITE_POINTERS + 4
 
 
 			lda #$01
@@ -190,7 +203,10 @@ IRQ: {
 			sta VIC.SCREEN_CONTROL_1	
 
 			
-			!:
+
+	
+
+		!:
 
 			lda #<MainIRQ    
 			ldx #>MainIRQ
@@ -205,6 +221,19 @@ IRQ: {
 			and #%01111111
 			sta $d011	
 
+
+			//Restore sprite positions
+			lda SPRITE_CLIP_SAVE + 0
+			sta SPRITE_POINTERS + 0 
+			lda SPRITE_CLIP_SAVE + 1
+			sta SPRITE_POINTERS + 1
+			lda SPRITE_CLIP_SAVE + 2
+			sta SPRITE_POINTERS + 2 
+			lda SPRITE_CLIP_SAVE + 3
+			sta SPRITE_POINTERS + 3 
+			lda SPRITE_CLIP_SAVE + 4
+			sta SPRITE_POINTERS + 4
+			
 		!ExitIRQ:
 			
 			asl $d019 //Acknowledging the interrupt
