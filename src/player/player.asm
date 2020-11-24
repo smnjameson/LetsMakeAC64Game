@@ -411,6 +411,14 @@ PLAYER: {
 		 	dey 
 		 	bpl !-
 
+		 	pha 
+		 	lda PlayersActive
+		 	bne !+
+		 	lda #$01
+		 	jsr $1000
+		 !:
+		 	pla 
+
 		 	//Record score
 		 	cmp #$00
 		 	bne !P2+

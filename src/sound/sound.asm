@@ -55,7 +55,7 @@ SOUND: {
 
 	CheckForSkipAndMute: {
 
-				//Set DDR to allow selecting a keyboard column
+		//Set DDR to allow selecting a keyboard column
 		lda #%11111111
 		sta $dc02
 			//Select a column
@@ -70,8 +70,10 @@ SOUND: {
 			bne !+
 
 			jsr SelectRandomGameTrack
-			inc TrackDisplayState	
-
+			lda #$01
+			sta  TrackDisplayState	
+			
+			nop
 		!:
 		//Restore joystick Control
 		lda #%00000000
@@ -186,6 +188,25 @@ SOUND: {
 			rts
 	}
 
+	NTSCCounter:
+		.byte $00
+	PlayMusic: {
+			.const PALMode = $02a6
+			lda PALMode
+			bne !ok+
+			lda NTSCCounter
+			clc
+			adc #$01
+			sta NTSCCounter
+			cmp #$06
+			bne !ok+
+
+			lda #$00
+			sta NTSCCounter
+			rts
+		!ok:
+			jmp $1003
+	}
 /*
 sfx 01. player fires shot
 sfx 02. player hits enemy with shot

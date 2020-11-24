@@ -146,7 +146,7 @@ Entry:
 				beq !IntroLoop-
 				lda #$00
 				sta TITLECARD.UpdateReady
-				jsr $1003
+				jsr SOUND.PlayMusic
 				jsr Random
 				jsr TITLE_SCREEN.Update
 				bcc !IntroLoop-
@@ -155,7 +155,7 @@ Entry:
 		jsr SOUND.ClearSoundRegisters
 		jsr TITLECARD.TransitionOut
 
-
+ 
 		lda #$00
 		sta PLAYER.CurrentLevel		
 		jsr CROWN.Initialise
@@ -255,17 +255,26 @@ Entry:
 			jsr DOOR.Update
 			jsr MESSAGES.Update
 
-			jsr $1003
+			jsr SOUND.PlayMusic
 
 			jsr ENEMIES.UpdateEnemies
 
 			//Check for game over condition
 			lda PLAYER.PlayersActive
 			bne !+
-			inc GameOverCounter
 			lda GameOverCounter
-			cmp #$ff
+			cmp #$30
+			beq !CheckForFire+
+			inc GameOverCounter
+			jmp !+
+		!CheckForFire:
+			
+			lda $dc00 
+			and #$10  
+			and $dc01 //$10
+
 			bne !+
+			jsr SOUND.ClearSoundRegisters
 			jmp !GameOver+
 		!:
 			jmp !Loop- 
@@ -284,12 +293,17 @@ Entry:
 				and #%11111000
 				sta $d011
 
+				jsr SOUND.ClearSoundRegisters
+
 				jsr BONUS.InitialiseTransition
 				lda #$01
 				sta TITLECARD.IsBonus
 				jsr TITLECARD.TransitionIn
 
 				jsr BONUS.Start
+		
+				lda #$02
+				jsr $1000
 				
 			!EndLevelLoop:
 				lda TITLECARD.UpdateReady
@@ -298,7 +312,7 @@ Entry:
 				sta TITLECARD.UpdateReady
 
 					jsr BONUS.Update
-					jsr $1003
+					jsr SOUND.PlayMusic
 
 
 		/////////////////////////////////
@@ -318,7 +332,7 @@ Entry:
 			sta SCREEN_RAM, x 
 			lda #$02
 			sta $d800 , x 
-			inx 
+			inx  
 			cpx #$c8
 			bne !-
 
@@ -349,8 +363,19 @@ Entry:
 				sta TITLECARD.IsBonus
 				jsr TITLECARD.TransitionIn
 
-				jsr GAMEOVER.Start
-				
+
+
+				jsr GAMEOVER.Start	
+
+				lda GAMEOVER.HiscorePositions + 0
+				bpl !yes+
+				lda GAMEOVER.HiscorePositions + 1
+				bpl !yes+
+				jmp !GameOverExiting+
+			!yes:
+				lda #$02
+				jsr $1000
+
 			!GameoverLoop:
 				lda TITLECARD.UpdateReady
 				beq !GameoverLoop-
@@ -358,11 +383,13 @@ Entry:
 				sta TITLECARD.UpdateReady
 
 				jsr GAMEOVER.Update
-				jsr $1003
+				jsr SOUND.PlayMusic
 
 			/////////////////////////////////
 				lda GAMEOVER.GameOverExited
 				bne !GameOverExiting+
+
+
 				jmp !GameoverLoop- 	
 
 			!GameOverExiting:

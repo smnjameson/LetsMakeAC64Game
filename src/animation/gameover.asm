@@ -6,28 +6,36 @@ GAMEOVER: {
 		.byte $00,$00
 
 	HiScoreValueData:
+		.text "00250000"
+		.text "00150000"
 		.text "00100000"
 		.text "00075000"
 		.text "00050000"
-		.text "00020000"
+		.text "00025000"
+		.text "00015000"
 		.text "00010000"
-		.text "00001000"
-		.text "00000500"
-		.text "00000100"
 
 
 	HiScoreNameData:
-		.text "ACE....."
-		.text "BCE....."
-		.text "CCE....."
-		.text "DCE....."
-		.text "ECE....."
-		.text "FCE....."
-		.text "GCE....."
-		.text "HCE....."
-
+		.text "HAYESMKR"
+		.text "STEPZ"
+		.byte $f6,$f6,$f6
+		.text "SP"
+		.byte $f8,$fe,$fc,$f6,$f6,$f6
+		.text "ELDRITCH"
+		.text "PROW"
+		.byte $fe,$f6,$f6,$f6
+		.text "MORGAN"
+		.byte $f6,$f6
+		.text "AKMAFIN"
+		.byte $f6
+		.text "AMK"
+		.byte $f6,$f6,$f6,$f6,$f6
+		
 
 	Start: {	
+
+
 			lda #$00
 			sta GameOverExited
 			sta TITLECARD.IsBonus
@@ -39,6 +47,14 @@ GAMEOVER: {
 			sta HiscoreEntryIndex + 1
 
 			jsr CheckHiScore
+
+			lda HiscorePositions + 0
+			bpl !yes+
+			lda HiscorePositions + 1
+			bpl !yes+
+			rts
+
+		!yes:
 			jsr DisplayHiScore
 			rts
 	}
@@ -64,30 +80,198 @@ GAMEOVER: {
 			.byte >[SCREEN_RAM + $10 * $28 + $1a]
 			.byte >[SCREEN_RAM + $11 * $28 + $1a]
 
+
+
+	HiscoreDebounce:
+			.byte $1f, $1f
+
 	PlayerNameEntry: {
 
-			ldx #$00
-		!:
+			ldx #$00 //Player index
+
+		!loop:
 			lda HiscorePositions, x 
-			bmi !Skip+
-			tay
+			bpl !+
+			jmp !Skip+ //Do we have high score?
+		!:
+			tay // Y = High score position
+
 			lda HiscoreNameLSB, y
 			sta HISCORE_ENTRY + 0
+			sta HISCORE_ENTRY_COLOR + 0
 			lda HiscoreNameMSB, y
 			sta HISCORE_ENTRY + 1
+			clc
+			adc #>[$d800-SCREEN_RAM]
+			sta HISCORE_ENTRY_COLOR + 1
 
 			lda HiscoreEntryIndex, x 
-			tay 
+			tay //Index of letter to update
+			cpy #$08
+			bcc !+
 			lda #$ff
-			sta (HISCORE_ENTRY), y
+			sta HiscoreEntryIndex, x 
+			jmp !Skip+
+		!:
+			
+			lda ZP_COUNTER
+			and #$08 
+			beq !+
+			lda #$07
+		!:
+			sta (HISCORE_ENTRY_COLOR), y
+
+
+			lda HiscoreDebounce, x 
+			cmp #$1f
+			beq !DoJoy+
+			lda $dc00, x
+			and #$1f
+			sta HiscoreDebounce, x 
+			jmp !Skip+
+		!DoJoy:
+			lda $dc00, x
+			and #$1f
+			sta HiscoreDebounce, x 
+		!Up:
+			lsr 
+			bcs !NotUp+
+
+			lda (HISCORE_ENTRY), y 
+			sec 
+			sbc #$01
+			jsr VerifyCharDn
+			sta (HISCORE_ENTRY), y 
+
+			jmp !Fire+
+		!NotUp:
+
+		!Dn:
+			lsr
+			bcs !NotDn+
+
+			lda (HISCORE_ENTRY), y 
+			clc 
+			adc #$01
+			jsr VerifyCharUp
+			sta (HISCORE_ENTRY), y 
+			jmp !Fire+
+		!NotDn:
+		!UpDnDone:
+
+		!Left:
+			lda HiscoreDebounce, x
+			and #$04
+			bne !Fire+
+			lda HiscoreEntryIndex, x
+			beq !Skip+
+			lda #$db
+			sta (HISCORE_ENTRY), y 
+			lda #$00
+			sta (HISCORE_ENTRY_COLOR), y
+			dec HiscoreEntryIndex, x
+			jmp !Skip+
+
+		!Fire:
+			lda HiscoreDebounce, x
+			and #$10 
+			bne !Skip+
+			lda HiscoreEntryIndex, x 
+			clc 
+			adc #$01
+			sta HiscoreEntryIndex, x 
+			lda #$00
+			sta (HISCORE_ENTRY_COLOR), y
+			iny
+			cpy #$08
+			beq !+
+			lda #$e6
+			sta (HISCORE_ENTRY), y 
+			jmp !Skip+
+
+		!:
+			//If we have entered all 8 chars
+			//then copy name into memory table
+			lda HiscorePositions, x
+			asl 
+			asl 
+			asl
+			clc 
+			adc #<HiScoreNameData
+			sta HISCORE_RAM_ENTRY+ 0
+			lda #>HiScoreNameData
+			adc #$00
+			sta HISCORE_RAM_ENTRY+ 1
+
+			ldy #$00
+		!:
+			lda (HISCORE_ENTRY), y
+			sec 
+			sbc #$e5
+			sta (HISCORE_RAM_ENTRY), y 
+			iny
+			cpy #$08
+			bne !-
 
 		!Skip: 
 			inx
 			cpx #$02
-			bne !-
+			beq !+
+			jmp !loop-
+		!:
+
+
 			rts
 	}
 
+
+	VerifyCharUp: {
+			//$db - Space
+			//$dc-e5 - Numbers
+			//$e6-$ff - Letters
+			//_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+
+
+			cmp #$dc 
+			bne !+
+			lda #$e6
+			rts
+		!:
+			cmp #$00 
+			bne !+
+			lda #$dc
+			rts
+		!:
+			cmp #$e6 
+			bne !+
+			lda #$db
+			rts
+		!:
+			rts 
+	}
+	VerifyCharDn: {
+			//$db - Space
+			//$dc-e5 - Numbers
+			//$e6-$ff - Letters
+			//_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+
+			cmp #$da 
+			bne !+
+			lda #$e5
+			rts
+		!:
+			cmp #$e5 
+			bne !+
+			lda #$db
+			rts
+		!:
+			cmp #$db 
+			bne !+
+			lda #$ff
+			rts
+		!:
+			rts 
+	}
 
 	Update: {	
 
@@ -266,6 +450,8 @@ GAMEOVER: {
 			sta HiscorePositions, x  //Stores player position in table
 			lda #$00
 			sta HiscoreEntryIndex, x
+			
+
 
 			ldx #$00
 			tya 
@@ -292,14 +478,17 @@ GAMEOVER: {
 		!InsertScore:
 			//Insert new score
 			ldy HISCORE_ENTRY_INDEX
+		
+		
+			lda #$01
 		!:	
+			sta HiScoreNameData, y 
 		SM_STORE:
 			lda $FF, x 
 			sta HiScoreValueData, y 
-			lda #$9f
-			sta HiScoreNameData, y 
 			iny
 			inx
+			lda #$f6
 			cpx #$08
 			bne !-
 
@@ -311,7 +500,9 @@ GAMEOVER: {
 			inc TEMP1
 			lda TEMP1 
 			cmp #$02
-			bne !NextPlayer-
+			beq !+
+			jmp !NextPlayer-
+		!:
 			rts
 
 	}

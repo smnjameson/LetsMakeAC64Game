@@ -170,9 +170,13 @@ TITLECARD: {
 
 			lda $d011
 			bmi *-3
-			lda $d011
-			bpl *-3
-				
+			// lda $d011
+			// bpl *-3
+			lda #$08
+			cmp $d012
+			bcs *-3
+			// .break
+
 			sei
 
 			// jsr TRANSITION_CHARS.ResetBars		
@@ -322,11 +326,13 @@ TITLECARD: {
 				sta IRQ_MSB	
 
 			//Check is complete
-			lda isComplete
-			cmp #$01
-			bne !+
+		// 	lda isComplete
+		// 	cmp #$01
+		// 	beq !+
+		// 	jsr $1003
+		// !:
 
-		!:
+
 
 			asl $d019 
 		RestoreAcc:
@@ -436,6 +442,9 @@ TITLECARD: {
 
 			lda #$00
 			sta $d01b
+		
+
+
 		!IsInBonus:
 			// jmp !MCFinished+			
 		!:	
@@ -464,7 +473,7 @@ TITLECARD: {
 			lda #>TransitionIRQ_1
 			sta IRQ_MSB
 
-			lda #$00
+			lda #$28
 			sta $d012	
 
 			jsr SetSideSprites
