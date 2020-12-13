@@ -46,6 +46,9 @@ TABLES: {
 		.byte 80,81,82
 	__PlayerEatRight: 
 
+	IntroAbsorb:
+		.byte 94,95,118,119
+	__IntroAbsorb:
 	
 	PlayerThrowLeft: 
 		.byte 76,77,78,79, 79,79,79,79,79, 78,78,78, 77,77

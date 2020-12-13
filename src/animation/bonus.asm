@@ -332,18 +332,18 @@ BONUS: {
 		!p1:	
 			lda #PLAYER1_X 
 			sta $d004
-			lda $d010
+			lda TITLECARD.SpriteMSB_Main
 			and #%11111011
-			sta $d010
+			sta TITLECARD.SpriteMSB_Main
 			jmp !pdone+
 
 		!p2:
 			lda #PLAYER2_X 
 			sta $d004
 			
-			lda $d010
+			lda TITLECARD.SpriteMSB_Main
 			ora #%00000100
-			sta $d010
+			sta TITLECARD.SpriteMSB_Main
 
 
 		!pdone:
@@ -1200,9 +1200,9 @@ BONUS: {
 			sta CROWN.CrownAvailable
 			lda #PLAYER1_X
 			sta $d004
-			lda $d010
+			lda TITLECARD.SpriteMSB_Main
 			and #%11111011
-			sta $d010
+			sta TITLECARD.SpriteMSB_Main
 			lda $d005
 			clc
 			adc #$06
@@ -1221,9 +1221,9 @@ BONUS: {
 			sta CROWN.CrownAvailable
 			lda #<PLAYER2_X
 			sta $d004
-			lda $d010
+			lda TITLECARD.SpriteMSB_Main
 			ora #%00000100
-			sta $d010
+			sta TITLECARD.SpriteMSB_Main
 			lda $d005
 			clc
 			adc #$06

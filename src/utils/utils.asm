@@ -1,4 +1,38 @@
 * = * "Utils"
+.macro Txt(str) { 
+	.var s = ""; 
+	// .print str 
+	.for (var i = 0; i < str.size(); i++) { 
+		.var c = str.charAt(i) 
+		// .print "C: " + c + " CHR: " + Chr(c) 
+		.byte Chr(c)
+	} 
+	.byte $00
+} 
+
+.function Chr(val) {
+	.if(val>=1 && val<27) {
+		.return val + $e5
+	}
+
+	.if(val == $20) {
+		.return $db 
+	}
+
+	.if(val>=$30 && val<$3a) {
+		.return val + $ac
+	}
+
+	.if(val == $2c) {
+		.return $9e
+	}
+	.if(val == $2e) {
+		.return $9f
+	}
+	.return val
+}
+
+
 UTILS: {
 	.label COLLISION_SOLID = %00010000
 	.label COLLISION_COLORABLE = %00100000

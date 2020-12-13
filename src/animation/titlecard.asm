@@ -25,7 +25,10 @@ TITLECARD: {
 	UpdateReady:
 		.byte $00
 
-
+	SpriteMSB_Main:
+		.byte $00
+	SpriteMC_Main:
+		.byte $00
 
 	Initialise: {
 			sei
@@ -55,7 +58,7 @@ TITLECARD: {
 
 			lda #$00
 			sta isComplete
-			lda #$35
+			lda #$32
 			sta SideSpritePositions
 
 
@@ -77,9 +80,6 @@ TITLECARD: {
 			and #%00111111
 			sta $d010
 
-			lda $d01b
-			ora #%11000000
-			sta $d01b
 
 			lda $d01d
 			ora #%01000000
@@ -156,9 +156,10 @@ TITLECARD: {
 			lda TITLECARD.isComplete
 			beq !-
 
-
 			rts
 	}
+
+
 
 	TransitionOut: {
 			lda #$ff
@@ -305,6 +306,7 @@ TITLECARD: {
 				rts
 	}
 
+
 	TransitionIRQ_1: {
 			sta RestoreAcc + 1
 			stx RestoreX + 1
@@ -325,6 +327,9 @@ TITLECARD: {
 				lda #>TransitionIRQ_2
 				sta IRQ_MSB	
 
+				//Maybe only on intro
+				lda TITLE_SCREEN.IntroSpriteColor + 2
+				sta $d029
 			//Check is complete
 		// 	lda isComplete
 		// 	cmp #$01
@@ -350,24 +355,69 @@ TITLECARD: {
 		stx RestoreX + 1
 		sty RestoreY + 1
 
+
 			lda SideSpritePositions + 1
+			pha 
+				ldx TransitionTopIndex
+				cpx #$46
+				bcc !storeY+
+				ldx SideSpriteIndex
+				cpx #$02
+				bcc !+
+		!storeY:
 			sta $d00d
 			sta $d00f
-
-			pha
+		!:
 
 
 			//Positional based stuff
 			//SPRITE LINE 0
 			lda SideSpriteIndex
-			cmp #$00
 			bne !+		
 			lda $d016
 			and #%11100000
 			ora #%00010000
 			sta $d016
-			lda #$fe
+
+			//Sprite setup
+			lda #$ff
 			sta $d01b
+
+
+			ldx TransitionTopIndex
+			cpx #$46
+			bcc !skipSpriteSetup+
+				lda #$00
+				sta $d01b
+			ldx IsBonus
+			bne !skipSpriteSetup+
+				lda #$00
+				sta $d010
+				lda #$ff
+				sta $d01c
+				lda TITLE_SCREEN.IntroSpriteFrame + 2
+				sta SPRITE_POINTERS + 2
+				lda TITLE_SCREEN.IntroSpriteFrame + 6
+				sta SPRITE_POINTERS + 6
+				lda TITLE_SCREEN.IntroSpriteColor + 6
+				sta $d027 + 6
+				lda TITLE_SCREEN.IntroSpriteY + 6
+				sta $d001 + 6 * 2
+				lda TITLE_SCREEN.IntroSpriteX + 6
+				sta $d000 + 6 * 2
+				lda #$00
+				sta $d01d
+				lda #$0b
+				sta $d025
+				lda #$0c
+				sta $d026
+				lda #$04
+				sta $d023
+				lda $d017
+				and #$fe
+				sta $d017
+
+		!skipSpriteSetup:
 
 			lda TransitionTopIndex
 			cmp #$46
@@ -385,16 +435,42 @@ TITLECARD: {
 		!skip:
 			jmp !MCFinished+
 
-			//SPRITE LINE 1
+
+			//SPRITE LINE 2
 		!:	
 			cmp #$02
 			bne !+	
 			lda #$07
 			sta $d021
+			lda #$ff
+			sta $d01b
+			//Sprite settings Restore
+			lda #$b0
+			sta SPRITE_POINTERS + 6
+			lda #$08
+			sta $d02d
 
-		!:	
-			cmp #$03
-			bne !+	
+			lda SpriteMSB_Main
+			sta $d010
+			lda SpriteMC_Main
+			sta $d01c
+
+
+			ldx TransitionTopIndex
+			cpx #$46
+			bcc !SkipSpriteXRestore+
+			lda #$40
+			sta $d01d
+			lda #$18
+			sta $d000 + 6 * 2
+		!SkipSpriteXRestore:
+
+			
+		!retestd012:
+			lda $d012
+			cmp #$68
+			bcc !retestd012-
+
 			lda TITLECARD.IsBonus
 			bne !F800+
 		!F000:
@@ -408,18 +484,43 @@ TITLECARD: {
 			and #$f0
 			ora #%00001110
 			sta $d018		
+			jmp !MCFinished+
 
+
+		// 	//SPRITE LINE 3
+		// !:	
+		// 	cmp #$03
+		// 	bne !+	
+
+
+		// 	lda TITLECARD.IsBonus
+		// 	bne !F800+
+		// !F000:
+		// 	lda $d018
+		// 	and #$f0
+		// 	ora #%00001100
+		// 	sta $d018
+		// 	jmp !+
+		// !F800:
+		// 	lda $d018
+		// 	and #$f0
+		// 	ora #%00001110
+		// 	sta $d018		
+		// 	jmp !MCFinished+
+
+
+			//SPRITE LINE 4
 		!:
 			cmp #$04
 			bne !+	
-			lda $d016
-			and #%11101111
-			sta $d016
+
 			jmp !MCFinished+	
 		!:
 
+			//SPRITE LINE 5
 			cmp #$05
 			bne !+	
+
 			lda #$00
 			sta $d01b
 			jmp !MCFinished+			
@@ -427,6 +528,16 @@ TITLECARD: {
 		!:	
 			cmp #$08	
 			bne !+
+
+			lda $d016
+			and #%11101111
+			sta $d016
+
+		!retestd012:
+			lda $d012
+			cmp #$df
+			bcc !retestd012-
+
 
 			lda $d018
 			and #$f0
@@ -439,10 +550,19 @@ TITLECARD: {
 			and #%11101000
 			ora TITLE_SCREEN.ScrollerFineIndex + 1
 			sta $d016
-
 			lda #$00
 			sta $d01b
-		
+			
+			//Scroller fader
+			lda #$b2
+			sta SPRITE_POINTERS + 2
+			lda #$38
+			sta $d004
+			lda #$e1
+			sta $d005
+
+			lda #$07
+			sta $d029
 
 
 		!IsInBonus:
@@ -613,6 +733,7 @@ TITLECARD: {
 
 			rts
 	}
+
 
 	SideTransitionIn:
 			:easeOutBounce(0,71,70)

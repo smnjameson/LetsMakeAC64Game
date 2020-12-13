@@ -12,8 +12,8 @@ GAMEOVER: {
 		.text "00075000"
 		.text "00050000"
 		.text "00025000"
-		.text "00015000"
-		.text "00010000"
+		.text "00000200"
+		.text "00000100"
 
 
 	HiScoreNameData:
@@ -287,17 +287,33 @@ GAMEOVER: {
 		ExitGameOverCheck:
 			lda debounce 
 			bne !B2+
+
+
+	
+
 			lda $dc00
-			and #$10
-			bne !+
+			eor #$ff
+ 			sta DEBOUNCE_CHECK
+ 			lda $dc01 
+ 			eor #$ff
+ 			ora DEBOUNCE_CHECK
+ 			and #$10
+			beq !+
 			inc debounce
 		!:
+
+
 			rts
 
 		!B2:
 			lda $dc00
+			eor #$ff
+ 			sta DEBOUNCE_CHECK
+ 			lda $dc01 
+ 			eor #$ff
+ 			ora DEBOUNCE_CHECK
 			and #$10
-			beq !-
+			bne !-
 			inc GameOverExited
 			dec debounce
 			rts	
@@ -305,6 +321,8 @@ GAMEOVER: {
 
 
 
+	ColorToggle:
+			.byte $06
 
 	DisplayHiScore: {
 			.label COLOR = VECTOR7
@@ -330,7 +348,7 @@ GAMEOVER: {
 			adc #$dd
 			ldy #$00
 			sta (SCREEN), y 
-			lda #$00
+			lda ColorToggle
 			sta (COLOR), y 
 
 			iny
@@ -349,7 +367,7 @@ GAMEOVER: {
 			clc
 			adc #$ac
 			sta (SCREEN), y 
-			lda #$00
+			lda ColorToggle
 			sta (COLOR), y 		
 			iny
 			inx 
@@ -372,14 +390,20 @@ GAMEOVER: {
 			clc
 			adc #$e5
 			sta (SCREEN), y 
-			lda #$00
-			sta (COLOR), y 		
+			lda ColorToggle
+			sta (COLOR), y 	
+
+
 			iny
 			inx 
 			dec TEMP1
 			bne !Loop1-
 
 
+			lda ColorToggle
+			eor #%010
+			sta ColorToggle
+			
 			//Advance row
 			lda SCREEN + 0
 			clc
@@ -389,6 +413,8 @@ GAMEOVER: {
 			bcc !skip+
 			inc SCREEN + 1
 			inc COLOR + 1
+
+
 
 		!skip:
 			pla 
@@ -448,6 +474,27 @@ GAMEOVER: {
 			lsr 
 			lsr
 			sta HiscorePositions, x  //Stores player position in table
+		
+			//Now check other player if this is p2 
+			//to see if their position needs moving down
+			cpx #$01
+			bne !skipCheckOtherPlayer+
+				lda HiscorePositions
+				bmi !skipCheckOtherPlayer+
+				cmp HiscorePositions, x 
+				bcc !skipCheckOtherPlayer+
+
+				inc HiscorePositions
+
+				lda HiscorePositions
+				cmp #$08
+				bcc !skipCheckOtherPlayer+
+				lda #$ff
+				sta HiscorePositions
+				sta HiscoreEntryIndex
+
+		!skipCheckOtherPlayer:
+
 			lda #$00
 			sta HiscoreEntryIndex, x
 			

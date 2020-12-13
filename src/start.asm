@@ -8,8 +8,8 @@ BasicUpstart2(Entry)
 
 #import "utils/utils.asm"
 #import "utils/irq.asm"
+#import "maps/door.asm"
 
-#import "intro/introtext.asm"
 
 .var music = LoadSid("../assets/sound/phaze101/piknmix.sid")
 * = $1000 "Music"
@@ -18,7 +18,7 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
-#import "maps/door.asm"
+
 #import "player/projectiles.asm"
 #import "player/player.asm"
 #import "player/hud.asm"
@@ -57,7 +57,7 @@ Random: {
         .byte $62
 
 
-    init: 
+    init:  
         lda #$13 
         sta $dc05
         lda #$ff
@@ -135,6 +135,10 @@ Entry:
 		lda #$00
 		sta TITLECARD.IsBonus
 		jsr TITLECARD.TransitionIn
+		lda #$04 
+		sta TITLECARD.SpriteMSB_Main
+		lda #$00 
+		sta TITLECARD.SpriteMC_Main
 
 	!INTRO:
 				lda #$00
@@ -144,6 +148,7 @@ Entry:
 			!IntroLoop:
 				lda TITLECARD.UpdateReady
 				beq !IntroLoop-
+
 				lda #$00
 				sta TITLECARD.UpdateReady
 				jsr SOUND.PlayMusic
@@ -198,7 +203,7 @@ Entry:
 
 
 		//Check if transition is over and jump to Bonus screen if so
-		lda BONUS.BonusActive
+		lda BONUS .BonusActive
 		beq !+
 		jmp !BonusScreen+
 	!:	
@@ -299,6 +304,10 @@ Entry:
 				lda #$01
 				sta TITLECARD.IsBonus
 				jsr TITLECARD.TransitionIn
+				lda #$10 
+				sta TITLECARD.SpriteMSB_Main
+				lda #$1c
+				sta TITLECARD.SpriteMC_Main
 
 				jsr BONUS.Start
 		

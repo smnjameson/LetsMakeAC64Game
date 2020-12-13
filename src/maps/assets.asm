@@ -31,6 +31,8 @@
 
 	#import "mapdata.asm"
 
+	#import "intro/introtext.asm"
+	
 * = $b800 "Soft sprite patterns"
 	.fill 1024, 0
 * = $bc00 "Map buffer"
