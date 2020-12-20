@@ -68,7 +68,7 @@ TITLE_SCREEN: {
 
 			lda #$ff
 			sta PageTimer	
-			lda #$ff
+			lda #$00
 			sta PageNumber
 			jsr NextPage
 			
@@ -427,7 +427,7 @@ TITLE_SCREEN: {
 	UpdatePage: {
 			dec PageTimer
 			bne !+
-			jmp NextPage
+			// jmp NextPage
 		!:
 			lda PageNumber
 			asl
@@ -567,10 +567,43 @@ TITLE_SCREEN: {
 			rts
 	}
 
+	Page1_000:
+			Txt("POWER UPS")
+	Page1_001:
+			Txt("SPRINT MODE")
+	Page1_002:
+			Txt("INVINCIBILITY")
+	Page1_003:
+			Txt("SWAP COLOR TAGS")
+	Page1_004:
+			Txt("JUMP BOOST")
+	Page1_005:
+			Txt("BONUS POINTS")
+	Page1_006:
+			Txt("FREEZE TIME")
+
 
 	SetupPage1: {
+			ResetLine()
+			PrintText(Page1_000, 9, 6)
+			jsr AdvanceLine
+			PrintText(Page1_001, 5, 4)
+			jsr AdvanceLine
+			PrintText(Page1_002, 10, 4)
+			jsr AdvanceLine
+			PrintText(Page1_003, 5, 4)
+			jsr AdvanceLine
+			jsr AdvanceLine
+			PrintText(Page1_004, 13, 4)
+			jsr AdvanceLine
+			PrintText(Page1_005, 5, 4)
+			jsr AdvanceLine
+			PrintText(Page1_006, 12, 4)
+			jsr AdvanceLine
 			rts
 	}
+
+
 	SetupPage2: {
 			jsr GAMEOVER.DisplayHiScore
 			
@@ -945,7 +978,98 @@ TITLE_SCREEN: {
 	} 
 
 
-	UpdatePage1: 
+	UpdatePage1: {
+			//Global values
+			lda #%00111000
+			sta $d01c
+			lda #$00
+			sta $d023
+			lda $d01d
+			and #%11000111
+			sta $d01d
+			lda $d017
+			and #%11000111
+			sta $d017
+
+			//Powerups
+				lda #$38
+				sta SPRITE_POINTERS + 3
+				lda #$39
+				sta SPRITE_POINTERS + 4
+				lda #$3a
+				sta SPRITE_POINTERS + 5
+
+				lda #$6e
+				sta $d006
+				lda #$70
+				sta $d00a
+				lda #$28
+				sta $d008
+
+				//r/g/w
+				lda #$02
+				sta $d02a 
+				lda #$0c
+				sta $d02b 
+				lda #$01
+				sta $d02c 
+
+				lda $d010
+				and #%11000111
+				ora #%00010000
+				sta $d010
+
+				lda #$75
+				sta $d007
+				lda #$86
+				sta $d009
+				lda #$97
+				sta $d00b
+
+
+			lda #$ab
+			cmp $d012
+			bne *-3
+
+				lda #$3b
+				sta SPRITE_POINTERS + 3
+				lda #$3d
+				sta SPRITE_POINTERS + 4
+				lda #$3c
+				sta SPRITE_POINTERS + 5
+
+				lda #$28
+				sta $d006
+				lda #$29
+				sta $d00a
+				lda #$6e
+				sta $d008
+
+				//r/w/g
+				lda #$02
+				sta $d02a 
+				lda #$05
+				sta $d02b 
+				lda #$01
+				sta $d02c 
+
+
+				lda $d010
+				and #%11000111
+				ora #%00101000
+				sta $d010
+
+				lda #$ad
+				sta $d007
+				lda #$bc
+				sta $d009
+				lda #$cd
+				sta $d00b
+
+			rts
+	}
+
+
 	UpdatePage2: 
 	UpdatePage3:  {
 			rts
