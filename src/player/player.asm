@@ -275,9 +275,9 @@ PLAYER: {
 
 
 
-			lda #$00
+			lda #$04
 			sta Player1_Lives
-			lda #$00
+			lda #$04
 			sta Player2_Lives
 
 			lda #$00
@@ -317,6 +317,11 @@ PLAYER: {
 			sta ColorSwitchActive
 			sta ENEMIES.PowerUpTotalCount
 			sta ENEMIES.EnemyTotalCount
+
+
+
+
+
 			rts
 	}
 
@@ -1363,10 +1368,10 @@ PLAYER: {
 			asl //Because speed value is 16 bit
 			tay //Speed offset 0 or 2
 
-			//DEBUG
-			// lda #$02
-			// sta Player_Size, x
-			// rts
+			// DEBUG
+			lda #$01
+			sta Player_Size, x
+			rts
 
 			lda Player_Size, x
 			pha

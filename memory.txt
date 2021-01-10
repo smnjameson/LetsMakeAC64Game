@@ -1,0 +1,46 @@
+ *$0002-$00e3 Temp vars zero page
+
+
+  $0801-$080d Basic
+  $080e-$080d Basic End
+  $080e-$0975 Tables
+  $0976-$0a8c Utils
+  $0a8d-$0c31 IRQ
+  $0c32-$0fd5 Door
+
+  $1000-$27ff Music
+
+  $2800-$29b5 Map Loader
+  $29b6-$2b93 Platforms
+  $2b94-$2da2 Projectiles
+  $2da3-$38a4 Player
+  $38a5-$3d5e Hud
+  $3d5f-$415d CROWN
+  $415e-$484e Softsprites
+  $484f-$5be0 Behaviour self mod
+  $5be1-$6538 TITLE_SCREEN
+  $6539-$7713 BonusExited
+  $7714-$7862 Transition bars
+  $7863-$7df5 Sound
+
+  $7e00-$7fff Absorb animation sprites
+  $8000-$81ff Tile data
+  $8200-$82ff Color Data
+  $8300-$84ff DEMO MAP
+  *$8300-$8514 Map Data
+  $8500-$8507 Level Lookup
+  $8600-$8873 Compressed Levels
+
+  $8874-$8a15 Intro Text
+
+  $b800-$bbff Soft sprite patterns
+  $bc00-$bfff Map buffer
+
+
+  $c400-$cfff Enemy Sprites
+  $d000-$e7ff Player Sprites
+  $ec00-$edff Reserved for intro sprites
+  $eec0-$efff Dynamic sprite absorb frames
+  $f000-$f7ff Charset
+  $f800-$ff7f Charset
+  $fff0-$fff2 IRQ Indirect vector

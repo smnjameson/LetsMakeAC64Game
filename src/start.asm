@@ -18,7 +18,7 @@ BasicUpstart2(Entry)
 
 #import "maps/maploader.asm"
 #import "maps/platforms.asm"
-
+// 
 #import "player/projectiles.asm"
 #import "player/player.asm"
 #import "player/hud.asm"
@@ -147,7 +147,7 @@ Entry:
 				jsr TITLE_SCREEN.Initialise
 			!IntroLoop:
 				lda TITLECARD.UpdateReady
-				beq !IntroLoop-
+				beq !IntroLoop- 
 
 				lda #$00
 				sta TITLECARD.UpdateReady

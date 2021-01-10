@@ -25,18 +25,18 @@ TABLES: {
 		.byte 64,65,66,65
 	__PlayerWalkRight: 
 
-	PlayerCrownBob:
-		.byte 3,4,3,4
-	__PlayerCrownBob:
-	PlayerThrowCrownX:
-		.byte 1, 1,0,2,2, 2,2,2,2,2, 2,2,2, 0,0
-	_PlayerThrowCrownX:
-	PlayerThrowCrownY:
-		.byte 3, 4,5,4,4, 4,4,4,4,4 ,4,4,4, 5,5
-	_PlayerThrowCrownY:
-	PlayerSizeCrownOffset:
-		.byte 0,1,6
-	__PlayerSizeCrownOffset:
+	// PlayerCrownBob:
+	// 	.byte 3,4,3,4
+	// __PlayerCrownBob:
+	// PlayerThrowCrownX:
+	// 	.byte 1, 1,0,2,2, 2,2,2,2,2, 2,2,2, 0,0
+	// _PlayerThrowCrownX:
+	// PlayerThrowCrownY:
+	// 	.byte 3, 4,5,4,4, 4,4,4,4,4 ,4,4,4, 5,5
+	// _PlayerThrowCrownY:
+	// PlayerSizeCrownOffset:
+	// 	.byte 0,1,6
+	// __PlayerSizeCrownOffset:
 	
 	PlayerEatLeft: 
 		.byte 84,85,86

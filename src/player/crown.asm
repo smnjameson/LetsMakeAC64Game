@@ -13,10 +13,31 @@ CROWN: {
 			.byte $00
 
 
+	CrownOffsetX:
+			.byte 01,01,01,01,01,01,00,00
+			.byte 01,00,03,03,01,00,03,03 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+			.byte 01,01,01,01,01,01,00,00
+			.byte 01,-1,03,03,01,-1,03,03 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+			.byte -1,-1,-1,-1,-1,-1,00,00
+			.byte 00,00,00,00,00,00,00,00 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+	CrownOffsetY:
+			.byte -3,-4,-3,-3,-4,-3,00,00
+			.byte -4,-5,-4,-4,-4,-5,-4,-4 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+			.byte -4,-5,-3,-4,-5,-3,00,00
+			.byte -4,-5,-4,-4,-4,-5,-4,-4 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+			.byte -6,-6,-6,-6,-6,-6,00,00
+			.byte 00,00,00,00,00,00,00,00 //Throwing
+			.byte 00,00,00,00,00,00,00,00 //Eating
+
 	Initialise: {
 			// lda #$46
 			// sta SPRITE_POINTERS + 5	
-			lda #$00
+			lda #$01	
 			sta CrownAvailable
 			rts
 	}
@@ -99,65 +120,95 @@ CROWN: {
 				lda PlayerHasCrown 
 				beq !SkipThrowOffset+
 
-				//Check for crown offset
-				ldy CROWN_OFFSET_TEMP1
-				lda PLAYER.Player_State, y
-				and #[PLAYER.STATE_THROWING]
-				beq !NotThrowingOffset+
 
 
-				lda PLAYER.Player_ThrowIndex, y
-				tay
+				//Get player frame number
+				dex
+				lda [SPRITE_POINTERS + 5], x
+				
+				//shift so that first frame is 0
+				sec 
+				sbc #$40
+				tay 
 
-				lda VIC.SPRITE_5_Y
-				sec
-				sbc TABLES.PlayerThrowCrownY, y
+				//grab offset from table using this value as index
+				lda CrownOffsetY, y 
+				clc 
+				adc VIC.SPRITE_5_Y
 				sta VIC.SPRITE_5_Y
 
-				lda TABLES.PlayerThrowCrownX, y
+
+				lda CrownOffsetX, y
 				sta CROWN_THROW_OFFSET_X
 
+				//Check for crown offset
+				// ldy CROWN_OFFSET_TEMP1
+				// lda PLAYER.Player_State, y
+				// and #[PLAYER.STATE_THROWING]
+				// beq !NotThrowingOffset+
 
-				jmp !SkipThrowOffset+
+
+				// lda PLAYER.Player_ThrowIndex, y
+				// tay
+
+				// lda VIC.SPRITE_5_Y
+				// sec
+				// sbc TABLES.PlayerThrowCrownY, y
+				// sta VIC.SPRITE_5_Y
+
+				// lda TABLES.PlayerThrowCrownX, y
+				// sta CROWN_THROW_OFFSET_X
+
+
+				// jmp !SkipThrowOffset+
 
 
 				//Adjust the player crown when walking
-			!NotThrowingOffset:
-				ldy CROWN_OFFSET_TEMP1
-				lda PLAYER.Player_State, y
-				and #[PLAYER.STATE_WALK_LEFT + PLAYER.STATE_WALK_RIGHT]
-				beq !+
-				lda PLAYER.Player_WalkIndex, y
-				tay
-				jmp !FetchedOffset+
-			!:
-				ldy #$00
-			!FetchedOffset:
-				//Y is the current walk index
-				ldx PlayerHasCrown
-				dex
-				lda PLAYER.Player_Size, x
-				cmp #$02
-				bcc !AddBob+
-				lda VIC.SPRITE_5_Y
-				jmp !NoAddBob+
+			// !NotThrowingOffset:
+			// 	ldy CROWN_OFFSET_TEMP1
+			// 	lda PLAYER.Player_State, y
+			// 	and #[PLAYER.STATE_WALK_LEFT + PLAYER.STATE_WALK_RIGHT]
+			// 	beq !+
+			// 	lda PLAYER.Player_WalkIndex, y
+			// 	tay
+			// 	jmp !FetchedOffset+
+			// !:
+			// 	ldy #$00
+			// !FetchedOffset:
+			// 	//Y is the current walk index
+			// 	ldx PlayerHasCrown
+			// 	dex
+			// 	lda PLAYER.Player_Size, x
+			// 	cmp #$02
+			// 	bcc !AddBob+
+			// 	lda VIC.SPRITE_5_Y
+			// 	jmp !NoAddBob+
 				
-			!AddBob:
-				lda VIC.SPRITE_5_Y
-				sec
-				sbc TABLES.PlayerCrownBob, y
-			!NoAddBob:
-				ldy PLAYER.Player_Size, x
-				sec
-				sbc TABLES.PlayerSizeCrownOffset, y
-				sta VIC.SPRITE_5_Y
+			// !AddBob:
+			// 	lda VIC.SPRITE_5_Y
+			// 	sec
+			// 	sbc TABLES.PlayerCrownBob, y
+			// !NoAddBob:
+			// 	ldy PLAYER.Player_Size, x
+			// 	sec
+			// 	sbc TABLES.PlayerSizeCrownOffset, y
+			// 	sta VIC.SPRITE_5_Y
 
 
+		
 		!SkipThrowOffset:
 			ldy CROWN_OFFSET_TEMP1
 			lda PLAYER.Player_State, y
 			and #[PLAYER.STATE_FACE_LEFT]
 			bne !FacingLeft+
+
+			ldy #$00
+			lda CROWN_THROW_OFFSET_X
+			bpl !+
+			ldy #$ff
+		!:
+			sty MSBMOD1 + 1
+			sty MSBMOD2 + 1
 
 		!FacingRight:
 			pla
@@ -170,6 +221,7 @@ CROWN: {
 			sta CROWN_X
 			iny
 			lda (CROWN_POS_X), y
+		MSBMOD1:	
 			adc #$00
 			sta CROWN_X + 1
 
@@ -178,6 +230,7 @@ CROWN: {
 			sbc #$01
 			sta CROWN_X
 			lda CROWN_X + 1
+
 			sbc #$00
 			sta CROWN_X + 1
 			jmp !Apply+

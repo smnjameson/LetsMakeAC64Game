@@ -68,7 +68,7 @@ TITLE_SCREEN: {
 
 			lda #$ff
 			sta PageTimer	
-			lda #$00
+			lda #$ff
 			sta PageNumber
 			jsr NextPage
 			
@@ -427,7 +427,7 @@ TITLE_SCREEN: {
 	UpdatePage: {
 			dec PageTimer
 			bne !+
-			// jmp NextPage
+			jmp NextPage
 		!:
 			lda PageNumber
 			asl
