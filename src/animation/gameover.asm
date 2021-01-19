@@ -11,8 +11,9 @@ GAMEOVER: {
 		.text "00100000"
 		.text "00075000"
 		.text "00050000"
-		.text "00025000"
-		.text "00000200"
+		.text "00002000"
+			//
+		.text "00001000"
 		.text "00000100"
 
 
@@ -34,7 +35,7 @@ GAMEOVER: {
 		
 
 	Start: {	
-
+			jsr TITLE_SCREEN.SpriteInit
 
 			lda #$00
 			sta GameOverExited
@@ -53,6 +54,7 @@ GAMEOVER: {
 			lda HiscorePositions + 1
 			bpl !yes+
 			rts
+
 
 		!yes:
 			jsr DisplayHiScore
@@ -274,6 +276,8 @@ GAMEOVER: {
 	}
 
 	Update: {	
+			jsr TITLE_SCREEN.UpdateLogoSprites
+
 
 			lda HiscoreEntryIndex + 0
 			bpl !+
@@ -337,6 +341,8 @@ GAMEOVER: {
 			sta COLOR + 1
 
 
+			lda #$04
+			sta ColorToggle
 
 			ldx #$00
 		!:
@@ -510,7 +516,8 @@ GAMEOVER: {
 			beq !InsertScore+
 
 			//Shift hiscores down
-			ldy #$38
+
+			ldy #$40
 		!:
 			dey 
 			lda HiScoreValueData - $08, y 

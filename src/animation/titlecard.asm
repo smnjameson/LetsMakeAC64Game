@@ -328,8 +328,11 @@ TITLECARD: {
 				sta IRQ_MSB	
 
 				//Maybe only on intro
+				lda IsBonus
+				bne !+
 				lda TITLE_SCREEN.IntroSpriteColor + 2
 				sta $d029
+			!:
 			//Check is complete
 		// 	lda isComplete
 		// 	cmp #$01
@@ -560,6 +563,15 @@ TITLECARD: {
 			sta $d004
 			lda #$e1
 			sta $d005
+
+			lda $d010
+			ora #$04
+			sta $d010
+			lda #$07
+			sta $d029
+			lda $d01c
+			and #$fb
+			sta $d01c
 
 			lda #$07
 			sta $d029

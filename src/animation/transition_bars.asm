@@ -361,7 +361,7 @@ TRANSITION_BARS: {
 		.byte $00
 
 
-	.align $100
+	// .align $100
 
 
 	UpdateOffsetsLeft: {

@@ -108,7 +108,7 @@ SOFTSPRITES: {
 
 
 
-	
+	  
 	SpriteUpdateIndex:
 		.byte $00
 		

@@ -16,7 +16,7 @@ BasicUpstart2(Entry)
 	.fill music.size, music.getData(i)
 	.fill $2800-*, 0
 
-#import "maps/maploader.asm"
+
 #import "maps/platforms.asm"
 // 
 #import "player/projectiles.asm"
@@ -31,15 +31,17 @@ BasicUpstart2(Entry)
 #import "enemies/behaviours.asm"
 #import "enemies/enemymacros.asm"
 #import "enemies/pipes.asm" 
-
+#import "sound/sound.asm"
 
 #import "intro/titlescreen.asm"
+
+
 #import "animation/bonus.asm"
 #import "animation/gameover.asm"
 #import "animation/titlecard.asm"
 // #import "animation/transition_bars.asm"
 #import "animation/transition_chars.asm"
-#import "sound/sound.asm"
+
 
 Random: { 
         lda seed
@@ -358,8 +360,6 @@ Entry:
 			
 		/////////////////////////////////
 		!GameOver:
-
-
 				lda #$00
 				sta $d015
 

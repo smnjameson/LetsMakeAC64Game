@@ -34,6 +34,9 @@ BONUS: {
 	CrownOffTween:
 		.fill 32, $d2 - (sin((i/24) * (PI - PI/4) + (PI/4)) - sin(PI/4)) * ($ff-$d2) 
 
+
+
+
 	*=*"BonusExited"
 	BonusExited:
 		.byte $00
@@ -706,7 +709,11 @@ BONUS: {
 	}
 
 	Update: {
+			lda #$08
+			sta $d029
+
 			lda BonusCounters + 3
+
 			beq !+
 
 
@@ -1188,7 +1195,9 @@ BONUS: {
 	AwardCrown: {
 			jsr WhoHasHighestScore
 			cpy #$00
-			beq !Exit+
+			bne !+
+			jmp !Exit+
+		!:
 			cpy #$02
 			beq !p2+
 
@@ -1205,12 +1214,21 @@ BONUS: {
 			sta TITLECARD.SpriteMSB_Main
 			lda $d005
 			clc
-			adc #$06
+			adc #$08
 			cmp $d007
-			bcs !Exit+
+			bcs !Force+
 			inc $d005
 			inc $d005
-			inc $d005
+			jmp !Exit+
+		!Force:
+			lda SPRITE_POINTERS + 3 
+			sec 
+			sbc #$40
+			tax 
+			lda CROWN.CrownOffsetY, x
+			clc 
+			adc $d007
+			sta $d005 
 			jmp !Exit+
 		!p2:
 
@@ -1226,14 +1244,23 @@ BONUS: {
 			sta TITLECARD.SpriteMSB_Main
 			lda $d005
 			clc
-			adc #$06
+			adc #$08
 			cmp $d009
-			bcs !Exit+
-			inc $d005
+			bcs !Force+
 			inc $d005
 			inc $d005
 			jmp !Exit+
 
+		!Force:
+			lda SPRITE_POINTERS + 4 
+			sec 
+			sbc #$40
+			tax 
+			lda CROWN.CrownOffsetY, x
+			clc 
+			adc $d009
+			sta $d005 
+			jmp !Exit+
 		!Exit:
 			
 			rts

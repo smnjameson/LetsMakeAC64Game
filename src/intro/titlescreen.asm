@@ -49,10 +49,32 @@ TITLE_SCREEN: {
 			dex
 			bpl !-
 
+			lda $d01c
+			and #%11111011 
+			sta $d01c
+
+			lda #$b2
+			sta SPRITE_POINTERS + 2
+			lda #$38
+			sta $d004
+			lda #$e1
+			sta $d005
+			
+			// jsr SetupLogoSprites
+			jsr SpriteInit
 
 
+			lda #$ff
+			sta PageTimer	
+			lda #$ff
+			sta PageNumber
+			jsr NextPage
+			
 
+			rts
+	}
 
+	SpriteInit: {
 			lda $d01c
 			and #%11111011
 			sta $d01c
@@ -65,17 +87,8 @@ TITLE_SCREEN: {
 			sta $d005
 			
 			jsr SetupLogoSprites
-
-			lda #$ff
-			sta PageTimer	
-			lda #$ff
-			sta PageNumber
-			jsr NextPage
-			
-
 			rts
 	}
-
 	IntroSpriteFrame:
 			.byte $99,$9a,$9b,$9c,$9d,$9e,$9f
 	IntroSpriteBaseX:
@@ -609,7 +622,7 @@ TITLE_SCREEN: {
 			
 			ResetLine()
 			jsr AdvanceLine
-			PrintText(Highscores, 6, 4)
+			PrintText(Highscores, 6, 6)
 
 			rts
 	}

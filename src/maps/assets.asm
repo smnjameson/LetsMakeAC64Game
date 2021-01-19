@@ -29,10 +29,12 @@
 		.import binary "../../assets/maps/cols.bin"
 
 
-	#import "mapdata.asm"
 
+	#import "mapdata.asm"
+	#import "maps/maploader.asm"
 	#import "intro/introtext.asm"
 	
+
 * = $b800 "Soft sprite patterns"
 	.fill 1024, 0
 * = $bc00 "Map buffer"

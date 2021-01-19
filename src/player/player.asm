@@ -275,9 +275,9 @@ PLAYER: {
 
 
 
-			lda #$04
+			lda #$00
 			sta Player1_Lives
-			lda #$04
+			lda #$00
 			sta Player2_Lives
 
 			lda #$00
@@ -317,10 +317,6 @@ PLAYER: {
 			sta ColorSwitchActive
 			sta ENEMIES.PowerUpTotalCount
 			sta ENEMIES.EnemyTotalCount
-
-
-
-
 
 			rts
 	}
@@ -1165,6 +1161,7 @@ PLAYER: {
 				clc
 				adc #$02
 				sta VIC.SPRITE_6_Y, x
+				
 			!NoSwitchAdjust:
 
 
@@ -1369,7 +1366,7 @@ PLAYER: {
 			tay //Speed offset 0 or 2
 
 			// DEBUG
-			lda #$01
+			lda #$02
 			sta Player_Size, x
 			rts
 

@@ -20,18 +20,18 @@ CROWN: {
 			.byte 01,01,01,01,01,01,00,00
 			.byte 01,-1,03,03,01,-1,03,03 //Throwing
 			.byte 00,00,00,00,00,00,00,00 //Eating
-			.byte -1,-1,-1,-1,-1,-1,00,00
-			.byte 00,00,00,00,00,00,00,00 //Throwing
+			.byte 00,00,00,00,00,00,00,00
+			.byte 00,00,02,02,00,00,02,02 //Throwing
 			.byte 00,00,00,00,00,00,00,00 //Eating
 	CrownOffsetY:
 			.byte -3,-4,-3,-3,-4,-3,00,00
 			.byte -4,-5,-4,-4,-4,-5,-4,-4 //Throwing
 			.byte 00,00,00,00,00,00,00,00 //Eating
-			.byte -4,-5,-3,-4,-5,-3,00,00
+			.byte -5,-5,-3,-4,-5,-3,00,00
 			.byte -4,-5,-4,-4,-4,-5,-4,-4 //Throwing
 			.byte 00,00,00,00,00,00,00,00 //Eating
 			.byte -6,-6,-6,-6,-6,-6,00,00
-			.byte 00,00,00,00,00,00,00,00 //Throwing
+			.byte -6,-6,-6,-6,-6,-6,-6,-6 //Throwing
 			.byte 00,00,00,00,00,00,00,00 //Eating
 
 	Initialise: {
@@ -123,7 +123,9 @@ CROWN: {
 
 
 				//Get player frame number
-				dex
+				lda PlayerHasCrown
+				tax
+				// dex
 				lda [SPRITE_POINTERS + 5], x
 				
 				//shift so that first frame is 0
@@ -196,21 +198,27 @@ CROWN: {
 
 
 		
-		!SkipThrowOffset:
-			ldy CROWN_OFFSET_TEMP1
-			lda PLAYER.Player_State, y
-			and #[PLAYER.STATE_FACE_LEFT]
-			bne !FacingLeft+
+			!SkipThrowOffset:
+				ldy CROWN_OFFSET_TEMP1
+				lda PLAYER.Player_State, y
+				and #[PLAYER.STATE_FACE_LEFT]
+				beq !+
+				//Facing left so invert the offset
+				lda CROWN_THROW_OFFSET_X
+				eor #$ff
+				clc 
+				adc #$01
+				sta CROWN_THROW_OFFSET_X
+			!:	
 
-			ldy #$00
-			lda CROWN_THROW_OFFSET_X
-			bpl !+
-			ldy #$ff
-		!:
-			sty MSBMOD1 + 1
-			sty MSBMOD2 + 1
+				ldy #$00
+				lda CROWN_THROW_OFFSET_X
+				bpl !+
+				ldy #$ff
+			!:
+				sty MSBMOD1 + 1
 
-		!FacingRight:
+		//Add offset
 			pla
 			tay
 			iny
@@ -225,37 +233,16 @@ CROWN: {
 			adc #$00
 			sta CROWN_X + 1
 
-			lda CROWN_X
-			sec
-			sbc #$01
-			sta CROWN_X
-			lda CROWN_X + 1
+			// lda CROWN_X
+			// sec
+			// sbc #$01
+			// sta CROWN_X
+			// lda CROWN_X + 1
 
-			sbc #$00
-			sta CROWN_X + 1
-			jmp !Apply+
+			// sbc #$00
+			// sta CROWN_X + 1
+	
 
-		!FacingLeft:
-			pla
-			tay
-			iny
-
-			lda (CROWN_POS_X), y
-			sec
-		 	sbc CROWN_THROW_OFFSET_X
-			sta CROWN_X
-			iny
-			lda (CROWN_POS_X), y
-			sbc #$00
-			sta CROWN_X + 1
-
-			lda CROWN_X
-			clc
-			adc #$01
-			sta CROWN_X
-			lda CROWN_X + 1
-			adc #$00
-			sta CROWN_X + 1
 
 
 		!Apply:
@@ -305,6 +292,22 @@ CROWN: {
 			clc
 			adc SCREEN_SHAKE_VAL
 			sta VIC.SPRITE_5_Y
+
+
+			lda PlayerHasCrown
+			beq !+
+			tay 
+			dey 
+			lda DOOR.SwitchPressed
+			beq !+
+			lda PLAYER.Player1_FloorANDCollision, y
+			and #$40
+			beq !+
+			lda VIC.SPRITE_5_Y, x
+			clc
+			adc #$02
+			sta VIC.SPRITE_5_Y, x			
+		!:			
 			rts
 
 
