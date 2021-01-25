@@ -143,6 +143,8 @@ CROWN: {
 				lda CrownOffsetX, y
 				sta CROWN_THROW_OFFSET_X
 
+
+
 				//Check for crown offset
 				// ldy CROWN_OFFSET_TEMP1
 				// lda PLAYER.Player_State, y
@@ -199,6 +201,12 @@ CROWN: {
 
 		
 			!SkipThrowOffset:
+				//Ensure offset ignored if on ground
+				lda PlayerHasCrown
+				bne !+
+				sta CROWN_THROW_OFFSET_X
+			!:
+					
 				ldy CROWN_OFFSET_TEMP1
 				lda PLAYER.Player_State, y
 				and #[PLAYER.STATE_FACE_LEFT]
@@ -222,6 +230,8 @@ CROWN: {
 			pla
 			tay
 			iny
+
+
 
 			lda (CROWN_POS_X), y
 			clc

@@ -275,9 +275,9 @@ PLAYER: {
 
 
 
-			lda #$00
+			lda #$04
 			sta Player1_Lives
-			lda #$00
+			lda #$04
 			sta Player2_Lives
 
 			lda #$00
@@ -1076,7 +1076,7 @@ PLAYER: {
 					bmi !skipExitOverride+
 					cpy #[TABLES.__PlayerExitAnimation - TABLES.PlayerExitAnimation]
 					bne !+
-					lda #$5f
+					lda #$8f
 					sta CURRENT_FRAME
 					jmp !skipExitOverride+
 				!:
@@ -1366,9 +1366,9 @@ PLAYER: {
 			tay //Speed offset 0 or 2
 
 			// DEBUG
-			lda #$02
-			sta Player_Size, x
-			rts
+			// lda #$02
+			// sta Player_Size, x
+			// rts
 
 			lda Player_Size, x
 			pha

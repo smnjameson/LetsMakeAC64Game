@@ -240,6 +240,7 @@ Entry:
 		
 		/// NORMAL GAME LOOP ///////////////////////////////////////////
 		!NormalLoop:
+
 			jsr SOFTSPRITES.UpdateSprites
 
 			jsr PLAYER.PlayerControl

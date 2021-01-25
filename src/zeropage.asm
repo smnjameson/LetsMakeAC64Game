@@ -171,7 +171,7 @@ zp_bitbuf: .byte $00
 zp_dest_lo: .byte $00
 zp_dest_hi: .byte $00
 
-SPRITE_CLIP_SAVE: .fill 5, $00
+SPRITE_CLIP_SAVE: .fill 8, $00
 
 LIVES_POS_TEMP:	.byte $00
 

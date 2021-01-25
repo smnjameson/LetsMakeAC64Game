@@ -91,7 +91,9 @@ IRQ: {
 			sta $d00c
 			sta $d00e 
 			sta $d00a
-
+			lda $d010
+			and #%00011111
+			sta $d010
 
 			lda VIC.SCREEN_CONTROL_2
 			ora #%00010000
@@ -102,22 +104,14 @@ IRQ: {
 		
 
 			//Save sprite positions
-			lda SPRITE_POINTERS + 0 
-			sta SPRITE_CLIP_SAVE + 0
-			lda SPRITE_POINTERS + 1 
-			sta SPRITE_CLIP_SAVE + 1
-			lda SPRITE_POINTERS + 2  
-			sta SPRITE_CLIP_SAVE + 2
-			lda SPRITE_POINTERS + 3  
-			sta SPRITE_CLIP_SAVE + 3
-			lda SPRITE_POINTERS + 4 
-			sta SPRITE_CLIP_SAVE + 4
-			lda #$5e
-			sta SPRITE_POINTERS + 0
-			sta SPRITE_POINTERS + 1
-			sta SPRITE_POINTERS + 2
-			sta SPRITE_POINTERS + 3
-			sta SPRITE_POINTERS + 4
+			ldx #$04
+		!:
+			lda SPRITE_POINTERS, x 
+			sta SPRITE_CLIP_SAVE, x 
+			lda #$8f
+			sta SPRITE_POINTERS, x 
+			dex 
+			bpl !-
 
 
 			lda #$01
@@ -223,16 +217,23 @@ IRQ: {
 
 
 			//Restore sprite positions
-			lda SPRITE_CLIP_SAVE + 0
-			sta SPRITE_POINTERS + 0 
-			lda SPRITE_CLIP_SAVE + 1
-			sta SPRITE_POINTERS + 1
-			lda SPRITE_CLIP_SAVE + 2
-			sta SPRITE_POINTERS + 2 
-			lda SPRITE_CLIP_SAVE + 3
-			sta SPRITE_POINTERS + 3 
-			lda SPRITE_CLIP_SAVE + 4
-			sta SPRITE_POINTERS + 4
+			ldx #$04
+		!:
+			lda SPRITE_CLIP_SAVE, x 
+			sta SPRITE_POINTERS, x 
+			dex 
+			bpl !-
+
+			// lda SPRITE_CLIP_SAVE + 0
+			// sta SPRITE_POINTERS + 0 
+			// lda SPRITE_CLIP_SAVE + 1
+			// sta SPRITE_POINTERS + 1
+			// lda SPRITE_CLIP_SAVE + 2
+			// sta SPRITE_POINTERS + 2 
+			// lda SPRITE_CLIP_SAVE + 3
+			// sta SPRITE_POINTERS + 3 
+			// lda SPRITE_CLIP_SAVE + 4
+			// sta SPRITE_POINTERS + 4
 			
 		!ExitIRQ:
 			
